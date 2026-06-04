@@ -235,8 +235,9 @@
         <!-- ===== Nav + Lang ===== -->
         <div class="w-full max-w-sm mx-auto flex items-center justify-between mb-1">
             <div class="flex gap-2">
+                <a href="./staff.html" class="nav-pill">认识五线谱</a>
                 <a href="./index.html" class="nav-pill active">免费在线节拍器</a>
-                <a href="./ear-training.html" class="nav-pill">音程练耳训练</a>
+                <a href="./ear-training.html" class="nav-pill">视唱练耳训练</a>
             </div>
             <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1 focus:outline-none focus:border-accent cursor-pointer">
                 <option value="en">🇬🇧 EN</option>
@@ -1571,10 +1572,8 @@
                     // Fire bar callback when returning to beat 0
                     if (this.currentBeat === 0 && this.onBarCallback) {
                         this._barCount++;
-                        // Schedule bar callback slightly after the beat
-                        const barTime = this.nextNoteTime;
-                        const barDelay = Math.max(0, (barTime - this.audioCtx.currentTime) * 1000);
-                        setTimeout(() => this.onBarCallback(this._barCount), barDelay);
+                        // Synchronous: fire before next beat is scheduled so muted/state takes effect immediately
+                        this.onBarCallback(this._barCount);
                     }
                 }
             }
@@ -1748,6 +1747,16 @@
                 // Mute trainer start
                 this.$muteStartBtn.addEventListener('click', () => this._toggleMuteTrainer());
 
+                // Mute settings change immediately during training
+                this.$mutePlayBars.addEventListener('input', () => {
+                    if (!this.running || this.mode !== 'mute') return;
+                    this.mutePlayBars = Math.max(1, Math.min(8, parseInt(this.$mutePlayBars.value) || 2));
+                });
+                this.$muteSilenceBars.addEventListener('input', () => {
+                    if (!this.running || this.mode !== 'mute') return;
+                    this.muteSilenceBars = Math.max(1, Math.min(8, parseInt(this.$muteSilenceBars.value) || 2));
+                });
+
                 // Speed trainer start
                 this.$speedStartBtn.addEventListener('click', () => this._toggleSpeedTrainer());
 
@@ -1837,6 +1846,30 @@
                 };
                 this.$speedStepMins.addEventListener('input', onTimeInputChange);
                 this.$speedStepBpmTime.addEventListener('input', onTimeInputChange);
+
+                // BPM range changes take effect immediately during training
+                this.$speedStartBpm.addEventListener('input', () => {
+                    if (!this.running || this.mode !== 'speed') return;
+                    this.speedStartBpm = Math.max(20, Math.min(280, parseInt(this.$speedStartBpm.value) || 60));
+                    // If current BPM is below new start, jump to start
+                    if (this.speedCurrentBpm < this.speedStartBpm) {
+                        this.speedCurrentBpm = this.speedStartBpm;
+                        this.ui.setBpm(this.speedStartBpm);
+                    }
+                    this.$speedStatus.textContent = this._speedStatusText();
+                });
+                this.$speedEndBpm.addEventListener('input', () => {
+                    if (!this.running || this.mode !== 'speed') return;
+                    this.speedEndBpm = Math.max(30, Math.min(300, parseInt(this.$speedEndBpm.value) || 160));
+                    // If current BPM already exceeds new end, stop training
+                    if (this.speedCurrentBpm >= this.speedEndBpm) {
+                        this.speedCurrentBpm = this.speedEndBpm;
+                        this.ui.setBpm(this.speedEndBpm);
+                        this._stopSpeedTrainer();
+                        return;
+                    }
+                    this.$speedStatus.textContent = this._speedStatusText();
+                });
 
                 // Engine bar callback
                 this.engine.onBarCallback = (barCount) => {
