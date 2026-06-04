@@ -311,47 +311,47 @@
             <div class="text-base font-medium mb-3" style="color:#2C313C;margin-left:4px;" data-i18n="rhythm-label">节奏类型</div>
             <div class="flex flex-wrap justify-center" style="gap:12px;row-gap:18px;" id="subdivisionNotes">
                 <!-- 1. 四分音符 -->
-                <button class="note-btn active" data-sub="1" title="四分音符 · 无细分">
+                <button class="note-btn active" data-sub="1" data-i18n-title="note-1">
                     <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="16" cy="27" rx="5" ry="3.5" transform="rotate(-25 16 27)" fill="currentColor"/><rect x="20" y="8" width="1.8" height="19.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 2. 八分音符 -->
-                <button class="note-btn" data-sub="2" title="八分音符 · 每拍2下">
+                <button class="note-btn" data-sub="2" data-i18n-title="note-2">
                     <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="12" cy="27" rx="4.5" ry="3" transform="rotate(-25 12 27)" fill="currentColor"/><rect x="15.5" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="26" cy="27" rx="4.5" ry="3" transform="rotate(-25 26 27)" fill="currentColor"/><rect x="29.5" y="10" width="1.8" height="17.5" fill="currentColor"/><polygon points="15.5,10 31.3,10 31.3,13.5 15.5,13.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 3. 三连音 -->
-                <button class="note-btn" data-sub="3" title="三连音八分 · 每拍3下">
+                <button class="note-btn" data-sub="3" data-i18n-title="note-3">
                     <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="10" cy="27" rx="4" ry="2.8" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="13" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="4" ry="2.8" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="23" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="4" ry="2.8" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="33" y="10" width="1.8" height="17.5" fill="currentColor"/><polygon points="13,10 34.8,10 34.8,13.5 13,13.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 4. 十六分音符 -->
-                <button class="note-btn" data-sub="4" title="十六分音符 · 每拍4下">
+                <button class="note-btn" data-sub="4" data-i18n-title="note-4">
                     <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="8" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 8 27)" fill="currentColor"/><rect x="10.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="16" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 16 27)" fill="currentColor"/><rect x="18.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="24" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 24 27)" fill="currentColor"/><rect x="26.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="32" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 32 27)" fill="currentColor"/><rect x="34.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="10.5,10 36,10 36,12.5 10.5,12.5" fill="currentColor"/><polygon points="10.5,14 36,14 36,16.5 10.5,16.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 5. 前附点 -->
-                <button class="note-btn" data-sub="5" title="前附点 · 附点八分+十六分">
+                <button class="note-btn" data-sub="5" data-i18n-title="note-5">
                     <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="12" cy="27" rx="4.5" ry="3" transform="rotate(-25 12 27)" fill="currentColor"/><rect x="15.5" y="10" width="1.8" height="17.5" fill="currentColor"/><circle cx="20" cy="27" r="1.3" fill="currentColor"/><ellipse cx="28" cy="27" rx="4.5" ry="3" transform="rotate(-25 28 27)" fill="currentColor"/><rect x="31.5" y="10" width="1.8" height="17.5" fill="currentColor"/><polygon points="15.5,10 33.3,10 33.3,13 15.5,13" fill="currentColor"/><polygon points="26,15.5 33.3,15.5 33.3,18 26,18" fill="currentColor"/></svg>
                 </button>
                 <!-- 6. 后附点 -->
-                <button class="note-btn" data-sub="6" title="后附点 · 十六分+附点八分">
+                <button class="note-btn" data-sub="6" data-i18n-title="note-6">
                     <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="12" cy="27" rx="4.5" ry="3" transform="rotate(-25 12 27)" fill="currentColor"/><rect x="15.5" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="28" cy="27" rx="4.5" ry="3" transform="rotate(-25 28 27)" fill="currentColor"/><rect x="31.5" y="10" width="1.8" height="17.5" fill="currentColor"/><circle cx="35" cy="27" r="1.3" fill="currentColor"/><polygon points="15.5,10 33.3,10 33.3,13 15.5,13" fill="currentColor"/><polygon points="15.5,15.5 22.5,15.5 22.5,18 15.5,18" fill="currentColor"/></svg>
                 </button>
                 <!-- 7. 前十六后八 -->
-                <button class="note-btn" data-sub="7" title="前十六后八 · 两个十六分+一个八分">
+                <button class="note-btn" data-sub="7" data-i18n-title="note-7">
                     <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 24,14 24,16.5 12.5,16.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 8. 前八后十六 -->
-                <button class="note-btn" data-sub="8" title="前八后十六 · 一个八分+两个十六分">
+                <button class="note-btn" data-sub="8" data-i18n-title="note-8">
                     <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="22.5,14 34,14 34,16.5 22.5,16.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 9. 切分音 -->
-                <button class="note-btn" data-sub="9" title="切分音 · 八分+四分+八分">
+                <button class="note-btn" data-sub="9" data-i18n-title="note-9">
                     <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 18,14 18,16.5 12.5,16.5" fill="currentColor"/><polygon points="28.5,14 34,14 34,16.5 28.5,16.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 10. 三连音十六分 -->
-                <button class="note-btn" data-sub="10" title="三连音十六分 · 三连音双梁">
+                <button class="note-btn" data-sub="10" data-i18n-title="note-10">
                     <svg viewBox="0 0 40 40" width="40" height="40"><text x="23.5" y="6" font-size="7.5" font-family="sans-serif" font-style="italic" font-weight="bold" text-anchor="middle" fill="currentColor">3</text><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 34,14 34,16.5 12.5,16.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 11. 三连音三梁 -->
-                <button class="note-btn" data-sub="11" title="三连音三十二分 · 三连音三梁">
+                <button class="note-btn" data-sub="11" data-i18n-title="note-11">
                     <svg viewBox="0 0 40 40" width="40" height="40"><text x="23.5" y="6" font-size="7.5" font-family="sans-serif" font-style="italic" font-weight="bold" text-anchor="middle" fill="currentColor">3</text><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 34,14 34,16.5 12.5,16.5" fill="currentColor"/><polygon points="12.5,18 34,18 34,20.5 12.5,20.5" fill="currentColor"/></svg>
                 </button>
             </div>
@@ -468,6 +468,9 @@
                 <option value="it">🇮🇹 Italiano</option>
                 <option value="ru">🇷🇺 Русский</option>
                 <option value="pl">🇵🇱 Polski</option>
+                <option value="th">🇹🇭 ไทย</option>
+                <option value="vi">🇻🇳 Tiếng Việt</option>
+                <option value="my">🇲🇲 မြန်မာ</option>
             </select>
         </div>
     </footer>
@@ -531,6 +534,17 @@
                 'vol-tab': '🔊 音量',
                 'train-tab': '🎯 训练模式',
                 'sound-tab': '🎵 音色',
+                'note-1': '四分音符 · 无细分',
+                'note-2': '八分音符 · 每拍2下',
+                'note-3': '三连音八分 · 每拍3下',
+                'note-4': '十六分音符 · 每拍4下',
+                'note-5': '前附点 · 附点八分+十六分',
+                'note-6': '后附点 · 十六分+附点八分',
+                'note-7': '前十六后八 · 两个十六分+八分',
+                'note-8': '前八后十六 · 八分+两个十六分',
+                'note-9': '切分音 · 八分+四分+八分',
+                'note-10': '三连音十六分 · 双梁',
+                'note-11': '三连音三十二分 · 三梁',
             },
             'en': {
                 'title': 'Online Metronome — Free Professional Metronome',
@@ -574,6 +588,17 @@
                 'vol-tab': '🔊 Volume',
                 'train-tab': '🎯 Training',
                 'sound-tab': '🎵 Sound',
+                'note-1': 'Quarter Note',
+                'note-2': 'Eighth Notes · 2 per beat',
+                'note-3': 'Triplet Eighths · 3 per beat',
+                'note-4': 'Sixteenth Notes · 4 per beat',
+                'note-5': 'Dotted Eighth + Sixteenth',
+                'note-6': 'Sixteenth + Dotted Eighth',
+                'note-7': '2 Sixteenths + Eighth',
+                'note-8': 'Eighth + 2 Sixteenths',
+                'note-9': 'Syncopation',
+                'note-10': 'Triplet Sixteenths · Double Beam',
+                'note-11': 'Triplet 32nds · Triple Beam',
             },
             'ja': {
                 'title': 'オンラインメトロノーム — 無料の高精度メトロノーム',
@@ -617,6 +642,17 @@
                 'vol-tab': '🔊 音量',
                 'train-tab': '🎯 トレーニング',
                 'sound-tab': '🎵 音色',
+                'note-1': '四分音符',
+                'note-2': '八分音符 · 1拍2つ',
+                'note-3': '三連八分 · 1拍3つ',
+                'note-4': '十六分音符 · 1拍4つ',
+                'note-5': '前付点',
+                'note-6': '後付点',
+                'note-7': '前十六後八',
+                'note-8': '前八後十六',
+                'note-9': '切分音',
+                'note-10': '三連十六分',
+                'note-11': '三連三十二分',
             },
             'es': {
                 'title': 'Metrónomo Online — Metrónomo Profesional Gratuito',
@@ -660,6 +696,17 @@
                 'vol-tab': '🔊 Volumen',
                 'train-tab': '🎯 Entreno',
                 'sound-tab': '🎵 Sonido',
+                'note-1': 'Negra',
+                'note-2': 'Corcheas · 2 por tiempo',
+                'note-3': 'Tresillos · 3 por tiempo',
+                'note-4': 'Semicorcheas · 4 por tiempo',
+                'note-5': 'Corchea con puntillo + Semicorchea',
+                'note-6': 'Semicorchea + Corchea con puntillo',
+                'note-7': '2 Semicorcheas + Corchea',
+                'note-8': 'Corchea + 2 Semicorcheas',
+                'note-9': 'Síncopa',
+                'note-10': 'Tresillos de semicorchea',
+                'note-11': 'Tresillos de fusa',
             },
             'pt': {
                 'title': 'Metrônomo Online — Metrônomo Profissional Grátis',
@@ -703,6 +750,17 @@
                 'vol-tab': '🔊 Volume',
                 'train-tab': '🎯 Treino',
                 'sound-tab': '🎵 Som',
+                'note-1': 'Semínima',
+                'note-2': 'Colcheias · 2 por tempo',
+                'note-3': 'Tercinas · 3 por tempo',
+                'note-4': 'Semicolcheias · 4 por tempo',
+                'note-5': 'Colcheia pontuada + Semicolcheia',
+                'note-6': 'Semicolcheia + Colcheia pontuada',
+                'note-7': '2 Semicolcheias + Colcheia',
+                'note-8': 'Colcheia + 2 Semicolcheias',
+                'note-9': 'Síncope',
+                'note-10': 'Tercinas de semicolcheia',
+                'note-11': 'Tercinas de fusa',
             },
             'ko': {
                 'title': '온라인 메트로놈 — 무료 전문 메트로놈',
@@ -743,6 +801,17 @@
                 'vol-tab': '🔊 볼륨',
                 'train-tab': '🎯 트레이닝',
                 'sound-tab': '🎵 사운드',
+                'note-1': '4분음표',
+                'note-2': '8분음표 · 박당 2개',
+                'note-3': '셋잇단 8분음표 · 박당 3개',
+                'note-4': '16분음표 · 박당 4개',
+                'note-5': '앞붙임점 · 붙점8분+16분',
+                'note-6': '뒤붙임점 · 16분+붙점8분',
+                'note-7': '앞16분 뒤8분',
+                'note-8': '앞8분 뒤16분',
+                'note-9': '당김음',
+                'note-10': '셋잇단 16분 · 이중빔',
+                'note-11': '셋잇단 32분 · 삼중빔',
             },
             'de': {
                 'title': 'Online Metronom — Kostenloses Profi-Metronom',
@@ -783,6 +852,17 @@
                 'vol-tab': '🔊 Lautst.',
                 'train-tab': '🎯 Training',
                 'sound-tab': '🎵 Klang',
+                'note-1': 'Viertelnote',
+                'note-2': 'Achtelnoten · 2 pro Schlag',
+                'note-3': 'Triolenachtel · 3 pro Schlag',
+                'note-4': 'Sechzehntel · 4 pro Schlag',
+                'note-5': 'Punktierte Achtel + Sechzehntel',
+                'note-6': 'Sechzehntel + Punktierte Achtel',
+                'note-7': '2 Sechzehntel + Achtel',
+                'note-8': 'Achtel + 2 Sechzehntel',
+                'note-9': 'Synkope',
+                'note-10': 'Triolensechzehntel · Doppelbalken',
+                'note-11': 'Triolen-32stel · Dreifachbalken',
             },
             'fr': {
                 'title': 'Métronome en Ligne — Métronome Pro Gratuit',
@@ -823,6 +903,17 @@
                 'vol-tab': '🔊 Volume',
                 'train-tab': '🎯 Entraîn.',
                 'sound-tab': '🎵 Son',
+                'note-1': 'Noire',
+                'note-2': 'Croches · 2 par temps',
+                'note-3': 'Triolets · 3 par temps',
+                'note-4': 'Doubles · 4 par temps',
+                'note-5': 'Croche pointée + Double',
+                'note-6': 'Double + Croche pointée',
+                'note-7': '2 Doubles + Croche',
+                'note-8': 'Croche + 2 Doubles',
+                'note-9': 'Syncope',
+                'note-10': 'Triolets doubles',
+                'note-11': 'Triolets triples',
             },
             'it': {
                 'title': 'Metronomo Online — Metronomo Professionale Gratuito',
@@ -863,6 +954,17 @@
                 'vol-tab': '🔊 Volume',
                 'train-tab': '🎯 Training',
                 'sound-tab': '🎵 Suono',
+                'note-1': 'Semiminima',
+                'note-2': 'Crome · 2 per battito',
+                'note-3': 'Terzine · 3 per battito',
+                'note-4': 'Semicrome · 4 per battito',
+                'note-5': 'Croma puntata + Semicroma',
+                'note-6': 'Semicroma + Croma puntata',
+                'note-7': '2 Semicrome + Croma',
+                'note-8': 'Croma + 2 Semicrome',
+                'note-9': 'Sincope',
+                'note-10': 'Terzine di semicrome',
+                'note-11': 'Terzine di biscrome',
             },
             'ru': {
                 'title': 'Онлайн Метроном — Бесплатный Профессиональный Метроном',
@@ -903,6 +1005,17 @@
                 'vol-tab': '🔊 Громк.',
                 'train-tab': '🎯 Тренир.',
                 'sound-tab': '🎵 Звук',
+                'note-1': 'Четверть',
+                'note-2': 'Восьмые · 2 на долю',
+                'note-3': 'Триоли · 3 на долю',
+                'note-4': 'Шестнадцатые · 4 на долю',
+                'note-5': 'Пунктирная восьмая + шестнадцатая',
+                'note-6': 'Шестнадцатая + пунктирная восьмая',
+                'note-7': '2 шестнадцатые + восьмая',
+                'note-8': 'Восьмая + 2 шестнадцатые',
+                'note-9': 'Синкопа',
+                'note-10': 'Триоли шестнадцатыми',
+                'note-11': 'Триоли 32-ми',
             },
             'pl': {
                 'title': 'Metronom Online — Darmowy Profesjonalny Metronom',
@@ -943,6 +1056,170 @@
                 'vol-tab': '🔊 Głośn.',
                 'train-tab': '🎯 Trening',
                 'sound-tab': '🎵 Dźwięk',
+                'note-1': 'Ćwierćnuta',
+                'note-2': 'Ósemki · 2 na uderzenie',
+                'note-3': 'Triole ósemkowe · 3 na uderzenie',
+                'note-4': 'Szesnastki · 4 na uderzenie',
+                'note-5': 'Ósemka z kropką + Szesnastka',
+                'note-6': 'Szesnastka + Ósemka z kropką',
+                'note-7': '2 Szesnastki + Ósemka',
+                'note-8': 'Ósemka + 2 Szesnastki',
+                'note-9': 'Synkopa',
+                'note-10': 'Triole szesnastkowe',
+                'note-11': 'Triole 32-owe',
+            },
+            'th': {
+                'title': 'เครื่องเมตรอนอมออนไลน์ — ฟรี',
+                'page-heading': 'เครื่องเมตรอนอมออนไลน์ฟรี',
+                'meta-desc': 'เครื่องเมตรอนอมออนไลน์ฟรี แม่นยำด้วย Web Audio. Tap Tempo, แบ่งจังหวะ, 3 เสียง, โหมดฝึก, หลายภาษา.',
+                'bpm-label': 'bpm',
+                'sub-label': 'จังหวะ',
+                'beats-label1': 'จังหวะต่อ',
+                'beats-label2': 'ห้อง',
+                'sound-label': 'เสียง',
+                'vol-toggle': '🔊 ระดับเสียง ▾',
+                'vol-accent': 'เน้น',
+                'vol-normal': 'ปกติ',
+                'vol-sub': 'แบ่ง',
+                'train-toggle': '🎯 ฝึก ▾',
+                'train-mute-tab': 'ฝึกเงียบ',
+                'train-speed-tab': 'เพิ่มความเร็ว',
+                'train-mute-play': 'เล่น',
+                'train-mute-bars': 'ห้อง',
+                'train-mute-silence': 'เงียบ',
+                'train-speed-from': 'จาก',
+                'train-speed-to': 'ถึง',
+                'train-speed-step': 'ทุก',
+                'train-speed-step-bars': 'ห้อง +',
+                'train-start': 'เริ่ม',
+                'keyboard-hint': 'Space เริ่ม · ←→ ±1BPM · Shift+←→ ±10 · T แตะ · 1-4 แบ่ง',
+                'share-btn': 'แชร์การตั้งค่า',
+                'footer-copy': '© 2026 เครื่องเมตรอนอมออนไลน์',
+                'footer-privacy': 'ความเป็นส่วนตัว',
+                'footer-about': 'เกี่ยวกับ',
+                'accent-label': 'เน้นจังหวะแรก',
+                'timer-label': 'ตัวจับเวลา',
+                'sound-classic': 'คลาสสิก',
+                'sound-wood': 'ไม้',
+                'sound-cymbal': 'ฉาบ',
+                'beat-label': 'จังหวะ',
+                'rhythm-label': 'ประเภทจังหวะ',
+                'vol-tab': '🔊 ระดับเสียง',
+                'train-tab': '🎯 ฝึก',
+                'sound-tab': '🎵 เสียง',
+                'note-1': 'ตัวกลม',
+                'note-2': 'ตัวขาว · 2 ต่อจังหวะ',
+                'note-3': 'สามพยางค์ · 3 ต่อจังหวะ',
+                'note-4': 'ตัวดำ · 4 ต่อจังหวะ',
+                'note-5': 'ตัวขาวประจุด + ตัวดำ',
+                'note-6': 'ตัวดำ + ตัวขาวประจุด',
+                'note-7': 'ตัวดำ 2 + ตัวขาว',
+                'note-8': 'ตัวขาว + ตัวดำ 2',
+                'note-9': 'ซินโคเปชัน',
+                'note-10': 'สามพยางค์ตัวดำ',
+                'note-11': 'สามพยางค์ 32',
+            },
+            'vi': {
+                'title': 'Máy Đập Nhịp Online — Miễn Phí',
+                'page-heading': 'Máy Đập Nhịp Online Miễn Phí',
+                'meta-desc': 'Máy đập nhịp online miễn phí chính xác với Web Audio. Tap Tempo, phân chia, 3 âm thanh, chế độ luyện tập, đa ngôn ngữ.',
+                'bpm-label': 'bpm',
+                'sub-label': 'Nhịp điệu',
+                'beats-label1': 'Phách mỗi',
+                'beats-label2': 'ô nhịp',
+                'sound-label': 'Âm thanh',
+                'vol-toggle': '🔊 Âm lượng ▾',
+                'vol-accent': 'Nhấn',
+                'vol-normal': 'Thường',
+                'vol-sub': 'Chia',
+                'train-toggle': '🎯 Luyện tập ▾',
+                'train-mute-tab': 'Luyện im lặng',
+                'train-speed-tab': 'Tăng tốc',
+                'train-mute-play': 'Phát',
+                'train-mute-bars': 'ô nhịp',
+                'train-mute-silence': 'im lặng',
+                'train-speed-from': 'Từ',
+                'train-speed-to': 'đến',
+                'train-speed-step': 'Mỗi',
+                'train-speed-step-bars': 'ô nhịp +',
+                'train-start': 'Bắt đầu',
+                'keyboard-hint': 'Space Bắt đầu · ←→ ±1BPM · Shift+←→ ±10 · T Chạm · 1-4 Chia',
+                'share-btn': 'Chia sẻ',
+                'footer-copy': '© 2026 Máy Đập Nhịp Online',
+                'footer-privacy': 'Riêng tư',
+                'footer-about': 'Giới thiệu',
+                'accent-label': 'Nhấn phách đầu',
+                'timer-label': 'Hẹn giờ',
+                'sound-classic': 'Cổ điển',
+                'sound-wood': 'Gỗ',
+                'sound-cymbal': 'Chũm chọe',
+                'beat-label': 'Phách',
+                'rhythm-label': 'Loại nhịp',
+                'vol-tab': '🔊 Âm lượng',
+                'train-tab': '🎯 Luyện tập',
+                'sound-tab': '🎵 Âm thanh',
+                'note-1': 'Nốt đen',
+                'note-2': 'Nốt móc đơn · 2 mỗi phách',
+                'note-3': 'Liên ba · 3 mỗi phách',
+                'note-4': 'Nốt móc kép · 4 mỗi phách',
+                'note-5': 'Nốt đen chấm + Móc kép',
+                'note-6': 'Móc kép + Nốt đen chấm',
+                'note-7': '2 Móc kép + Móc đơn',
+                'note-8': 'Móc đơn + 2 Móc kép',
+                'note-9': 'Đảo phách',
+                'note-10': 'Liên ba móc kép',
+                'note-11': 'Liên ba móc ba',
+            },
+            'my': {
+                'title': 'အွန်လိုင်းမက်ထရိုနုမ် — အခမဲ့',
+                'page-heading': 'အခမဲ့အွန်လိုင်းမက်ထရိုနုမ်',
+                'meta-desc': 'Web Audio ဖြင့်တိကျသောအခမဲ့အွန်လိုင်းမက်ထရိုနုမ်။ Tap Tempo၊ အပိုင်းများ၊ ၃ သံ၊ လေ့ကျင့်ခန်း၊ ဘာသာစကားမျိုးစုံ။',
+                'bpm-label': 'bpm',
+                'sub-label': 'စည်းချက်',
+                'beats-label1': 'တစ်ဘားလျှင်',
+                'beats-label2': 'ချက်',
+                'sound-label': 'အသံ',
+                'vol-toggle': '🔊 အသံအတိုးအကျယ် ▾',
+                'vol-accent': 'အလေးပေး',
+                'vol-normal': 'ပုံမှန်',
+                'vol-sub': 'အပိုင်း',
+                'train-toggle': '🎯 လေ့ကျင့်ခန်း ▾',
+                'train-mute-tab': 'အသံတိတ်လေ့ကျင့်',
+                'train-speed-tab': 'အမြန်နှုန်းတင်',
+                'train-mute-play': 'ဖွင့်',
+                'train-mute-bars': 'ဘား',
+                'train-mute-silence': 'အသံတိတ်',
+                'train-speed-from': 'မှ',
+                'train-speed-to': 'သို့',
+                'train-speed-step': 'တိုင်း',
+                'train-speed-step-bars': 'ဘား +',
+                'train-start': 'စတင်',
+                'keyboard-hint': 'Space စတင် · ←→ ±1BPM · Shift+←→ ±10 · T ထိ · 1-4 အပိုင်း',
+                'share-btn': 'မျှဝေ',
+                'footer-copy': '© 2026 အွန်လိုင်းမက်ထရိုနုမ်',
+                'footer-privacy': 'ကိုယ်ရေး',
+                'footer-about': 'အကြောင်း',
+                'accent-label': 'ပထမချက်ကိုအလေးပေး',
+                'timer-label': 'အချိန်မှတ်နာရီ',
+                'sound-classic': 'ဂန္ထဝင်',
+                'sound-wood': 'သစ်သား',
+                'sound-cymbal': 'လင်းကွင်း',
+                'beat-label': 'စည်းချက်',
+                'rhythm-label': 'စည်းချက်အမျိုးအစား',
+                'vol-tab': '🔊 အသံ',
+                'train-tab': '🎯 လေ့ကျင့်',
+                'sound-tab': '🎵 အသံ',
+                'note-1': 'Quarter Note',
+                'note-2': 'Eighth Notes · 2 per beat',
+                'note-3': 'Triplet · 3 per beat',
+                'note-4': 'Sixteenth Notes · 4 per beat',
+                'note-5': 'Dotted Eighth + Sixteenth',
+                'note-6': 'Sixteenth + Dotted Eighth',
+                'note-7': '2 Sixteenths + Eighth',
+                'note-8': 'Eighth + 2 Sixteenths',
+                'note-9': 'Syncopation',
+                'note-10': 'Triplet Sixteenths',
+                'note-11': 'Triplet 32nds',
             },
         };
 
@@ -961,6 +1238,9 @@
             if (navLang.startsWith('it')) return 'it';
             if (navLang.startsWith('ru')) return 'ru';
             if (navLang.startsWith('pl')) return 'pl';
+            if (navLang.startsWith('th')) return 'th';
+            if (navLang.startsWith('vi')) return 'vi';
+            if (navLang.startsWith('my')) return 'my';
             return 'en';
         }
 
@@ -981,6 +1261,11 @@
                         el.textContent = dict[key];
                     }
                 }
+            });
+            // Update title attributes via data-i18n-title
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (dict[key]) el.setAttribute('title', dict[key]);
             });
 
             document.documentElement.lang = lang;
