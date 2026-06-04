@@ -1728,7 +1728,6 @@
                 this.$speedBarCounter = document.getElementById('speedBarCounter');
                 this.$speedTimeCounter = document.getElementById('speedTimeCounter');
                 this._timeSpeedCountdown = 0; // countdown in seconds
-                this._timeSpeedCountdownInterval = null;
                 this.$speedStartBtn = document.getElementById('speedStartBtn');
                 this.$speedStatus = document.getElementById('speedStatus');
 
@@ -1761,35 +1760,36 @@
                     this.$speedTimeCheckMark.classList.toggle('checked', checked);
                     if (!this.running || this.mode !== 'speed') return;
                     if (checked) {
-                        // Resume: restart countdown + interval from saved remaining
-                        const mins = Math.max(1, Math.min(30, parseInt(this.$speedStepMins.value) || 2));
-                        const bpmInc = Math.max(1, Math.min(20, parseInt(this.$speedStepBpmTime.value) || 5));
-                        if (this._timeSpeedCountdown <= 0) this._timeSpeedCountdown = mins * 60;
+                        // Resume: restart single interval from saved countdown
+                        if (this._timeSpeedCountdown <= 0) {
+                            const mins = Math.max(1, Math.min(30, parseInt(this.$speedStepMins.value) || 2));
+                            this._timeSpeedCountdown = mins * 60;
+                        }
                         this._updateTimeCounter();
                         if (this.$speedTimeCounter) this.$speedTimeCounter.style.display = 'inline';
-                        this._timeSpeedCountdownInterval = setInterval(() => {
+                        this._timeSpeedInterval = setInterval(() => {
                             if (!this.running || this.mode !== 'speed' || !this.$speedTimeCheck.checked) return;
                             this._timeSpeedCountdown--;
                             this._updateTimeCounter();
-                        }, 1000);
-                        this._timeSpeedInterval = setInterval(() => {
-                            if (!this.running || this.mode !== 'speed' || !this.$speedTimeCheck.checked) return;
-                            this._timeSpeedCountdown = mins * 60;
-                            this._updateTimeCounter();
-                            this.speedCurrentBpm += bpmInc;
-                            if (this.speedCurrentBpm >= this.speedEndBpm) {
-                                this.speedCurrentBpm = this.speedEndBpm;
-                                this.ui.setBpm(this.speedEndBpm);
-                                this._stopSpeedTrainer();
-                                return;
+                            if (this._timeSpeedCountdown <= 0) {
+                                const curMins = parseInt(this.$speedStepMins.value) || 2;
+                                const curBpmInc = parseInt(this.$speedStepBpmTime.value) || 5;
+                                this._timeSpeedCountdown = curMins * 60;
+                                this._updateTimeCounter();
+                                this.speedCurrentBpm += curBpmInc;
+                                if (this.speedCurrentBpm >= this.speedEndBpm) {
+                                    this.speedCurrentBpm = this.speedEndBpm;
+                                    this.ui.setBpm(this.speedEndBpm);
+                                    this._stopSpeedTrainer();
+                                    return;
+                                }
+                                this.ui.setBpm(this.speedCurrentBpm);
+                                this.$speedStatus.textContent = this._speedStatusText();
                             }
-                            this.ui.setBpm(this.speedCurrentBpm);
-                            this.$speedStatus.textContent = this._speedStatusText();
-                        }, mins * 60000);
+                        }, 1000);
                     } else {
-                        // Pause: clear intervals, keep countdown value
+                        // Pause: clear interval, keep countdown visible
                         this._clearTimeSpeed();
-                        if (this.$speedTimeCounter) this.$speedTimeCounter.style.display = 'none';
                     }
                 });
 
@@ -1810,29 +1810,30 @@
                     const mins = Math.max(1, Math.min(30, parseInt(this.$speedStepMins.value) || 2));
                     const bpmInc = Math.max(1, Math.min(20, parseInt(this.$speedStepBpmTime.value) || 5));
                     this._clearTimeSpeed();
-                    // Restart time speed with new values, keep same BPM trajectory
+                    // Restart single interval with new values
                     this._timeSpeedCountdown = mins * 60;
                     this._updateTimeCounter();
                     if (this.$speedTimeCounter) this.$speedTimeCounter.style.display = 'inline';
-                    this._timeSpeedCountdownInterval = setInterval(() => {
-                        if (!this.running || this.mode !== 'speed') return;
+                    this._timeSpeedInterval = setInterval(() => {
+                        if (!this.running || this.mode !== 'speed' || !this.$speedTimeCheck.checked) return;
                         this._timeSpeedCountdown--;
                         this._updateTimeCounter();
-                    }, 1000);
-                    this._timeSpeedInterval = setInterval(() => {
-                        if (!this.running || this.mode !== 'speed') return;
-                        this._timeSpeedCountdown = mins * 60;
-                        this._updateTimeCounter();
-                        this.speedCurrentBpm += bpmInc;
-                        if (this.speedCurrentBpm >= this.speedEndBpm) {
-                            this.speedCurrentBpm = this.speedEndBpm;
-                            this.ui.setBpm(this.speedEndBpm);
-                            this._stopSpeedTrainer();
-                            return;
+                        if (this._timeSpeedCountdown <= 0) {
+                            const curMins2 = parseInt(this.$speedStepMins.value) || 2;
+                            const curBpmInc2 = parseInt(this.$speedStepBpmTime.value) || 5;
+                            this._timeSpeedCountdown = curMins2 * 60;
+                            this._updateTimeCounter();
+                            this.speedCurrentBpm += curBpmInc2;
+                            if (this.speedCurrentBpm >= this.speedEndBpm) {
+                                this.speedCurrentBpm = this.speedEndBpm;
+                                this.ui.setBpm(this.speedEndBpm);
+                                this._stopSpeedTrainer();
+                                return;
+                            }
+                            this.ui.setBpm(this.speedCurrentBpm);
+                            this.$speedStatus.textContent = this._speedStatusText();
                         }
-                        this.ui.setBpm(this.speedCurrentBpm);
-                        this.$speedStatus.textContent = this._speedStatusText();
-                    }, mins * 60000);
+                    }, 1000);
                 };
                 this.$speedStepMins.addEventListener('input', onTimeInputChange);
                 this.$speedStepBpmTime.addEventListener('input', onTimeInputChange);
@@ -1974,27 +1975,28 @@
                 this._timeSpeedCountdown = mins * 60;
                 this._updateTimeCounter();
                 if (this.$speedTimeCounter) this.$speedTimeCounter.style.display = 'inline';
-                // 1-second tick for countdown display
-                this._timeSpeedCountdownInterval = setInterval(() => {
+                // Single interval: countdown + BPM change combined
+                this._timeSpeedInterval = setInterval(() => {
                     if (!this.running || this.mode !== 'speed' || !this.$speedTimeCheck.checked) return;
                     this._timeSpeedCountdown--;
                     this._updateTimeCounter();
-                }, 1000);
-                // Actual BPM change at the minute interval
-                this._timeSpeedInterval = setInterval(() => {
-                    if (!this.running || this.mode !== 'speed' || !this.$speedTimeCheck.checked) return;
-                    this._timeSpeedCountdown = mins * 60;
-                    this._updateTimeCounter();
-                    this.speedCurrentBpm += bpmInc;
-                    if (this.speedCurrentBpm >= this.speedEndBpm) {
-                        this.speedCurrentBpm = this.speedEndBpm;
-                        this.ui.setBpm(this.speedEndBpm);
-                        this._stopSpeedTrainer();
-                        return;
+                    if (this._timeSpeedCountdown <= 0) {
+                        // Time's up: increase BPM, reset countdown
+                        const curMins = parseInt(this.$speedStepMins.value) || 2;
+                        const curBpmInc = parseInt(this.$speedStepBpmTime.value) || 5;
+                        this._timeSpeedCountdown = curMins * 60;
+                        this._updateTimeCounter();
+                        this.speedCurrentBpm += curBpmInc;
+                        if (this.speedCurrentBpm >= this.speedEndBpm) {
+                            this.speedCurrentBpm = this.speedEndBpm;
+                            this.ui.setBpm(this.speedEndBpm);
+                            this._stopSpeedTrainer();
+                            return;
+                        }
+                        this.ui.setBpm(this.speedCurrentBpm);
+                        this.$speedStatus.textContent = this._speedStatusText();
                     }
-                    this.ui.setBpm(this.speedCurrentBpm);
-                    this.$speedStatus.textContent = this._speedStatusText();
-                }, mins * 60000);
+                }, 1000);
             }
 
             _updateTimeCounter() {
@@ -2006,7 +2008,6 @@
 
             _clearTimeSpeed() {
                 if (this._timeSpeedInterval) { clearInterval(this._timeSpeedInterval); this._timeSpeedInterval = null; }
-                if (this._timeSpeedCountdownInterval) { clearInterval(this._timeSpeedCountdownInterval); this._timeSpeedCountdownInterval = null; }
             }
 
             _stopSpeedTrainer() {
