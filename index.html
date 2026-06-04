@@ -1847,30 +1847,28 @@
                 this.$speedStepMins.addEventListener('input', onTimeInputChange);
                 this.$speedStepBpmTime.addEventListener('input', onTimeInputChange);
 
-                // BPM range changes take effect immediately — no debounce, no confirm
-                const commitBpmRange = () => {
+                // BPM range: clamp internally, never overwrite input while user is typing
+                const applyBpmRange = () => {
                     if (!this.running || this.mode !== 'speed') return;
                     let s = parseInt(this.$speedStartBpm.value);
                     let e = parseInt(this.$speedEndBpm.value);
-                    if (isNaN(s)) return; // still typing, skip
-                    if (isNaN(e)) return;
-                    if (s < 20) { s = 20; this.$speedStartBpm.value = 20; }
-                    if (e > 300) { e = 300; this.$speedEndBpm.value = 300; }
-                    if (s >= e) { s = Math.max(20, e - 5); this.$speedStartBpm.value = s; }
+                    if (isNaN(s) || isNaN(e)) return; // mid-typing, skip
+                    // Clamp internally only — don't touch the input field
+                    s = Math.max(20, Math.min(280, s));
+                    e = Math.max(30, Math.min(300, e));
+                    if (s >= e && document.activeElement === this.$speedEndBpm) {
+                        s = Math.max(20, e - 5);
+                    } else if (s >= e && document.activeElement === this.$speedStartBpm) {
+                        e = Math.min(300, s + 5);
+                    }
                     this.speedStartBpm = s;
                     this.speedEndBpm = e;
-                    if (this.speedCurrentBpm < this.speedStartBpm) {
-                        this.speedCurrentBpm = this.speedStartBpm;
-                        this.ui.setBpm(this.speedStartBpm);
-                    }
-                    if (this.speedCurrentBpm > this.speedEndBpm) {
-                        this.speedCurrentBpm = this.speedEndBpm;
-                        this.ui.setBpm(this.speedEndBpm);
-                    }
+                    if (this.speedCurrentBpm < s) { this.speedCurrentBpm = s; this.ui.setBpm(s); }
+                    if (this.speedCurrentBpm > e) { this.speedCurrentBpm = e; this.ui.setBpm(e); }
                     this.$speedStatus.textContent = this._speedStatusText();
                 };
-                this.$speedStartBpm.addEventListener('input', commitBpmRange);
-                this.$speedEndBpm.addEventListener('input', commitBpmRange);
+                this.$speedStartBpm.addEventListener('input', applyBpmRange);
+                this.$speedEndBpm.addEventListener('input', applyBpmRange);
 
                 // Engine bar callback — only fire for the active mode
                 this.engine.onBarCallback = (barCount) => {
