@@ -230,10 +230,10 @@
         <div class="ad-placeholder h-[90px] w-full" id="ad-top">🎵 广告位 — 728×90</div>
     </div>
 
-    <main class="flex-1 flex flex-col items-center justify-center w-full max-w-lg mx-auto gap-4 bg-white rounded-2xl border border-[#d0ddd0] shadow-md py-8 px-4 sm:px-6">
+    <main class="flex-1 flex flex-col items-center justify-center w-full max-w-3xl mx-auto gap-5 bg-white rounded-2xl border border-[#d0ddd0] shadow-md py-10 px-6 sm:px-10">
 
         <!-- ===== Nav + Lang ===== -->
-        <div class="w-full max-w-sm mx-auto flex items-center justify-between mb-1">
+        <div class="w-full max-w-md mx-auto flex items-center justify-between mb-1">
             <div class="flex gap-2">
                 <a href="./staff.html" class="nav-pill">认识五线谱</a>
                 <a href="./index.html" class="nav-pill active">免费在线节拍器</a>
@@ -260,7 +260,7 @@
 
         <!-- ===== BPM Display ===== -->
         <div class="text-center select-none">
-            <div class="bpm-display text-8xl sm:text-9xl font-extrabold text-gray-900 tracking-tight cursor-pointer"
+            <div class="bpm-display text-9xl sm:text-[10rem] font-extrabold text-gray-900 tracking-tight cursor-pointer"
                  id="bpmDisplay" title="点击输入BPM" role="button" tabindex="0">120</div>
             <div class="text-gray-500 text-xs tracking-[0.2em] uppercase mt-1" data-i18n="bpm-label">bpm</div>
         </div>
@@ -302,7 +302,7 @@
         </div>
 
         <!-- ===== Settings Panel ===== -->
-        <div class="w-full max-w-sm mx-auto select-none rounded-xl overflow-hidden border border-[#d0ddd0]" style="background:#fff;">
+        <div class="w-full max-w-md mx-auto select-none rounded-xl overflow-hidden border border-[#d0ddd0]" style="background:#fff;">
             <!-- 行1: 节拍数 -->
             <div class="flex items-center justify-between px-4 h-14 border-b border-[#d0ddd0]">
                 <span class="text-base font-medium" style="color:#2C313C;" data-i18n="beat-label">节拍</span>
@@ -336,7 +336,7 @@
         </div>
 
         <!-- ===== Subdivision (SVG Notes) ===== -->
-        <div class="w-full max-w-sm mx-auto select-none px-2">
+        <div class="w-full max-w-md mx-auto select-none px-2">
             <div class="text-base font-medium mb-3" style="color:#2C313C;margin-left:4px;" data-i18n="rhythm-label">节奏类型</div>
             <div class="flex flex-wrap justify-center" style="gap:12px;row-gap:18px;" id="subdivisionNotes">
                 <!-- 1. 四分音符 -->
@@ -387,7 +387,7 @@
         </div>
 
         <!-- ===== Toggle Row: 音量 | 训练 | 音色 ===== -->
-        <div class="w-full max-w-sm mx-auto select-none">
+        <div class="w-full max-w-md mx-auto select-none">
             <!-- 3 toggle buttons -->
             <div class="flex gap-1.5">
                 <button class="panel-tab active" data-panel="vol" id="volToggle" data-i18n="vol-tab">🔊 音量</button>
