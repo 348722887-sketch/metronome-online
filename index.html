@@ -101,7 +101,7 @@
         .btn-preset.active{background:rgba(79,140,255,.15);border-color:#4F8CFF;color:#4F8CFF}
 
         /* BPM Adj */
-        .btn-bpm-adj{width:48px;height:48px;min-width:48px;min-height:48px;border-radius:50%;background:#e8efe8;color:#4F8CFF;font-size:28px;font-weight:600;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #4F8CFF;transition:all .15s ease;user-select:none;padding:0;margin:0;flex-shrink:0}
+        .btn-bpm-adj{width:48px;height:48px;min-width:48px;min-height:48px;max-width:48px;max-height:48px;border-radius:50%;background:#e8efe8;color:#4F8CFF;font-size:24px;font-weight:500;line-height:48px;text-align:center;cursor:pointer;border:2px solid #4F8CFF;transition:all .15s ease;user-select:none;padding:0;margin:0;flex-shrink:0;flex-grow:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;position:relative}
         .btn-bpm-adj:hover{border-color:#3A6FCC;color:#3A6FCC;background:#f0f4ff}
         .btn-bpm-adj:active{transform:scale(.92);background:#4F8CFF;border-color:#4F8CFF;color:#fff}
 
@@ -219,11 +219,11 @@
         </div>
 
         <!-- ===== BPM Slider + Buttons Row ===== -->
-        <div class="flex items-center w-full px-0 select-none" style="gap:5px;">
+        <div class="flex w-full px-0 select-none" style="align-items:center; gap:5px; height:48px;">
             <button class="btn-bpm-adj" id="bpmDown10" title="-10 BPM">«</button>
             <button class="btn-bpm-adj" id="bpmDown1" title="-1 BPM">−</button>
-            <div class="flex-1 px-2">
-                <input type="range" id="bpmSlider" min="20" max="300" value="120" step="1" aria-label="BPM 滑块">
+            <div class="flex-1 px-2" style="display:flex; align-items:center; height:48px;">
+                <input type="range" id="bpmSlider" min="20" max="300" value="120" step="1" aria-label="BPM 滑块" style="width:100%;">
             </div>
             <button class="btn-bpm-adj" id="bpmUp1" title="+1 BPM">+</button>
             <button class="btn-bpm-adj" id="bpmUp10" title="+10 BPM">»</button>
