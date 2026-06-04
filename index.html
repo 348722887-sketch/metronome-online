@@ -276,7 +276,7 @@
         <div class="w-full max-w-sm mx-auto select-none rounded-xl overflow-hidden border border-[#d0ddd0]" style="background:#fff;">
             <!-- 行1: 节拍数 -->
             <div class="flex items-center justify-between px-4 h-14 border-b border-[#d0ddd0]">
-                <span class="text-base font-medium" style="color:#2C313C;">节拍</span>
+                <span class="text-base font-medium" style="color:#2C313C;" data-i18n="beat-label">节拍</span>
                 <div class="flex items-center gap-3">
                     <button class="beat-counter-btn" id="beatMinus" aria-label="减少节拍">
                         <svg width="10" height="2" viewBox="0 0 10 2"><path d="M1 1h8"/></svg>
@@ -308,7 +308,7 @@
 
         <!-- ===== Subdivision (SVG Notes) ===== -->
         <div class="w-full max-w-sm mx-auto select-none px-2">
-            <div class="text-base font-medium mb-3" style="color:#2C313C;margin-left:4px;">节奏类型</div>
+            <div class="text-base font-medium mb-3" style="color:#2C313C;margin-left:4px;" data-i18n="rhythm-label">节奏类型</div>
             <div class="flex flex-wrap justify-center" style="gap:12px;row-gap:18px;" id="subdivisionNotes">
                 <!-- 1. 四分音符 -->
                 <button class="note-btn active" data-sub="1" title="四分音符 · 无细分">
@@ -361,9 +361,9 @@
         <div class="w-full max-w-sm mx-auto select-none">
             <!-- 3 toggle buttons -->
             <div class="flex gap-1.5">
-                <button class="panel-tab active" data-panel="vol" id="volToggle">🔊 音量</button>
-                <button class="panel-tab" data-panel="train" id="trainToggle">🎯 训练模式</button>
-                <button class="panel-tab" data-panel="sound" id="soundToggle">🎵 音色</button>
+                <button class="panel-tab active" data-panel="vol" id="volToggle" data-i18n="vol-tab">🔊 音量</button>
+                <button class="panel-tab" data-panel="train" id="trainToggle" data-i18n="train-tab">🎯 训练模式</button>
+                <button class="panel-tab" data-panel="sound" id="soundToggle" data-i18n="sound-tab">🎵 音色</button>
             </div>
 
             <!-- Panel: Volume -->
@@ -526,6 +526,11 @@
                 'sound-classic': '电子',
                 'sound-wood': '木鱼',
                 'sound-cymbal': '擦片',
+                'beat-label': '节拍',
+                'rhythm-label': '节奏类型',
+                'vol-tab': '🔊 音量',
+                'train-tab': '🎯 训练模式',
+                'sound-tab': '🎵 音色',
             },
             'en': {
                 'title': 'Online Metronome — Free Professional Metronome',
@@ -564,6 +569,11 @@
                 'sound-classic': 'Classic',
                 'sound-wood': 'Wood',
                 'sound-cymbal': 'Cymbal',
+                'beat-label': 'Beat',
+                'rhythm-label': 'Rhythm',
+                'vol-tab': '🔊 Volume',
+                'train-tab': '🎯 Training',
+                'sound-tab': '🎵 Sound',
             },
             'ja': {
                 'title': 'オンラインメトロノーム — 無料の高精度メトロノーム',
@@ -602,6 +612,11 @@
                 'sound-classic': '電子音',
                 'sound-wood': '木魚',
                 'sound-cymbal': 'シンバル',
+                'beat-label': '拍',
+                'rhythm-label': 'リズム',
+                'vol-tab': '🔊 音量',
+                'train-tab': '🎯 トレーニング',
+                'sound-tab': '🎵 音色',
             },
             'es': {
                 'title': 'Metrónomo Online — Metrónomo Profesional Gratuito',
@@ -640,6 +655,11 @@
                 'sound-classic': 'Clásico',
                 'sound-wood': 'Madera',
                 'sound-cymbal': 'Platillo',
+                'beat-label': 'Pulso',
+                'rhythm-label': 'Ritmo',
+                'vol-tab': '🔊 Volumen',
+                'train-tab': '🎯 Entreno',
+                'sound-tab': '🎵 Sonido',
             },
             'pt': {
                 'title': 'Metrônomo Online — Metrônomo Profissional Grátis',
@@ -678,6 +698,11 @@
                 'sound-classic': 'Clássico',
                 'sound-wood': 'Madeira',
                 'sound-cymbal': 'Chimbal',
+                'beat-label': 'Pulso',
+                'rhythm-label': 'Ritmo',
+                'vol-tab': '🔊 Volume',
+                'train-tab': '🎯 Treino',
+                'sound-tab': '🎵 Som',
             },
             'ko': {
                 'title': '온라인 메트로놈 — 무료 전문 메트로놈',
@@ -713,6 +738,11 @@
                 'sound-classic': '클래식',
                 'sound-wood': '우드',
                 'sound-cymbal': '심벌',
+                'beat-label': '박자',
+                'rhythm-label': '리듬',
+                'vol-tab': '🔊 볼륨',
+                'train-tab': '🎯 트레이닝',
+                'sound-tab': '🎵 사운드',
             },
             'de': {
                 'title': 'Online Metronom — Kostenloses Profi-Metronom',
@@ -748,6 +778,11 @@
                 'sound-classic': 'Klassisch',
                 'sound-wood': 'Holz',
                 'sound-cymbal': 'Becken',
+                'beat-label': 'Takt',
+                'rhythm-label': 'Rhythmus',
+                'vol-tab': '🔊 Lautst.',
+                'train-tab': '🎯 Training',
+                'sound-tab': '🎵 Klang',
             },
             'fr': {
                 'title': 'Métronome en Ligne — Métronome Pro Gratuit',
@@ -783,6 +818,11 @@
                 'sound-classic': 'Classique',
                 'sound-wood': 'Bois',
                 'sound-cymbal': 'Cymbale',
+                'beat-label': 'Temps',
+                'rhythm-label': 'Rythme',
+                'vol-tab': '🔊 Volume',
+                'train-tab': '🎯 Entraîn.',
+                'sound-tab': '🎵 Son',
             },
             'it': {
                 'title': 'Metronomo Online — Metronomo Professionale Gratuito',
@@ -818,6 +858,11 @@
                 'sound-classic': 'Classico',
                 'sound-wood': 'Legno',
                 'sound-cymbal': 'Piatto',
+                'beat-label': 'Battito',
+                'rhythm-label': 'Ritmo',
+                'vol-tab': '🔊 Volume',
+                'train-tab': '🎯 Training',
+                'sound-tab': '🎵 Suono',
             },
             'ru': {
                 'title': 'Онлайн Метроном — Бесплатный Профессиональный Метроном',
@@ -853,6 +898,11 @@
                 'sound-classic': 'Классика',
                 'sound-wood': 'Дерево',
                 'sound-cymbal': 'Тарелка',
+                'beat-label': 'Доля',
+                'rhythm-label': 'Ритм',
+                'vol-tab': '🔊 Громк.',
+                'train-tab': '🎯 Тренир.',
+                'sound-tab': '🎵 Звук',
             },
             'pl': {
                 'title': 'Metronom Online — Darmowy Profesjonalny Metronom',
@@ -888,6 +938,11 @@
                 'sound-classic': 'Klasyczny',
                 'sound-wood': 'Drewno',
                 'sound-cymbal': 'Talerz',
+                'beat-label': 'Miara',
+                'rhythm-label': 'Rytm',
+                'vol-tab': '🔊 Głośn.',
+                'train-tab': '🎯 Trening',
+                'sound-tab': '🎵 Dźwięk',
             },
         };
 
