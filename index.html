@@ -101,7 +101,7 @@
         .btn-preset.active{background:rgba(79,140,255,.15);border-color:#4F8CFF;color:#4F8CFF}
 
         /* BPM Adj */
-        .btn-bpm-adj{width:48px;height:48px;border-radius:12px;background:#e8efe8;color:#1a2a1a;font-size:24px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;border:3px solid #1a2a1a;transition:all .15s ease;user-select:none}
+        .btn-bpm-adj{width:48px;height:48px;min-width:48px;min-height:48px;border-radius:12px;background:#e8efe8;color:#1a2a1a;font-size:28px;font-weight:600;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border:3px solid #1a2a1a;transition:all .15s ease;user-select:none;padding:0;margin:0;flex-shrink:0}
         .btn-bpm-adj:hover{border-color:#4F8CFF;color:#4F8CFF;background:#f0f4ff}
         .btn-bpm-adj:active{transform:scale(.92);background:#4F8CFF;border-color:#4F8CFF;color:#fff}
 
@@ -219,10 +219,10 @@
         </div>
 
         <!-- ===== BPM Slider + Buttons Row ===== -->
-        <div class="flex items-center gap-0 w-full px-0 select-none">
+        <div class="flex items-center w-full px-0 select-none" style="gap:5px;">
             <button class="btn-bpm-adj" id="bpmDown10" title="-10 BPM">«</button>
             <button class="btn-bpm-adj" id="bpmDown1" title="-1 BPM">−</button>
-            <div class="flex-1 px-3">
+            <div class="flex-1 px-2">
                 <input type="range" id="bpmSlider" min="20" max="300" value="120" step="1" aria-label="BPM 滑块">
             </div>
             <button class="btn-bpm-adj" id="bpmUp1" title="+1 BPM">+</button>
