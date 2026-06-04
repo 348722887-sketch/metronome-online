@@ -89,7 +89,7 @@
         @keyframes tapPulse{0%{transform:scale(1)}50%{transform:scale(.92)}100%{transform:scale(1)}}
 
         /* Small buttons */
-        .btn-sm{padding:6px 14px;border-radius:16px;background:#e8efe8;color:#5a6a5a;font-size:12px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .2s ease;white-space:nowrap}
+        .btn-sm{padding:8px 18px;border-radius:16px;background:#e8efe8;color:#5a6a5a;font-size:14px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .2s ease;white-space:nowrap}
         .btn-sm:hover{border-color:#8a9a8a;color:#2a3a2a}
         .btn-sm.active{background:rgba(79,140,255,.15);border-color:#4F8CFF;color:#4F8CFF}
 
@@ -105,7 +105,7 @@
         .btn-bpm-adj:active{transform:scale(.92);background:#4F8CFF;border-color:#4F8CFF;color:#fff}
 
         /* Settings toggle */
-        .panel-tab{flex:1;background:none;border:none;color:#6a7a6a;cursor:pointer;font-size:13px;padding:8px 0;border-radius:8px;transition:all .2s ease;font-weight:600;text-align:center}
+        .panel-tab{flex:1;background:none;border:none;color:#6a7a6a;cursor:pointer;font-size:15px;padding:10px 0;border-radius:8px;transition:all .2s ease;font-weight:600;text-align:center}
         .panel-tab:hover{color:#2a3a2a;background:#e8efe8}
         .panel-tab.active{background:#4F8CFF;color:#fff}
         .panel-collapse{max-height:0;overflow:hidden;transition:max-height .35s ease,opacity .35s ease;opacity:0}
@@ -362,7 +362,7 @@
             <!-- 3 toggle buttons -->
             <div class="flex gap-1.5">
                 <button class="panel-tab active" data-panel="vol" id="volToggle">🔊 音量</button>
-                <button class="panel-tab" data-panel="train" id="trainToggle">🎯 训练</button>
+                <button class="panel-tab" data-panel="train" id="trainToggle">🎯 训练模式</button>
                 <button class="panel-tab" data-panel="sound" id="soundToggle">音色</button>
             </div>
 
@@ -434,8 +434,8 @@
                     <button class="btn-sm active btn-sound" data-sound="classic">电子</button>
                     <button class="btn-sm btn-sound" data-sound="wood">木鱼</button>
                     <button class="btn-sm btn-sound" data-sound="cymbal">擦片</button>
-                    <button class="btn-sm btn-sound" data-sound="piano">钢琴</button>
-                    <button class="btn-sm btn-sound" data-sound="bell">铃声</button>
+                    <button class="btn-sm btn-sound" data-sound="beep">嘟嘟</button>
+                    <button class="btn-sm btn-sound" data-sound="voice">人声</button>
                 </div>
             </div>
         </div>
@@ -496,7 +496,7 @@
                 'sound-label': '音色',
                 'sound-classic': '电子',
                 'sound-wood': '木鱼',
-                'sound-clap': '鼓掌',
+                'sound-cymbal': '擦片',
                 'vol-toggle': '🔊 音量 ▾',
                 'vol-accent': '强拍',
                 'vol-normal': '弱拍',
@@ -792,7 +792,7 @@
             }
 
             _generateAllBuffers() {
-                for (const type of ['classic', 'wood', 'cymbal', 'piano', 'bell']) {
+                for (const type of ['classic', 'wood', 'cymbal', 'beep', 'voice']) {
                     this.buffers[type] = {
                         accent: this._createBuffer(type, true),
                         normal: this._createBuffer(type, false),
@@ -846,35 +846,33 @@
                         }
                         break;
 
-                    case 'piano':
-                        dur = accented ? 0.15 : 0.1;
-                        freq = accented ? 523 : 440; // C5 : A4
-                        amp = accented ? 0.8 : 0.5;
+                    case 'beep':
+                        dur = accented ? 0.08 : 0.06;
+                        freq = accented ? 800 : 600;
+                        amp = accented ? 0.85 : 0.55;
                         for (let i = 0; i < Math.floor(sr * dur); i++) {
                             const t = i / sr;
-                            // Piano-like: fast attack, medium decay with harmonics
-                            const env = Math.exp(-t * 8) * 0.8 + Math.exp(-t * 30) * 0.2;
-                            const tone = Math.sin(2 * Math.PI * freq * t) * 0.5
-                                       + Math.sin(2 * Math.PI * freq * 2 * t) * 0.25
-                                       + Math.sin(2 * Math.PI * freq * 3 * t) * 0.15
-                                       + Math.sin(2 * Math.PI * freq * 4.5 * t) * 0.1;
+                            // Short punchy beep with slight pitch drop (car-horn-like)
+                            const env = Math.exp(-t * 60);
+                            const sweep = 1 - t * 3; // slight downward pitch sweep
+                            const tone = Math.sin(2 * Math.PI * freq * Math.max(0.5, sweep) * t);
                             d[i] = tone * env * amp;
                         }
                         break;
 
-                    case 'bell':
+                    case 'voice':
                         dur = accented ? 0.12 : 0.08;
-                        freq = accented ? 1400 : 1100;
-                        amp = accented ? 0.85 : 0.55;
+                        amp = accented ? 0.8 : 0.5;
                         for (let i = 0; i < Math.floor(sr * dur); i++) {
                             const t = i / sr;
-                            // Bell-like: slow decay, high freq, slight vibrato
-                            const env = Math.exp(-t * 15);
-                            const vibrato = 1 + 0.03 * Math.sin(2 * Math.PI * 50 * t);
-                            const tone = Math.sin(2 * Math.PI * freq * t * vibrato) * 0.5
-                                       + Math.sin(2 * Math.PI * freq * 2.7 * t) * 0.3
-                                       + Math.sin(2 * Math.PI * freq * 5.4 * t) * 0.2;
-                            d[i] = tone * env * amp;
+                            // Vocal-like: warm mid-tone with formant-ish harmonics
+                            const env = Math.exp(-t * 40);
+                            const base = accented ? 400 : 320;
+                            const tone = Math.sin(2 * Math.PI * base * t) * 0.5
+                                       + Math.sin(2 * Math.PI * base * 2 * t) * 0.3
+                                       + Math.sin(2 * Math.PI * base * 3 * t) * 0.15
+                                       + Math.sin(2 * Math.PI * 650 * t) * 0.2;  // formant
+                            d[i] = tone * env * amp * 0.7;
                         }
                         break;
                 }
@@ -976,7 +974,7 @@
                 this.subIndex = 0;
                 return this.subdivision;
             }
-            setSoundType(t) { if (['classic','wood','cymbal','piano','bell'].includes(t)) this.soundType = t; }
+            setSoundType(t) { if (['classic','wood','cymbal','beep','voice'].includes(t)) this.soundType = t; }
             setVolumes(a, n, s) { this.volAccent = Math.max(10,Math.min(100,a)); this.volNormal = Math.max(10,Math.min(100,n)); this.volSub = Math.max(10,Math.min(100,s)); }
             setMuted(m) { this.muted = !!m; }
 
