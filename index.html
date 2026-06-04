@@ -101,8 +101,9 @@
         .btn-preset.active{background:rgba(79,140,255,.15);border-color:#4F8CFF;color:#4F8CFF}
 
         /* BPM Adj */
-        .btn-bpm-adj{width:48px;height:48px;min-width:48px;min-height:48px;max-width:48px;max-height:48px;border-radius:50%;background:#e8efe8;color:#4F8CFF;font-size:24px;font-weight:500;line-height:48px;text-align:center;cursor:pointer;border:2px solid #4F8CFF;transition:all .15s ease;user-select:none;padding:0;margin:0;flex-shrink:0;flex-grow:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;position:relative}
-        .btn-bpm-adj:hover{border-color:#3A6FCC;color:#3A6FCC;background:#f0f4ff}
+        .btn-bpm-adj{width:40px;height:40px;min-width:40px;min-height:40px;max-width:40px;max-height:40px;border-radius:50%;background:transparent;color:#4F8CFF;cursor:pointer;border:2px solid #4F8CFF;transition:all .15s ease;user-select:none;padding:0;margin:0;flex-shrink:0;flex-grow:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;outline:none}
+        .btn-bpm-adj svg{display:block;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .btn-bpm-adj:hover{border-color:#3A6FCC;color:#3A6FCC;background:rgba(79,140,255,.08)}
         .btn-bpm-adj:active{transform:scale(.92);background:#4F8CFF;border-color:#4F8CFF;color:#fff}
 
         /* Settings toggle */
@@ -140,7 +141,7 @@
             input[type="range"]::-webkit-slider-thumb{width:32px;height:32px}
             input[type="range"]::-moz-range-thumb{width:32px;height:32px}
             .btn-preset{padding:6px 14px;font-size:13px}
-            .btn-bpm-adj{width:42px;height:42px;font-size:20px}
+            .btn-bpm-adj{width:36px;height:36px;min-width:36px;min-height:36px;max-width:36px;max-height:36px}
             .btn-sm{padding:4px 10px;font-size:11px}
         }
         @media(max-height:500px) and (orientation:landscape){
@@ -219,14 +220,22 @@
         </div>
 
         <!-- ===== BPM Slider + Buttons Row ===== -->
-        <div class="flex w-full px-0 select-none" style="align-items:center; gap:5px; height:48px;">
-            <button class="btn-bpm-adj" id="bpmDown10" title="-10 BPM">«</button>
-            <button class="btn-bpm-adj" id="bpmDown1" title="-1 BPM">−</button>
-            <div class="flex-1 px-2" style="display:flex; align-items:center; height:48px;">
+        <div class="flex w-full px-0 select-none" style="align-items:center; gap:8px; height:40px;">
+            <button class="btn-bpm-adj" id="bpmDown10" title="-10 BPM">
+                <svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 3L4 8l6 5"/><path d="M13 3L7 8l6 5"/></svg>
+            </button>
+            <button class="btn-bpm-adj" id="bpmDown1" title="-1 BPM">
+                <svg width="14" height="2" viewBox="0 0 14 2"><path d="M1 1h12"/></svg>
+            </button>
+            <div class="flex-1 px-3" style="display:flex; align-items:center; height:40px;">
                 <input type="range" id="bpmSlider" min="20" max="300" value="120" step="1" aria-label="BPM 滑块" style="width:100%;">
             </div>
-            <button class="btn-bpm-adj" id="bpmUp1" title="+1 BPM">+</button>
-            <button class="btn-bpm-adj" id="bpmUp10" title="+10 BPM">»</button>
+            <button class="btn-bpm-adj" id="bpmUp1" title="+1 BPM">
+                <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12"/></svg>
+            </button>
+            <button class="btn-bpm-adj" id="bpmUp10" title="+10 BPM">
+                <svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 13l6-5-6-5"/><path d="M3 13l6-5-6-5"/></svg>
+            </button>
         </div>
         <div class="text-center">
             <span class="text-gray-600 text-xs" id="bpmLabel">Allegro</span>
