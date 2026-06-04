@@ -139,9 +139,10 @@
         @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.6}}
 
         /* Note buttons (subdivision) */
-        .note-btn{width:48px;height:48px;border-radius:50%;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#2C313C;transition:all .2s ease;padding:0;outline:none;flex-shrink:0}
+        .note-btn{width:54px;height:54px;border-radius:50%;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#2C313C;transition:all .2s ease;padding:0;outline:none;flex-shrink:0}
         .note-btn:hover{background:#E8EDF5;color:#2C313C}
         .note-btn.active{background:#4F8CFF;color:#fff}
+        .note-btn svg{width:40px;height:40px}
 
         .ad-placeholder{border:1px dashed #d0ddd0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9a8a;font-size:12px}
 
@@ -306,51 +307,51 @@
 
         <!-- ===== Subdivision (SVG Notes) ===== -->
         <div class="w-full max-w-sm mx-auto select-none px-2">
-            <div class="text-base font-medium mb-3" style="color:#2C313C;margin-left:4px;">细分</div>
-            <div class="flex flex-wrap gap-2.5" style="row-gap:16px;" id="subdivisionNotes">
+            <div class="text-base font-medium mb-3" style="color:#2C313C;margin-left:4px;">节奏类型</div>
+            <div class="flex flex-wrap justify-center" style="gap:12px;row-gap:18px;" id="subdivisionNotes">
                 <!-- 1. 四分音符 -->
                 <button class="note-btn active" data-sub="1" title="四分音符 · 无细分">
-                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="16" cy="27" rx="5" ry="3.5" transform="rotate(-25 16 27)" fill="currentColor"/><rect x="20" y="8" width="1.8" height="19.5" fill="currentColor"/></svg>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="16" cy="27" rx="5" ry="3.5" transform="rotate(-25 16 27)" fill="currentColor"/><rect x="20" y="8" width="1.8" height="19.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 2. 八分音符 -->
                 <button class="note-btn" data-sub="2" title="八分音符 · 每拍2下">
-                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="12" cy="27" rx="4.5" ry="3" transform="rotate(-25 12 27)" fill="currentColor"/><rect x="15.5" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="26" cy="27" rx="4.5" ry="3" transform="rotate(-25 26 27)" fill="currentColor"/><rect x="29.5" y="10" width="1.8" height="17.5" fill="currentColor"/><polygon points="15.5,10 31.3,10 31.3,13.5 15.5,13.5" fill="currentColor"/></svg>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="12" cy="27" rx="4.5" ry="3" transform="rotate(-25 12 27)" fill="currentColor"/><rect x="15.5" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="26" cy="27" rx="4.5" ry="3" transform="rotate(-25 26 27)" fill="currentColor"/><rect x="29.5" y="10" width="1.8" height="17.5" fill="currentColor"/><polygon points="15.5,10 31.3,10 31.3,13.5 15.5,13.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 3. 三连音 -->
                 <button class="note-btn" data-sub="3" title="三连音八分 · 每拍3下">
-                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="10" cy="27" rx="4" ry="2.8" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="13" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="4" ry="2.8" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="23" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="4" ry="2.8" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="33" y="10" width="1.8" height="17.5" fill="currentColor"/><polygon points="13,10 34.8,10 34.8,13.5 13,13.5" fill="currentColor"/></svg>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="10" cy="27" rx="4" ry="2.8" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="13" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="4" ry="2.8" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="23" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="4" ry="2.8" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="33" y="10" width="1.8" height="17.5" fill="currentColor"/><polygon points="13,10 34.8,10 34.8,13.5 13,13.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 4. 十六分音符 -->
                 <button class="note-btn" data-sub="4" title="十六分音符 · 每拍4下">
-                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="8" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 8 27)" fill="currentColor"/><rect x="10.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="16" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 16 27)" fill="currentColor"/><rect x="18.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="24" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 24 27)" fill="currentColor"/><rect x="26.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="32" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 32 27)" fill="currentColor"/><rect x="34.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="10.5,10 36,10 36,12.5 10.5,12.5" fill="currentColor"/><polygon points="10.5,14 36,14 36,16.5 10.5,16.5" fill="currentColor"/></svg>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="8" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 8 27)" fill="currentColor"/><rect x="10.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="16" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 16 27)" fill="currentColor"/><rect x="18.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="24" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 24 27)" fill="currentColor"/><rect x="26.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="32" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 32 27)" fill="currentColor"/><rect x="34.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="10.5,10 36,10 36,12.5 10.5,12.5" fill="currentColor"/><polygon points="10.5,14 36,14 36,16.5 10.5,16.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 5. 前附点 -->
                 <button class="note-btn" data-sub="5" title="前附点 · 附点八分+十六分">
-                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="12" cy="27" rx="4.5" ry="3" transform="rotate(-25 12 27)" fill="currentColor"/><rect x="15.5" y="10" width="1.8" height="17.5" fill="currentColor"/><circle cx="20" cy="27" r="1.3" fill="currentColor"/><ellipse cx="28" cy="27" rx="4.5" ry="3" transform="rotate(-25 28 27)" fill="currentColor"/><rect x="31.5" y="10" width="1.8" height="17.5" fill="currentColor"/><polygon points="15.5,10 33.3,10 33.3,13 15.5,13" fill="currentColor"/><polygon points="26,15.5 33.3,15.5 33.3,18 26,18" fill="currentColor"/></svg>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="12" cy="27" rx="4.5" ry="3" transform="rotate(-25 12 27)" fill="currentColor"/><rect x="15.5" y="10" width="1.8" height="17.5" fill="currentColor"/><circle cx="20" cy="27" r="1.3" fill="currentColor"/><ellipse cx="28" cy="27" rx="4.5" ry="3" transform="rotate(-25 28 27)" fill="currentColor"/><rect x="31.5" y="10" width="1.8" height="17.5" fill="currentColor"/><polygon points="15.5,10 33.3,10 33.3,13 15.5,13" fill="currentColor"/><polygon points="26,15.5 33.3,15.5 33.3,18 26,18" fill="currentColor"/></svg>
                 </button>
                 <!-- 6. 后附点 -->
                 <button class="note-btn" data-sub="6" title="后附点 · 十六分+附点八分">
-                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="12" cy="27" rx="4.5" ry="3" transform="rotate(-25 12 27)" fill="currentColor"/><rect x="15.5" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="28" cy="27" rx="4.5" ry="3" transform="rotate(-25 28 27)" fill="currentColor"/><rect x="31.5" y="10" width="1.8" height="17.5" fill="currentColor"/><circle cx="35" cy="27" r="1.3" fill="currentColor"/><polygon points="15.5,10 33.3,10 33.3,13 15.5,13" fill="currentColor"/><polygon points="15.5,15.5 22.5,15.5 22.5,18 15.5,18" fill="currentColor"/></svg>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="12" cy="27" rx="4.5" ry="3" transform="rotate(-25 12 27)" fill="currentColor"/><rect x="15.5" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="28" cy="27" rx="4.5" ry="3" transform="rotate(-25 28 27)" fill="currentColor"/><rect x="31.5" y="10" width="1.8" height="17.5" fill="currentColor"/><circle cx="35" cy="27" r="1.3" fill="currentColor"/><polygon points="15.5,10 33.3,10 33.3,13 15.5,13" fill="currentColor"/><polygon points="15.5,15.5 22.5,15.5 22.5,18 15.5,18" fill="currentColor"/></svg>
                 </button>
                 <!-- 7. 前十六后八 -->
                 <button class="note-btn" data-sub="7" title="前十六后八 · 两个十六分+一个八分">
-                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 24,14 24,16.5 12.5,16.5" fill="currentColor"/></svg>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 24,14 24,16.5 12.5,16.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 8. 前八后十六 -->
                 <button class="note-btn" data-sub="8" title="前八后十六 · 一个八分+两个十六分">
-                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="22.5,14 34,14 34,16.5 22.5,16.5" fill="currentColor"/></svg>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="22.5,14 34,14 34,16.5 22.5,16.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 9. 切分音 -->
                 <button class="note-btn" data-sub="9" title="切分音 · 八分+四分+八分">
-                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 18,14 18,16.5 12.5,16.5" fill="currentColor"/><polygon points="28.5,14 34,14 34,16.5 28.5,16.5" fill="currentColor"/></svg>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 18,14 18,16.5 12.5,16.5" fill="currentColor"/><polygon points="28.5,14 34,14 34,16.5 28.5,16.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 10. 三连音十六分 -->
                 <button class="note-btn" data-sub="10" title="三连音十六分 · 三连音双梁">
-                    <svg viewBox="0 0 40 40" width="36" height="36"><text x="23.5" y="6" font-size="7.5" font-family="sans-serif" font-style="italic" font-weight="bold" text-anchor="middle" fill="currentColor">3</text><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 34,14 34,16.5 12.5,16.5" fill="currentColor"/></svg>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><text x="23.5" y="6" font-size="7.5" font-family="sans-serif" font-style="italic" font-weight="bold" text-anchor="middle" fill="currentColor">3</text><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 34,14 34,16.5 12.5,16.5" fill="currentColor"/></svg>
                 </button>
                 <!-- 11. 三连音三梁 -->
                 <button class="note-btn" data-sub="11" title="三连音三十二分 · 三连音三梁">
-                    <svg viewBox="0 0 40 40" width="36" height="36"><text x="23.5" y="6" font-size="7.5" font-family="sans-serif" font-style="italic" font-weight="bold" text-anchor="middle" fill="currentColor">3</text><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 34,14 34,16.5 12.5,16.5" fill="currentColor"/><polygon points="12.5,18 34,18 34,20.5 12.5,20.5" fill="currentColor"/></svg>
+                    <svg viewBox="0 0 40 40" width="40" height="40"><text x="23.5" y="6" font-size="7.5" font-family="sans-serif" font-style="italic" font-weight="bold" text-anchor="middle" fill="currentColor">3</text><ellipse cx="10" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="12.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="22.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="3.5" ry="2.5" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="32.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="12.5,10 34,10 34,12.5 12.5,12.5" fill="currentColor"/><polygon points="12.5,14 34,14 34,16.5 12.5,16.5" fill="currentColor"/><polygon points="12.5,18 34,18 34,20.5 12.5,20.5" fill="currentColor"/></svg>
                 </button>
             </div>
         </div>
@@ -491,7 +492,7 @@
                 'page-heading': '免费在线节拍器',
                 'meta-desc': '免费在线节拍器，专业级精准节拍器。支持Tap Tempo、拍子细分、3种音色、训练模式、多语言。深色主题，无需下载，打开即用。',
                 'bpm-label': 'bpm',
-                'sub-label': '细分',
+                'sub-label': '节奏类型',
                 'beats-label1': '每小节',
                 'beats-label2': '拍',
                 'sound-label': '音色',
@@ -524,7 +525,7 @@
                 'page-heading': 'Free Online Metronome',
                 'meta-desc': 'Free online metronome with Web Audio precision. Tap Tempo, subdivisions, 3 sounds, training mode, multi-language. Dark theme, no install needed.',
                 'bpm-label': 'bpm',
-                'sub-label': 'Sub',
+                'sub-label': 'Rhythm',
                 'beats-label1': 'Beats per',
                 'beats-label2': 'bar',
                 'sound-label': 'Sound',
@@ -557,7 +558,7 @@
                 'page-heading': '無料オンラインメトロノーム',
                 'meta-desc': '無料オンラインメトロノーム。タップテンポ、分割、3つの音色、トレーニングモード、多言語対応。ダークテーマ、インストール不要。',
                 'bpm-label': 'bpm',
-                'sub-label': '分割',
+                'sub-label': 'リズム',
                 'beats-label1': '1小節',
                 'beats-label2': '拍',
                 'sound-label': '音色',
@@ -590,7 +591,7 @@
                 'page-heading': 'Metrónomo Online Gratuito',
                 'meta-desc': 'Metrónomo online gratuito con precisión Web Audio. Tap Tempo, subdivisiones, 3 sonidos, modo entrenamiento, multi-idioma. Tema oscuro, sin instalación.',
                 'bpm-label': 'bpm',
-                'sub-label': 'Subdiv',
+                'sub-label': 'Ritmo',
                 'beats-label1': 'Pulsos por',
                 'beats-label2': 'compás',
                 'sound-label': 'Sonido',
@@ -623,7 +624,7 @@
                 'page-heading': 'Metrônomo Online Grátis',
                 'meta-desc': 'Metrônomo online gratuito com precisão Web Audio. Tap Tempo, subdivisões, 3 sons, modo treino, multi-idioma. Tema escuro, sem instalação.',
                 'bpm-label': 'bpm',
-                'sub-label': 'Subdiv',
+                'sub-label': 'Ritmo',
                 'beats-label1': 'Batidas por',
                 'beats-label2': 'compasso',
                 'sound-label': 'Som',
