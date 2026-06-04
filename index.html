@@ -1847,34 +1847,41 @@
                 this.$speedStepMins.addEventListener('input', onTimeInputChange);
                 this.$speedStepBpmTime.addEventListener('input', onTimeInputChange);
 
-                // BPM range changes take effect on change (blur/enter), not input
+                // BPM range changes: input for immediate, but debounced to skip mid-typing
+                let _bpmRangeTimer = null;
                 const commitBpmRange = () => {
-                    if (!this.running || this.mode !== 'speed') return;
-                    let s = parseInt(this.$speedStartBpm.value);
-                    let e = parseInt(this.$speedEndBpm.value);
-                    if (isNaN(s) || s < 20) { s = 20; this.$speedStartBpm.value = 20; }
-                    if (isNaN(e) || e > 300) { e = 300; this.$speedEndBpm.value = 300; }
-                    if (s >= e) { s = Math.max(20, e - 10); this.$speedStartBpm.value = s; }
-                    this.speedStartBpm = s;
-                    this.speedEndBpm = e;
-                    if (this.speedCurrentBpm < this.speedStartBpm) {
-                        this.speedCurrentBpm = this.speedStartBpm;
-                        this.ui.setBpm(this.speedStartBpm);
-                    }
-                    if (this.speedCurrentBpm > this.speedEndBpm) {
-                        this.speedCurrentBpm = this.speedEndBpm;
-                        this.ui.setBpm(this.speedEndBpm);
-                    }
-                    this.$speedStatus.textContent = this._speedStatusText();
+                    clearTimeout(_bpmRangeTimer);
+                    _bpmRangeTimer = setTimeout(() => {
+                        if (!this.running || this.mode !== 'speed') return;
+                        let s = parseInt(this.$speedStartBpm.value);
+                        let e = parseInt(this.$speedEndBpm.value);
+                        if (isNaN(s) || s < 20) { s = 20; this.$speedStartBpm.value = 20; }
+                        if (isNaN(e) || e > 300) { e = 300; this.$speedEndBpm.value = 300; }
+                        if (s >= e) { s = Math.max(20, e - 10); this.$speedStartBpm.value = s; }
+                        this.speedStartBpm = s;
+                        this.speedEndBpm = e;
+                        if (this.speedCurrentBpm < this.speedStartBpm) {
+                            this.speedCurrentBpm = this.speedStartBpm;
+                            this.ui.setBpm(this.speedStartBpm);
+                        }
+                        if (this.speedCurrentBpm > this.speedEndBpm) {
+                            this.speedCurrentBpm = this.speedEndBpm;
+                            this.ui.setBpm(this.speedEndBpm);
+                        }
+                        this.$speedStatus.textContent = this._speedStatusText();
+                    }, 400); // 400ms debounce after last keystroke
                 };
-                this.$speedStartBpm.addEventListener('change', commitBpmRange);
-                this.$speedEndBpm.addEventListener('change', commitBpmRange);
+                this.$speedStartBpm.addEventListener('input', commitBpmRange);
+                this.$speedEndBpm.addEventListener('input', commitBpmRange);
 
-                // Engine bar callback
+                // Engine bar callback — only fire for the active mode
                 this.engine.onBarCallback = (barCount) => {
                     if (this.running) {
                         if (this.mode === 'mute') this._onMuteBar();
-                        if (this.mode === 'speed') this._onSpeedBar();
+                        else if (this.mode === 'speed') this._onSpeedBar();
+                    } else {
+                        // Safety: if training is not running, ensure engine is unmuted
+                        this.engine.muted = false;
                     }
                 };
             }
@@ -2534,7 +2541,7 @@
                 this.$volSub.addEventListener('input', () => this.setVolumes());
 
                 // Panel tab switching — dropdown pattern
-                this._openPanel = 'vol'; // currently open panel
+                this._openPanel = null;
                 this.$panelTabs.forEach(tab => {
                     tab.addEventListener('click', () => {
                         const panelName = tab.dataset.panel;
@@ -2546,6 +2553,10 @@
                             this.$trainPanel.classList.remove('open');
                             this.$soundPanel.classList.remove('open');
                             return;
+                        }
+                        // When switching to training panel, ensure muted is cleared from other mode
+                        if (panelName === 'train' && this.trainingCtrl && this.trainingCtrl.running) {
+                            this.trainingCtrl.engine.setMuted(false);
                         }
                         // Otherwise, switch to the clicked panel
                         this._openPanel = panelName;
