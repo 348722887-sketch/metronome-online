@@ -292,7 +292,7 @@
                 <label class="flex items-center cursor-pointer w-full h-full">
                     <input type="checkbox" id="accentCheck" checked class="sr-only">
                     <div class="custom-check" id="accentCheckMark"></div>
-                    <span class="ml-3 text-base font-medium" style="color:#2C313C;">重音第一拍</span>
+                    <span class="ml-3 text-base font-medium" style="color:#2C313C;" data-i18n="accent-label">重音第一拍</span>
                 </label>
             </div>
             <!-- 行3: 定时器 -->
@@ -300,7 +300,7 @@
                 <label class="flex items-center cursor-pointer h-full">
                     <input type="checkbox" id="timerCheck" class="sr-only">
                     <div class="custom-check" id="timerCheckMark"></div>
-                    <span class="ml-3 text-base font-medium" style="color:#2C313C;">定时器</span>
+                    <span class="ml-3 text-base font-medium" style="color:#2C313C;" data-i18n="timer-label">定时器</span>
                 </label>
                 <div class="timer-badge cursor-pointer" id="timerDisplay" title="点击设置时间">1:00</div>
             </div>
@@ -363,7 +363,7 @@
             <div class="flex gap-1.5">
                 <button class="panel-tab active" data-panel="vol" id="volToggle">🔊 音量</button>
                 <button class="panel-tab" data-panel="train" id="trainToggle">🎯 训练模式</button>
-                <button class="panel-tab" data-panel="sound" id="soundToggle">音色</button>
+                <button class="panel-tab" data-panel="sound" id="soundToggle">🎵 音色</button>
             </div>
 
             <!-- Panel: Volume -->
@@ -431,9 +431,9 @@
             <!-- Panel: Sound -->
             <div class="panel-collapse w-full" id="soundPanel">
                 <div class="flex flex-wrap gap-2 bg-[#f8fcf8] rounded-xl p-4 border border-[#e8efe8] mt-1.5 justify-center">
-                    <button class="btn-sm active btn-sound" data-sound="classic">电子</button>
-                    <button class="btn-sm btn-sound" data-sound="wood">木鱼</button>
-                    <button class="btn-sm btn-sound" data-sound="cymbal">擦片</button>
+                    <button class="btn-sm active btn-sound" data-sound="classic" data-i18n="sound-classic">电子</button>
+                    <button class="btn-sm btn-sound" data-sound="wood" data-i18n="sound-wood">木鱼</button>
+                    <button class="btn-sm btn-sound" data-sound="cymbal" data-i18n="sound-cymbal">擦片</button>
                 </div>
             </div>
         </div>
@@ -460,8 +460,14 @@
                 <option value="zh-CN">🇨🇳 中文</option>
                 <option value="en">🇺🇸 English</option>
                 <option value="ja">🇯🇵 日本語</option>
+                <option value="ko">🇰🇷 한국어</option>
+                <option value="de">🇩🇪 Deutsch</option>
+                <option value="fr">🇫🇷 Français</option>
                 <option value="es">🇪🇸 Español</option>
                 <option value="pt">🇧🇷 Português</option>
+                <option value="it">🇮🇹 Italiano</option>
+                <option value="ru">🇷🇺 Русский</option>
+                <option value="pl">🇵🇱 Polski</option>
             </select>
         </div>
     </footer>
@@ -515,6 +521,11 @@
                 'footer-copy': '© 2026 在线节拍器 — 免费在线节拍器工具',
                 'footer-privacy': '隐私政策',
                 'footer-about': '关于',
+                'accent-label': '重音第一拍',
+                'timer-label': '定时器',
+                'sound-classic': '电子',
+                'sound-wood': '木鱼',
+                'sound-cymbal': '擦片',
             },
             'en': {
                 'title': 'Online Metronome — Free Professional Metronome',
@@ -548,6 +559,11 @@
                 'footer-copy': '© 2026 Online Metronome — Free Metronome Tool',
                 'footer-privacy': 'Privacy',
                 'footer-about': 'About',
+                'accent-label': 'Accent 1st Beat',
+                'timer-label': 'Timer',
+                'sound-classic': 'Classic',
+                'sound-wood': 'Wood',
+                'sound-cymbal': 'Cymbal',
             },
             'ja': {
                 'title': 'オンラインメトロノーム — 無料の高精度メトロノーム',
@@ -581,6 +597,11 @@
                 'footer-copy': '© 2026 オンラインメトロノーム',
                 'footer-privacy': 'プライバシー',
                 'footer-about': '概要',
+                'accent-label': '1拍目を強調',
+                'timer-label': 'タイマー',
+                'sound-classic': '電子音',
+                'sound-wood': '木魚',
+                'sound-cymbal': 'シンバル',
             },
             'es': {
                 'title': 'Metrónomo Online — Metrónomo Profesional Gratuito',
@@ -614,6 +635,11 @@
                 'footer-copy': '© 2026 Metrónomo Online — Herramienta Gratuita',
                 'footer-privacy': 'Privacidad',
                 'footer-about': 'Acerca de',
+                'accent-label': 'Acentuar 1er tiempo',
+                'timer-label': 'Temporizador',
+                'sound-classic': 'Clásico',
+                'sound-wood': 'Madera',
+                'sound-cymbal': 'Platillo',
             },
             'pt': {
                 'title': 'Metrônomo Online — Metrônomo Profissional Grátis',
@@ -647,7 +673,222 @@
                 'footer-copy': '© 2026 Metrônomo Online — Ferramenta Gratuita',
                 'footer-privacy': 'Privacidade',
                 'footer-about': 'Sobre',
-            }
+                'accent-label': 'Acentuar 1º tempo',
+                'timer-label': 'Temporizador',
+                'sound-classic': 'Clássico',
+                'sound-wood': 'Madeira',
+                'sound-cymbal': 'Chimbal',
+            },
+            'ko': {
+                'title': '온라인 메트로놈 — 무료 전문 메트로놈',
+                'page-heading': '무료 온라인 메트로놈',
+                'meta-desc': 'Web Audio 정밀도를 갖춘 무료 온라인 메트로놈. 탭 템포, 세분화, 3가지 사운드, 트레이닝 모드, 다국어 지원.',
+                'bpm-label': 'bpm',
+                'sub-label': '리듬',
+                'beats-label1': '한 마디',
+                'beats-label2': '박',
+                'sound-label': '사운드',
+                'vol-toggle': '🔊 볼륨 ▾',
+                'vol-accent': '강박',
+                'vol-normal': '약박',
+                'vol-sub': '세분',
+                'train-toggle': '🎯 트레이닝 ▾',
+                'train-mute-tab': '묵음 훈련',
+                'train-speed-tab': '속도 증가',
+                'train-mute-play': '재생',
+                'train-mute-bars': '마디',
+                'train-mute-silence': '묵음',
+                'train-speed-from': '시작',
+                'train-speed-to': '종료',
+                'train-speed-step': '간격',
+                'train-speed-step-bars': '마디 +',
+                'train-start': '시작',
+                'keyboard-hint': 'Space 재생 · ←→ ±1BPM · Shift+←→ ±10 · T 탭 · 1-4 세분',
+                'share-btn': '설정 공유',
+                'footer-copy': '© 2026 온라인 메트로놈',
+                'footer-privacy': '개인정보',
+                'footer-about': '정보',
+                'accent-label': '첫 박 강조',
+                'timer-label': '타이머',
+                'sound-classic': '클래식',
+                'sound-wood': '우드',
+                'sound-cymbal': '심벌',
+            },
+            'de': {
+                'title': 'Online Metronom — Kostenloses Profi-Metronom',
+                'page-heading': 'Kostenloses Online Metronom',
+                'meta-desc': 'Kostenloses Online-Metronom mit Web-Audio-Präzision. Tap Tempo, Unterteilungen, 3 Sounds, Trainingsmodus, mehrsprachig.',
+                'bpm-label': 'bpm',
+                'sub-label': 'Rhythmus',
+                'beats-label1': 'Schläge pro',
+                'beats-label2': 'Takt',
+                'sound-label': 'Klang',
+                'vol-toggle': '🔊 Lautstärke ▾',
+                'vol-accent': 'Betonung',
+                'vol-normal': 'Normal',
+                'vol-sub': 'Untert.',
+                'train-toggle': '🎯 Training ▾',
+                'train-mute-tab': 'Stumm-Übung',
+                'train-speed-tab': 'Temposteigerung',
+                'train-mute-play': 'Spielen',
+                'train-mute-bars': 'Takte',
+                'train-mute-silence': 'Stumm',
+                'train-speed-from': 'Von',
+                'train-speed-to': 'bis',
+                'train-speed-step': 'Alle',
+                'train-speed-step-bars': 'Takte +',
+                'train-start': 'Start',
+                'keyboard-hint': 'Leertaste Start · ←→ ±1BPM · Shift+←→ ±10 · T Tippen · 1-4 Untert.',
+                'share-btn': 'Einstellungen teilen',
+                'footer-copy': '© 2026 Online Metronom — Kostenloses Tool',
+                'footer-privacy': 'Datenschutz',
+                'footer-about': 'Über',
+                'accent-label': '1. Schlag betonen',
+                'timer-label': 'Timer',
+                'sound-classic': 'Klassisch',
+                'sound-wood': 'Holz',
+                'sound-cymbal': 'Becken',
+            },
+            'fr': {
+                'title': 'Métronome en Ligne — Métronome Pro Gratuit',
+                'page-heading': 'Métronome en Ligne Gratuit',
+                'meta-desc': 'Métronome en ligne gratuit avec précision Web Audio. Tap Tempo, subdivisions, 3 sons, mode entraînement, multilingue.',
+                'bpm-label': 'bpm',
+                'sub-label': 'Rythme',
+                'beats-label1': 'Temps par',
+                'beats-label2': 'mesure',
+                'sound-label': 'Son',
+                'vol-toggle': '🔊 Volume ▾',
+                'vol-accent': 'Accent',
+                'vol-normal': 'Normal',
+                'vol-sub': 'Subdiv.',
+                'train-toggle': '🎯 Entraînement ▾',
+                'train-mute-tab': 'Exercice muet',
+                'train-speed-tab': 'Accélération',
+                'train-mute-play': 'Jouer',
+                'train-mute-bars': 'mes.',
+                'train-mute-silence': 'muet',
+                'train-speed-from': 'De',
+                'train-speed-to': 'à',
+                'train-speed-step': 'Toutes les',
+                'train-speed-step-bars': 'mes. +',
+                'train-start': 'Démarrer',
+                'keyboard-hint': 'Espace Démarrer · ←→ ±1BPM · Shift+←→ ±10 · T Tap · 1-4 Subdiv.',
+                'share-btn': 'Partager',
+                'footer-copy': '© 2026 Métronome en Ligne — Outil Gratuit',
+                'footer-privacy': 'Confidentialité',
+                'footer-about': 'À propos',
+                'accent-label': 'Accentuer 1er temps',
+                'timer-label': 'Minuteur',
+                'sound-classic': 'Classique',
+                'sound-wood': 'Bois',
+                'sound-cymbal': 'Cymbale',
+            },
+            'it': {
+                'title': 'Metronomo Online — Metronomo Professionale Gratuito',
+                'page-heading': 'Metronomo Online Gratuito',
+                'meta-desc': 'Metronomo online gratuito con precisione Web Audio. Tap Tempo, suddivisioni, 3 suoni, modalità training, multilingua.',
+                'bpm-label': 'bpm',
+                'sub-label': 'Ritmo',
+                'beats-label1': 'Battiti per',
+                'beats-label2': 'battuta',
+                'sound-label': 'Suono',
+                'vol-toggle': '🔊 Volume ▾',
+                'vol-accent': 'Accento',
+                'vol-normal': 'Normale',
+                'vol-sub': 'Suddiv.',
+                'train-toggle': '🎯 Allenamento ▾',
+                'train-mute-tab': 'Esercizio muto',
+                'train-speed-tab': 'Accelerazione',
+                'train-mute-play': 'Suona',
+                'train-mute-bars': 'batt.',
+                'train-mute-silence': 'muto',
+                'train-speed-from': 'Da',
+                'train-speed-to': 'a',
+                'train-speed-step': 'Ogni',
+                'train-speed-step-bars': 'batt. +',
+                'train-start': 'Inizia',
+                'keyboard-hint': 'Spazio Avvia · ←→ ±1BPM · Shift+←→ ±10 · T Tap · 1-4 Suddiv.',
+                'share-btn': 'Condividi',
+                'footer-copy': '© 2026 Metronomo Online — Strumento Gratuito',
+                'footer-privacy': 'Privacy',
+                'footer-about': 'Info',
+                'accent-label': 'Accenta 1° battito',
+                'timer-label': 'Timer',
+                'sound-classic': 'Classico',
+                'sound-wood': 'Legno',
+                'sound-cymbal': 'Piatto',
+            },
+            'ru': {
+                'title': 'Онлайн Метроном — Бесплатный Профессиональный Метроном',
+                'page-heading': 'Бесплатный Онлайн Метроном',
+                'meta-desc': 'Бесплатный онлайн метроном с точностью Web Audio. Tap Tempo, деления, 3 звука, режим тренировки, многоязычный.',
+                'bpm-label': 'bpm',
+                'sub-label': 'Ритм',
+                'beats-label1': 'Долей в',
+                'beats-label2': 'такте',
+                'sound-label': 'Звук',
+                'vol-toggle': '🔊 Громкость ▾',
+                'vol-accent': 'Акцент',
+                'vol-normal': 'Норма',
+                'vol-sub': 'Дел.',
+                'train-toggle': '🎯 Тренировка ▾',
+                'train-mute-tab': 'Немой режим',
+                'train-speed-tab': 'Ускорение',
+                'train-mute-play': 'Играть',
+                'train-mute-bars': 'такт.',
+                'train-mute-silence': 'немо',
+                'train-speed-from': 'От',
+                'train-speed-to': 'до',
+                'train-speed-step': 'Каждые',
+                'train-speed-step-bars': 'такт. +',
+                'train-start': 'Старт',
+                'keyboard-hint': 'Пробел Старт · ←→ ±1BPM · Shift+←→ ±10 · T Тап · 1-4 Дел.',
+                'share-btn': 'Поделиться',
+                'footer-copy': '© 2026 Онлайн Метроном — Бесплатный Инструмент',
+                'footer-privacy': 'Конфиденц.',
+                'footer-about': 'О нас',
+                'accent-label': 'Акцент на 1-ю долю',
+                'timer-label': 'Таймер',
+                'sound-classic': 'Классика',
+                'sound-wood': 'Дерево',
+                'sound-cymbal': 'Тарелка',
+            },
+            'pl': {
+                'title': 'Metronom Online — Darmowy Profesjonalny Metronom',
+                'page-heading': 'Darmowy Metronom Online',
+                'meta-desc': 'Darmowy metronom online z precyzją Web Audio. Tap Tempo, podziały, 3 dźwięki, tryb treningowy, wielojęzyczny.',
+                'bpm-label': 'bpm',
+                'sub-label': 'Rytm',
+                'beats-label1': 'Uderzeń na',
+                'beats-label2': 'takt',
+                'sound-label': 'Dźwięk',
+                'vol-toggle': '🔊 Głośność ▾',
+                'vol-accent': 'Akcent',
+                'vol-normal': 'Normalny',
+                'vol-sub': 'Podz.',
+                'train-toggle': '🎯 Trening ▾',
+                'train-mute-tab': 'Ćw. wyciszone',
+                'train-speed-tab': 'Przyspieszenie',
+                'train-mute-play': 'Graj',
+                'train-mute-bars': 'takt.',
+                'train-mute-silence': 'cisza',
+                'train-speed-from': 'Od',
+                'train-speed-to': 'do',
+                'train-speed-step': 'Co',
+                'train-speed-step-bars': 'takt. +',
+                'train-start': 'Start',
+                'keyboard-hint': 'Spacja Start · ←→ ±1BPM · Shift+←→ ±10 · T Stuknij · 1-4 Podz.',
+                'share-btn': 'Udostępnij',
+                'footer-copy': '© 2026 Metronom Online — Darmowe Narzędzie',
+                'footer-privacy': 'Prywatność',
+                'footer-about': 'O nas',
+                'accent-label': 'Akcentuj 1. uderzenie',
+                'timer-label': 'Minutnik',
+                'sound-classic': 'Klasyczny',
+                'sound-wood': 'Drewno',
+                'sound-cymbal': 'Talerz',
+            },
         };
 
         let currentLang = 'zh-CN';
@@ -657,8 +898,14 @@
             const navLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
             if (navLang.startsWith('zh')) return 'zh-CN';
             if (navLang.startsWith('ja')) return 'ja';
+            if (navLang.startsWith('ko')) return 'ko';
+            if (navLang.startsWith('de')) return 'de';
+            if (navLang.startsWith('fr')) return 'fr';
             if (navLang.startsWith('es')) return 'es';
             if (navLang.startsWith('pt')) return 'pt';
+            if (navLang.startsWith('it')) return 'it';
+            if (navLang.startsWith('ru')) return 'ru';
+            if (navLang.startsWith('pl')) return 'pl';
             return 'en';
         }
 
