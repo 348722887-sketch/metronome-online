@@ -23,6 +23,21 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><text y='.8em' font-size='80' text-anchor='middle' x='50'>🎵</text></svg>">
 
+    <!-- DNS / Preconnect for performance -->
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+
+    <!-- hreflang for international SEO -->
+    <link rel="alternate" hreflang="zh-CN" href="https://metronome-online-mvp.vercel.app/?lang=zh-CN">
+    <link rel="alternate" hreflang="en" href="https://metronome-online-mvp.vercel.app/?lang=en">
+    <link rel="alternate" hreflang="ja" href="https://metronome-online-mvp.vercel.app/?lang=ja">
+    <link rel="alternate" hreflang="es" href="https://metronome-online-mvp.vercel.app/?lang=es">
+    <link rel="alternate" hreflang="pt" href="https://metronome-online-mvp.vercel.app/?lang=pt">
+    <link rel="alternate" hreflang="x-default" href="https://metronome-online-mvp.vercel.app/">
+
+    <!-- Google Search Console verification (replace with your code) -->
+    <meta name="google-site-verification" content="REPLACE_WITH_YOUR_VERIFICATION_CODE">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { theme: { extend: { colors: {
@@ -133,6 +148,58 @@
             .btn-play{width:54px;height:54px;font-size:24px}
         }
     </style>
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "在线节拍器 - Online Metronome",
+        "description": "Free precise online metronome with Tap Tempo, subdivisions, 3 sound types, training mode, and multi-language support.",
+        "applicationCategory": "MusicApplication",
+        "operatingSystem": "All",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "browserRequirements": "Requires Web Audio API support",
+        "inLanguage": ["zh-CN","en","ja","es","pt"],
+        "url": "https://metronome-online-mvp.vercel.app/",
+        "author": { "@type": "Organization", "name": "Online Metronome" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "How to use this online metronome?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Press the Space key or click the play button to start. Use arrow keys to adjust BPM by ±1, or Shift+arrow for ±10. Press T for Tap Tempo. Use keys 1-4 to switch subdivisions. All settings are automatically saved to your browser."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What is Tap Tempo?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Tap Tempo lets you find the BPM of any song by tapping along to the beat. Press the TAP button or T key in rhythm, and the metronome will calculate the average BPM from your taps."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Is this metronome free?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, this online metronome is completely free. All features — including Tap Tempo, subdivisions, 3 sound types, training mode, and multi-language support — are available for free without any registration or download."
+            }
+        }
+        ]
+    }
+    </script>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-between py-6 px-4" style="background:#0a0a0f;">
 
@@ -144,6 +211,7 @@
     <main class="flex-1 flex flex-col items-center justify-center w-full max-w-lg mx-auto gap-4">
 
         <!-- ===== BPM Display ===== -->
+        <h1 class="text-center text-gray-400 text-xs tracking-[0.15em] font-medium mb-0 select-none" data-i18n="page-heading">免费在线节拍器</h1>
         <div class="text-center select-none">
             <div class="bpm-display text-8xl sm:text-9xl font-extrabold text-white tracking-tight cursor-pointer"
                  id="bpmDisplay" title="点击输入BPM" role="button" tabindex="0">120</div>
@@ -351,6 +419,7 @@
         const I18N = {
             'zh-CN': {
                 'title': '在线节拍器 — 免费精准在线节拍器 | Online Metronome',
+                'page-heading': '免费在线节拍器',
                 'meta-desc': '免费在线节拍器，专业级精准节拍器。支持Tap Tempo、拍子细分、3种音色、训练模式、多语言。深色主题，无需下载，打开即用。',
                 'bpm-label': 'bpm',
                 'sub-label': '细分',
@@ -383,6 +452,7 @@
             },
             'en': {
                 'title': 'Online Metronome — Free Professional Metronome',
+                'page-heading': 'Free Online Metronome',
                 'meta-desc': 'Free online metronome with Web Audio precision. Tap Tempo, subdivisions, 3 sounds, training mode, multi-language. Dark theme, no install needed.',
                 'bpm-label': 'bpm',
                 'sub-label': 'Sub',
@@ -415,6 +485,7 @@
             },
             'ja': {
                 'title': 'オンラインメトロノーム — 無料の高精度メトロノーム',
+                'page-heading': '無料オンラインメトロノーム',
                 'meta-desc': '無料オンラインメトロノーム。タップテンポ、分割、3つの音色、トレーニングモード、多言語対応。ダークテーマ、インストール不要。',
                 'bpm-label': 'bpm',
                 'sub-label': '分割',
@@ -447,6 +518,7 @@
             },
             'es': {
                 'title': 'Metrónomo Online — Metrónomo Profesional Gratuito',
+                'page-heading': 'Metrónomo Online Gratuito',
                 'meta-desc': 'Metrónomo online gratuito con precisión Web Audio. Tap Tempo, subdivisiones, 3 sonidos, modo entrenamiento, multi-idioma. Tema oscuro, sin instalación.',
                 'bpm-label': 'bpm',
                 'sub-label': 'Subdiv',
@@ -479,6 +551,7 @@
             },
             'pt': {
                 'title': 'Metrônomo Online — Metrônomo Profissional Grátis',
+                'page-heading': 'Metrônomo Online Grátis',
                 'meta-desc': 'Metrônomo online gratuito com precisão Web Audio. Tap Tempo, subdivisões, 3 sons, modo treino, multi-idioma. Tema escuro, sem instalação.',
                 'bpm-label': 'bpm',
                 'sub-label': 'Subdiv',
@@ -591,6 +664,7 @@
                 if (params.has('va')) saved.volAccent = parseInt(params.get('va'));
                 if (params.has('vn')) saved.volNormal = parseInt(params.get('vn'));
                 if (params.has('vs')) saved.volSub = parseInt(params.get('vs'));
+                if (params.has('lang')) saved.lang = params.get('lang');
 
                 // Merge with defaults
                 const merged = { ...this.defaults, ...saved };
