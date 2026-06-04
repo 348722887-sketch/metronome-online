@@ -1861,10 +1861,17 @@
                     } else if (s >= e && document.activeElement === this.$speedStartBpm) {
                         e = Math.min(300, s + 5);
                     }
+                    const oldStart = this.speedStartBpm;
                     this.speedStartBpm = s;
                     this.speedEndBpm = e;
-                    if (this.speedCurrentBpm < s) { this.speedCurrentBpm = s; this.ui.setBpm(s); }
-                    if (this.speedCurrentBpm > e) { this.speedCurrentBpm = e; this.ui.setBpm(e); }
+                    // If current was at old start (训练刚起步), follow the new start
+                    if (this.speedCurrentBpm < s || this.speedCurrentBpm === oldStart || s < oldStart) {
+                        this.speedCurrentBpm = s;
+                        this.ui.setBpm(s);
+                    } else if (this.speedCurrentBpm > e) {
+                        this.speedCurrentBpm = e;
+                        this.ui.setBpm(e);
+                    }
                     this.$speedStatus.textContent = this._speedStatusText();
                 };
                 this.$speedStartBpm.addEventListener('input', applyBpmRange);
