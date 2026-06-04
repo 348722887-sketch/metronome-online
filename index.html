@@ -1847,33 +1847,28 @@
                 this.$speedStepMins.addEventListener('input', onTimeInputChange);
                 this.$speedStepBpmTime.addEventListener('input', onTimeInputChange);
 
-                // BPM range changes take effect immediately during training
-                this.$speedStartBpm.addEventListener('input', () => {
-                    const raw = parseInt(this.$speedStartBpm.value);
+                // BPM range changes take effect on change (blur/enter), not input
+                const commitBpmRange = () => {
                     if (!this.running || this.mode !== 'speed') return;
-                    if (isNaN(raw) || raw < 20) this.$speedStartBpm.value = 20;
-                    if (raw >= this.speedEndBpm) this.$speedStartBpm.value = this.speedEndBpm - 5;
-                    this.speedStartBpm = Math.max(20, Math.min(280, parseInt(this.$speedStartBpm.value) || 60));
+                    let s = parseInt(this.$speedStartBpm.value);
+                    let e = parseInt(this.$speedEndBpm.value);
+                    if (isNaN(s) || s < 20) { s = 20; this.$speedStartBpm.value = 20; }
+                    if (isNaN(e) || e > 300) { e = 300; this.$speedEndBpm.value = 300; }
+                    if (s >= e) { s = Math.max(20, e - 10); this.$speedStartBpm.value = s; }
+                    this.speedStartBpm = s;
+                    this.speedEndBpm = e;
                     if (this.speedCurrentBpm < this.speedStartBpm) {
                         this.speedCurrentBpm = this.speedStartBpm;
                         this.ui.setBpm(this.speedStartBpm);
                     }
-                    this.$speedStatus.textContent = this._speedStatusText();
-                });
-                this.$speedEndBpm.addEventListener('input', () => {
-                    const raw = parseInt(this.$speedEndBpm.value);
-                    if (!this.running || this.mode !== 'speed') return;
-                    if (isNaN(raw) || raw > 300) this.$speedEndBpm.value = 300;
-                    if (raw <= this.speedStartBpm) this.$speedEndBpm.value = this.speedStartBpm + 5;
-                    this.speedEndBpm = Math.max(30, Math.min(300, parseInt(this.$speedEndBpm.value) || 160));
-                    if (this.speedCurrentBpm >= this.speedEndBpm) {
+                    if (this.speedCurrentBpm > this.speedEndBpm) {
                         this.speedCurrentBpm = this.speedEndBpm;
                         this.ui.setBpm(this.speedEndBpm);
-                        this._stopSpeedTrainer();
-                        return;
                     }
                     this.$speedStatus.textContent = this._speedStatusText();
-                });
+                };
+                this.$speedStartBpm.addEventListener('change', commitBpmRange);
+                this.$speedEndBpm.addEventListener('change', commitBpmRange);
 
                 // Engine bar callback
                 this.engine.onBarCallback = (barCount) => {
@@ -2061,6 +2056,7 @@
             _stopSpeedTrainer() {
                 this.running = false;
                 this._clearTimeSpeed();
+                this.engine.setMuted(false); // Ensure unmuted on stop
                 if (this.$speedBarCounter) this.$speedBarCounter.style.display = 'none';
                 if (this.$speedTimeCounter) this.$speedTimeCounter.style.display = 'none';
                 this.$speedStatus.classList.add('hidden');
@@ -2102,6 +2098,7 @@
             onEngineStop() {
                 if (this.running) {
                     this.running = false;
+                    this._clearTimeSpeed();
                     this.engine.setMuted(false);
                     this.$muteStatus.classList.add('hidden');
                     this.$speedStatus.classList.add('hidden');
