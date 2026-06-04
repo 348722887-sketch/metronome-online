@@ -789,10 +789,14 @@
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 this.audioCtx = new AudioCtx();
                 this._generateAllBuffers();
-                // Preload speech synthesis voices
+                // Preload + wake up speech synthesis
                 if (window.speechSynthesis) {
                     speechSynthesis.getVoices();
                     speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+                    // Wake-up utterance to unlock browser speech API
+                    const wake = new SpeechSynthesisUtterance('');
+                    wake.volume = 0;
+                    speechSynthesis.speak(wake);
                 }
             }
 
@@ -894,25 +898,18 @@
                 src.start(time);
             }
 
-            /** Speak beat number using SpeechSynthesis (for voice sound type) */
-            _speakBeat(beatNumber, time) {
-                if (!window.speechSynthesis) return;
-                const now = this.audioCtx.currentTime;
-                const delay = Math.max(0, (time - now) * 1000 - 80); // 80ms ahead for synth latency
-                setTimeout(() => {
-                    if (!this.isPlaying || this.soundType !== 'voice') return;
-                    const num = beatNumber + 1;
-                    const utt = new SpeechSynthesisUtterance(String(num));
-                    utt.rate = 1.4;   // speak fast enough for higher BPM
-                    utt.pitch = 1.0;
-                    utt.volume = this.muted ? 0 : 0.9;
-                    // Use Chinese voice if available, else default
-                    const voices = speechSynthesis.getVoices();
-                    const zhVoice = voices.find(v => v.lang.startsWith('zh'));
-                    if (zhVoice) utt.voice = zhVoice;
-                    speechSynthesis.cancel(); // cancel previous to avoid overlap
-                    speechSynthesis.speak(utt);
-                }, delay);
+            /** Speak beat number using SpeechSynthesis */
+            _speakBeat(beatNumber) {
+                if (!this.isPlaying || this.soundType !== 'voice') return;
+                const num = beatNumber + 1;
+                const utt = new SpeechSynthesisUtterance(String(num));
+                utt.rate = 1.2;
+                utt.pitch = 1.0;
+                utt.volume = this.muted ? 0 : 0.8;
+                const voices = speechSynthesis.getVoices();
+                const zhVoice = voices.find(v => v.lang.startsWith('zh') || v.lang.startsWith('en'));
+                if (zhVoice) utt.voice = zhVoice;
+                speechSynthesis.speak(utt);
             }
 
             _nextNote() {
@@ -953,9 +950,9 @@
                 const isSub = subIndex > 0;
                 this._playClick(this._getBuffer(), time, this._getVolume(isAccent, isSub));
 
-                // Voice: speak beat number on main beats
-                if (this.soundType === 'voice' && subIndex === 0) {
-                    this._speakBeat(beatNumber, time);
+                // Voice: use speech synthesis on main beats
+                if (this.soundType === 'voice' && subIndex === 0 && window.speechSynthesis) {
+                    this._speakBeat(beatNumber);
                 }
 
                 if (this.onBeatCallback) {
