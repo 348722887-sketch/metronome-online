@@ -138,6 +138,11 @@
         .timer-badge.active-timer{background:#FFE0E0;color:#e04040;animation:timerPulse 1s ease-in-out infinite}
         @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.6}}
 
+        /* Note buttons (subdivision) */
+        .note-btn{width:48px;height:48px;border-radius:50%;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#2C313C;transition:all .2s ease;padding:0;outline:none;flex-shrink:0}
+        .note-btn:hover{background:#E8EDF5;color:#2C313C}
+        .note-btn.active{background:#4F8CFF;color:#fff}
+
         .ad-placeholder{border:1px dashed #d0ddd0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9a8a;font-size:12px}
 
         .btn-play-pill,.btn-tap-pill,.btn-preset,.btn-bpm-adj,.beat-dot,.btn-sm,.btn-sound,.btn-train{touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -257,15 +262,6 @@
         <!-- ===== Sub-beat Indicators ===== -->
         <div class="flex items-center justify-center gap-1.5 select-none hidden" id="subBeatIndicators"></div>
 
-        <!-- ===== Subdivision ===== -->
-        <div class="flex flex-wrap items-center justify-center gap-2 select-none">
-            <span class="text-gray-600 text-xs mr-1" data-i18n="sub-label">细分</span>
-            <button class="btn-sm active" data-sub="1" title="四分音符">¼</button>
-            <button class="btn-sm" data-sub="2" title="八分音符">⅛</button>
-            <button class="btn-sm" data-sub="3" title="三连音">♪3</button>
-            <button class="btn-sm" data-sub="4" title="十六分音符">1/16</button>
-        </div>
-
         <!-- ===== Play + Tap ===== -->
         <div class="flex items-center justify-center gap-4 select-none">
             <button class="btn-play-pill" id="playBtn" aria-label="播放/暂停">
@@ -305,6 +301,29 @@
                     <span class="ml-3 text-base font-medium" style="color:#2C313C;">定时器</span>
                 </label>
                 <div class="timer-badge cursor-pointer" id="timerDisplay" title="点击设置时间">1:00</div>
+            </div>
+        </div>
+
+        <!-- ===== Subdivision (SVG Notes) ===== -->
+        <div class="w-full max-w-sm mx-auto select-none px-2">
+            <div class="text-base font-medium mb-3" style="color:#2C313C;margin-left:4px;">细分</div>
+            <div class="flex flex-wrap gap-2.5" style="row-gap:16px;" id="subdivisionNotes">
+                <!-- 四分音符 -->
+                <button class="note-btn active" data-sub="1" title="四分音符 · 无细分">
+                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="16" cy="27" rx="5" ry="3.5" transform="rotate(-25 16 27)" fill="currentColor"/><rect x="20" y="8" width="1.8" height="19.5" fill="currentColor"/></svg>
+                </button>
+                <!-- 八分音符 -->
+                <button class="note-btn" data-sub="2" title="八分音符 · 每拍2下">
+                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="12" cy="27" rx="4.5" ry="3" transform="rotate(-25 12 27)" fill="currentColor"/><rect x="15.5" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="26" cy="27" rx="4.5" ry="3" transform="rotate(-25 26 27)" fill="currentColor"/><rect x="29.5" y="10" width="1.8" height="17.5" fill="currentColor"/><polygon points="15.5,10 31.3,10 31.3,13.5 15.5,13.5" fill="currentColor"/></svg>
+                </button>
+                <!-- 三连音 -->
+                <button class="note-btn" data-sub="3" title="三连音 · 每拍3下">
+                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="10" cy="27" rx="4" ry="2.8" transform="rotate(-25 10 27)" fill="currentColor"/><rect x="13" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="20" cy="27" rx="4" ry="2.8" transform="rotate(-25 20 27)" fill="currentColor"/><rect x="23" y="10" width="1.8" height="17.5" fill="currentColor"/><ellipse cx="30" cy="27" rx="4" ry="2.8" transform="rotate(-25 30 27)" fill="currentColor"/><rect x="33" y="10" width="1.8" height="17.5" fill="currentColor"/><polygon points="13,10 34.8,10 34.8,13.5 13,13.5" fill="currentColor"/></svg>
+                </button>
+                <!-- 十六分音符 -->
+                <button class="note-btn" data-sub="4" title="十六分音符 · 每拍4下">
+                    <svg viewBox="0 0 40 40" width="36" height="36"><ellipse cx="8" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 8 27)" fill="currentColor"/><rect x="10.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="16" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 16 27)" fill="currentColor"/><rect x="18.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="24" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 24 27)" fill="currentColor"/><rect x="26.5" y="10" width="1.5" height="17.5" fill="currentColor"/><ellipse cx="32" cy="27" rx="3.2" ry="2.2" transform="rotate(-25 32 27)" fill="currentColor"/><rect x="34.5" y="10" width="1.5" height="17.5" fill="currentColor"/><polygon points="10.5,10 36,10 36,12.5 10.5,12.5" fill="currentColor"/><polygon points="10.5,14 36,14 36,16.5 10.5,16.5" fill="currentColor"/></svg>
+                </button>
             </div>
         </div>
 
@@ -1192,7 +1211,7 @@
                 this.$playIcon = document.getElementById('playIcon');
                 this.$tapBtn = document.getElementById('tapBtn');
 
-                this.$subBtns = document.querySelectorAll('[data-sub]');
+                this.$subBtns = document.querySelectorAll('.note-btn');
                 this.$soundBtns = document.querySelectorAll('.btn-sound');
 
                 this.$volToggle = document.getElementById('volToggle');
