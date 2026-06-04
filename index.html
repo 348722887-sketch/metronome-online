@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>在线节拍器 — 免费精准在线节拍器 | Online Metronome</title>
-    <meta name="description" content="免费在线节拍器，专业级精准节拍器。支持Tap Tempo手点测速、多拍号切换、键盘快捷键。深色主题，手机电脑都能用，无需下载，打开即用。">
-    <meta name="keywords" content="在线节拍器,节拍器,metronome,online metronome,免费节拍器,free metronome,节拍器在线,节奏器">
+    <meta name="description" content="免费在线节拍器，专业级精准节拍器。支持Tap Tempo手点测速、多拍号切换、拍子细分、3种音色、独立音量控制、键盘快捷键。深色主题，无需下载，打开即用。">
+    <meta name="keywords" content="在线节拍器,节拍器,metronome,online metronome,免费节拍器,free metronome,节拍器在线,节奏器,拍子细分,subdivision">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://metronome-online-mvp.vercel.app/">
     <meta property="og:title" content="在线节拍器 — 免费精准在线节拍器">
-    <meta property="og:description" content="专业级在线节拍器，支持Tap Tempo、多拍号、键盘快捷键。深色主题，打开即用。">
+    <meta property="og:description" content="专业级在线节拍器，支持Tap Tempo、多拍号、拍子细分、3种音色。深色主题，打开即用。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://metronome-online-mvp.vercel.app/">
     <meta name="twitter:card" content="summary_large_image">
@@ -23,405 +23,229 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><text y='.8em' font-size='80' text-anchor='middle' x='50'>🎵</text></svg>">
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        surface: '#141419',
-                        'surface-light': '#1a1a21',
-                        accent: '#4F8CFF',
-                        'accent-strong': '#6BA0FF',
-                        'accent-dim': '#3A6FCC',
-                    }
-                }
-            }
-        }
+        tailwind.config = { theme: { extend: { colors: {
+            surface: '#141419', 'surface-light': '#1a1a21',
+            accent: '#4F8CFF', 'accent-strong': '#6BA0FF', 'accent-dim': '#3A6FCC',
+        } } } }
     </script>
 
     <style>
-        /* ===== Base ===== */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0a0a0f}::-webkit-scrollbar-thumb{background:#2a2a35;border-radius:3px}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            overflow-x: hidden;
-        }
+        /* BPM Slider */
+        input[type="range"]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:linear-gradient(to right,#4F8CFF 0%,#4F8CFF var(--fill-percent,40%),#2a2a35 var(--fill-percent,40%),#2a2a35 100%);outline:none;cursor:pointer}
+        input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #4F8CFF;cursor:pointer;box-shadow:0 0 20px rgba(79,140,255,.4),0 2px 8px rgba(0,0,0,.3);transition:transform .15s ease,box-shadow .15s ease}
+        input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.1);box-shadow:0 0 30px rgba(79,140,255,.6),0 2px 12px rgba(0,0,0,.4)}
+        input[type="range"]::-webkit-slider-thumb:active{transform:scale(1.15);cursor:grabbing}
+        input[type="range"]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #4F8CFF;cursor:pointer;box-shadow:0 0 20px rgba(79,140,255,.4)}
+        .volume-slider{height:4px}.volume-slider::-webkit-slider-thumb{width:20px;height:20px;border-width:2px}
 
-        /* ===== BPM Range Slider ===== */
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: linear-gradient(to right, #4F8CFF 0%, #4F8CFF var(--fill-percent, 40%), #2a2a35 var(--fill-percent, 40%), #2a2a35 100%);
-            outline: none;
-            cursor: pointer;
-            transition: background 0.05s linear;
-        }
+        /* BPM Display */
+        .bpm-display{font-variant-numeric:tabular-nums;text-shadow:0 0 60px rgba(79,140,255,.3);transition:text-shadow .6s ease}
+        .bpm-display.playing{text-shadow:0 0 80px rgba(79,140,255,.5),0 0 20px rgba(79,140,255,.3)}
 
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #ffffff;
-            border: 3px solid #4F8CFF;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(79, 140, 255, 0.4), 0 2px 8px rgba(0,0,0,0.3);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
+        /* Beat Dots */
+        .beat-dot{width:18px;height:18px;border-radius:50%;background:#2a2a35;transition:all .12s ease}
+        .beat-dot.active{background:#4F8CFF;box-shadow:0 0 16px rgba(79,140,255,.7),0 0 4px rgba(79,140,255,.5);transform:scale(1.35)}
+        .beat-dot.accent{width:22px;height:22px}
+        .beat-dot.accent.active{background:#fff;box-shadow:0 0 22px rgba(255,255,255,.8),0 0 8px rgba(79,140,255,.6);transform:scale(1.45)}
+        .sub-beat-dot{width:8px;height:8px;border-radius:50%;background:#1e1e28;transition:all .1s ease}
+        .sub-beat-dot.active{background:#5a8a6a;box-shadow:0 0 8px rgba(90,138,106,.6);transform:scale(1.2)}
 
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 30px rgba(79, 140, 255, 0.6), 0 2px 12px rgba(0,0,0,0.4);
-        }
+        /* Play Button */
+        .btn-play{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#4F8CFF 0%,#6B5CFF 100%);color:#fff;font-size:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;box-shadow:0 4px 24px rgba(79,140,255,.35);transition:all .2s ease;position:relative;overflow:hidden}
+        .btn-play::after{content:'';position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.1);opacity:0;transition:opacity .2s ease}
+        .btn-play:hover{transform:scale(1.06);box-shadow:0 6px 32px rgba(79,140,255,.5)}
+        .btn-play:hover::after{opacity:1}
+        .btn-play:active{transform:scale(.96)}
+        .btn-play.playing{background:linear-gradient(135deg,#FF5C5C 0%,#FF3B3B 100%);box-shadow:0 4px 24px rgba(255,92,92,.35)}
+        .btn-play.playing:hover{box-shadow:0 6px 32px rgba(255,92,92,.5)}
 
-        input[type="range"]::-webkit-slider-thumb:active {
-            transform: scale(1.15);
-            cursor: grabbing;
-        }
+        /* Tap Button */
+        .btn-tap{padding:12px 28px;border-radius:30px;background:#1a1a21;color:#aaa;font-size:15px;font-weight:600;cursor:pointer;border:2px solid #2a2a35;transition:all .2s ease}
+        .btn-tap:hover{border-color:#4F8CFF;color:#fff;background:#1e1e28}
+        .btn-tap:active{transform:scale(.96);background:#4F8CFF;border-color:#4F8CFF;color:#fff}
+        .btn-tap.tapping{background:#4F8CFF;border-color:#4F8CFF;color:#fff;animation:tapPulse .3s ease}
+        @keyframes tapPulse{0%{transform:scale(1)}50%{transform:scale(.9)}100%{transform:scale(1)}}
 
-        input[type="range"]::-moz-range-thumb {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #ffffff;
-            border: 3px solid #4F8CFF;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(79, 140, 255, 0.4);
-        }
+        /* Generic small toggle buttons */
+        .btn-sm{padding:6px 14px;border-radius:16px;background:#1a1a21;color:#777;font-size:12px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .2s ease;white-space:nowrap}
+        .btn-sm:hover{border-color:#333;color:#ccc}
+        .btn-sm.active{background:rgba(79,140,255,.15);border-color:#4F8CFF;color:#4F8CFF}
 
-        /* ===== BPM Display Glow ===== */
-        .bpm-display {
-            font-variant-numeric: tabular-nums;
-            font-feature-settings: "tnum";
-            text-shadow: 0 0 60px rgba(79, 140, 255, 0.3);
-            transition: text-shadow 0.6s ease;
-        }
+        /* Beat Preset Buttons */
+        .btn-preset{padding:8px 20px;border-radius:20px;background:#1a1a21;color:#888;font-size:14px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .2s ease}
+        .btn-preset:hover{border-color:#333;color:#ccc}
+        .btn-preset.active{background:rgba(79,140,255,.15);border-color:#4F8CFF;color:#4F8CFF}
 
-        .bpm-display.playing {
-            text-shadow: 0 0 80px rgba(79, 140, 255, 0.5), 0 0 20px rgba(79, 140, 255, 0.3);
-        }
+        /* BPM Adjustment */
+        .btn-bpm-adj{width:44px;height:44px;border-radius:50%;background:#1a1a21;color:#aaa;font-size:22px;font-weight:300;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #2a2a35;transition:all .15s ease;user-select:none}
+        .btn-bpm-adj:hover{border-color:#4F8CFF;color:#fff}
+        .btn-bpm-adj:active{transform:scale(.9);background:#4F8CFF;border-color:#4F8CFF}
 
-        /* ===== Beat Indicators ===== */
-        .beat-dot {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #2a2a35;
-            transition: all 0.12s ease;
-            position: relative;
-        }
+        /* Settings toggle */
+        .settings-toggle{background:none;border:none;color:#444;cursor:pointer;font-size:18px;padding:4px 8px;border-radius:8px;transition:all .2s ease}
+        .settings-toggle:hover{color:#888;background:#1a1a21}
+        .settings-panel{max-height:0;overflow:hidden;transition:max-height .35s ease,opacity .35s ease;opacity:0}
+        .settings-panel.open{max-height:300px;opacity:1}
 
-        .beat-dot.active {
-            background: #4F8CFF;
-            box-shadow: 0 0 16px rgba(79, 140, 255, 0.7), 0 0 4px rgba(79, 140, 255, 0.5);
-            transform: scale(1.35);
-        }
+        @keyframes bpmPop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+        .bpm-pop{animation:bpmPop .25s ease-out}
 
-        .beat-dot.accent {
-            width: 22px;
-            height: 22px;
-        }
+        .ad-placeholder{border:1px dashed #2a2a35;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#333;font-size:12px}
 
-        .beat-dot.accent.active {
-            background: #ffffff;
-            box-shadow: 0 0 22px rgba(255, 255, 255, 0.8), 0 0 8px rgba(79, 140, 255, 0.6);
-            transform: scale(1.45);
-        }
+        .btn-play,.btn-tap,.btn-preset,.btn-bpm-adj,.beat-dot,.btn-sm,.btn-sound{touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+        input[type="range"]{touch-action:pan-x}
+        main{touch-action:manipulation}
 
-        /* ===== Play Button ===== */
-        .btn-play {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4F8CFF 0%, #6B5CFF 100%);
-            color: white;
-            font-size: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 4px 24px rgba(79, 140, 255, 0.35);
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
+        @media(max-width:480px){
+            .btn-play{width:68px;height:68px;font-size:28px}
+            .beat-dot{width:14px;height:14px}.beat-dot.accent{width:18px;height:18px}
+            .sub-beat-dot{width:6px;height:6px}
+            input[type="range"]::-webkit-slider-thumb{width:32px;height:32px}
+            input[type="range"]::-moz-range-thumb{width:32px;height:32px}
+            .btn-preset{padding:6px 14px;font-size:13px}
+            .btn-bpm-adj{width:38px;height:38px;font-size:18px}
+            .btn-sm{padding:4px 10px;font-size:11px}
         }
-
-        .btn-play::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.1);
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .btn-play:hover {
-            transform: scale(1.06);
-            box-shadow: 0 6px 32px rgba(79, 140, 255, 0.5);
-        }
-        .btn-play:hover::after { opacity: 1; }
-        .btn-play:active { transform: scale(0.96); }
-        .btn-play.playing {
-            background: linear-gradient(135deg, #FF5C5C 0%, #FF3B3B 100%);
-            box-shadow: 0 4px 24px rgba(255, 92, 92, 0.35);
-        }
-        .btn-play.playing:hover {
-            box-shadow: 0 6px 32px rgba(255, 92, 92, 0.5);
-        }
-
-        /* ===== Tap Button ===== */
-        .btn-tap {
-            padding: 12px 28px;
-            border-radius: 30px;
-            background: #1a1a21;
-            color: #aaa;
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            cursor: pointer;
-            border: 2px solid #2a2a35;
-            transition: all 0.2s ease;
-        }
-
-        .btn-tap:hover {
-            border-color: #4F8CFF;
-            color: #fff;
-            background: #1e1e28;
-        }
-        .btn-tap:active {
-            transform: scale(0.96);
-            background: #4F8CFF;
-            border-color: #4F8CFF;
-            color: #fff;
-        }
-        .btn-tap.tapping {
-            background: #4F8CFF;
-            border-color: #4F8CFF;
-            color: #fff;
-            animation: tapPulse 0.3s ease;
-        }
-
-        @keyframes tapPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(0.9); }
-            100% { transform: scale(1); }
-        }
-
-        /* ===== Beat Preset Buttons ===== */
-        .btn-preset {
-            padding: 8px 20px;
-            border-radius: 20px;
-            background: #1a1a21;
-            color: #888;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s ease;
-        }
-
-        .btn-preset:hover {
-            border-color: #333;
-            color: #ccc;
-        }
-        .btn-preset.active {
-            background: rgba(79, 140, 255, 0.15);
-            border-color: #4F8CFF;
-            color: #4F8CFF;
-        }
-
-        /* ===== BPM Adjustment Buttons ===== */
-        .btn-bpm-adj {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: #1a1a21;
-            color: #aaa;
-            font-size: 22px;
-            font-weight: 300;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: 2px solid #2a2a35;
-            transition: all 0.15s ease;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        .btn-bpm-adj:hover {
-            border-color: #4F8CFF;
-            color: #fff;
-        }
-        .btn-bpm-adj:active {
-            transform: scale(0.9);
-            background: #4F8CFF;
-            border-color: #4F8CFF;
-        }
-
-        /* ===== Animation: BPM number change ===== */
-        @keyframes bpmPop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.06); }
-            100% { transform: scale(1); }
-        }
-        .bpm-pop { animation: bpmPop 0.25s ease-out; }
-
-        /* ===== Scrollbar ===== */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0f; }
-        ::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 3px; }
-
-        /* ===== Ad placeholder ===== */
-        .ad-placeholder {
-            border: 1px dashed #2a2a35;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #333;
-            font-size: 12px;
-            letter-spacing: 0.05em;
-        }
-
-        /* ===== Touch & Mobile Optimizations ===== */
-        .btn-play, .btn-tap, .btn-preset, .btn-bpm-adj, .beat-dot {
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        input[type="range"] {
-            touch-action: pan-x;
-        }
-
-        /* Prevent iOS zoom on double-tap for the whole controls area */
-        main {
-            touch-action: manipulation;
-        }
-
-        /* ===== Mobile tweaks ===== */
-        @media (max-width: 480px) {
-            .btn-play { width: 68px; height: 68px; font-size: 28px; }
-            .beat-dot { width: 14px; height: 14px; }
-            .beat-dot.accent { width: 18px; height: 18px; }
-            input[type="range"]::-webkit-slider-thumb { width: 32px; height: 32px; }
-            input[type="range"]::-moz-range-thumb { width: 32px; height: 32px; }
-            .btn-preset { padding: 6px 14px; font-size: 13px; }
-            .btn-bpm-adj { width: 38px; height: 38px; font-size: 18px; }
-        }
-
-        /* Landscape phone: limit height usage */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .bpm-display { font-size: 3rem !important; }
-            .btn-play { width: 54px; height: 54px; font-size: 24px; }
+        @media(max-height:500px) and (orientation:landscape){
+            .bpm-display{font-size:3rem!important}
+            .btn-play{width:54px;height:54px;font-size:24px}
+            .btn-sm{padding:3px 8px;font-size:10px}
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between py-6 px-4" style="background: #0a0a0f;">
+<body class="min-h-screen flex flex-col items-center justify-between py-6 px-4" style="background:#0a0a0f;">
 
-    <!-- ===== Top Ad Slot ===== -->
+    <!-- Top Ad Slot -->
     <div class="w-full max-w-4xl mx-auto mb-4">
-        <div class="ad-placeholder h-[90px] w-full" id="ad-top" title="Google AdSense — 顶部横幅广告">
-            🎵 广告位 — 728×90 (Google AdSense)
-        </div>
+        <div class="ad-placeholder h-[90px] w-full" id="ad-top" title="Google AdSense">🎵 广告位 — 728×90</div>
     </div>
 
-    <!-- ===== Main Content ===== -->
-    <main class="flex-1 flex flex-col items-center justify-center w-full max-w-lg mx-auto gap-6">
+    <main class="flex-1 flex flex-col items-center justify-center w-full max-w-lg mx-auto gap-5">
 
-        <!-- BPM Display -->
+        <!-- === BPM Display === -->
         <div class="text-center select-none">
             <div class="bpm-display text-8xl sm:text-9xl font-extrabold text-white tracking-tight cursor-pointer"
-                 id="bpmDisplay"
-                 title="点击输入 BPM"
-                 role="button"
-                 tabindex="0"
-                 aria-label="当前速度 120 BPM，点击可输入数值">
-                120
-            </div>
+                 id="bpmDisplay" title="点击输入BPM" role="button" tabindex="0">120</div>
             <div class="text-gray-500 text-xs tracking-[0.2em] uppercase mt-1">bpm</div>
         </div>
 
-        <!-- BPM Slider -->
-        <div class="w-full px-2" id="sliderContainer">
-            <input type="range"
-                   id="bpmSlider"
-                   min="20"
-                   max="300"
-                   value="120"
-                   step="1"
-                   aria-label="BPM 滑块调节"
-                   title="拖动调节 BPM (20-300)">
+        <!-- === Tempo Presets === -->
+        <div class="flex flex-wrap items-center justify-center gap-1.5 select-none" id="tempoPresets">
+            <button class="btn-sm" data-bpm="30">Larghissimo</button>
+            <button class="btn-sm" data-bpm="50">Largo</button>
+            <button class="btn-sm" data-bpm="63">Adagio</button>
+            <button class="btn-sm" data-bpm="72">Andante</button>
+            <button class="btn-sm" data-bpm="92">Moderato</button>
+            <button class="btn-sm active" data-bpm="120">Allegro</button>
+            <button class="btn-sm" data-bpm="144">Vivace</button>
+            <button class="btn-sm" data-bpm="184">Presto</button>
+            <button class="btn-sm" data-bpm="220">Prestissimo</button>
         </div>
 
-        <!-- BPM Fine-tune Buttons -->
+        <!-- === BPM Slider === -->
+        <div class="w-full px-2">
+            <input type="range" id="bpmSlider" min="20" max="300" value="120" step="1" aria-label="BPM 滑块" title="拖动调节 BPM (20-300)">
+        </div>
+
+        <!-- === BPM Fine-tune === -->
         <div class="flex items-center gap-3 select-none">
-            <button class="btn-bpm-adj" id="bpmDown10" title="-10 BPM (Shift+←)" aria-label="减10 BPM">«</button>
-            <button class="btn-bpm-adj" id="bpmDown1" title="-1 BPM (←)" aria-label="减1 BPM">−</button>
-            <span class="text-gray-600 text-xs mx-1 w-16 text-center" id="bpmLabel">Largo</span>
-            <button class="btn-bpm-adj" id="bpmUp1" title="+1 BPM (→)" aria-label="加1 BPM">+</button>
-            <button class="btn-bpm-adj" id="bpmUp10" title="+10 BPM (Shift+→)" aria-label="加10 BPM">»</button>
+            <button class="btn-bpm-adj" id="bpmDown10" title="-10 BPM">«</button>
+            <button class="btn-bpm-adj" id="bpmDown1" title="-1 BPM">−</button>
+            <span class="text-gray-600 text-xs mx-1 w-16 text-center" id="bpmLabel">Allegro</span>
+            <button class="btn-bpm-adj" id="bpmUp1" title="+1 BPM">+</button>
+            <button class="btn-bpm-adj" id="bpmUp10" title="+10 BPM">»</button>
         </div>
 
-        <!-- Beat Indicators -->
-        <div class="flex items-center justify-center gap-2 sm:gap-2.5 select-none" id="beatIndicators" aria-label="节拍指示灯">
-            <!-- Generated by JS -->
-        </div>
+        <!-- === Beat Indicators === -->
+        <div class="flex items-center justify-center gap-2 sm:gap-2.5 select-none" id="beatIndicators"></div>
 
-        <!-- Beat Presets -->
+        <!-- === Sub-beat indicators (shown when subdivision > 1) === -->
+        <div class="flex items-center justify-center gap-1.5 select-none hidden" id="subBeatIndicators"></div>
+
+        <!-- === Subdivision Selector === -->
         <div class="flex flex-wrap items-center justify-center gap-2 select-none">
-            <button class="btn-preset active" data-beats="4" aria-label="4/4 拍">4/4</button>
-            <button class="btn-preset" data-beats="3" aria-label="3/4 拍">3/4</button>
-            <button class="btn-preset" data-beats="2" aria-label="2/4 拍">2/4</button>
-            <button class="btn-preset" data-beats="6" aria-label="6/8 拍">6/8</button>
-            <button class="btn-preset" data-beats="5" aria-label="5/4 拍">5/4</button>
-            <button class="btn-preset" data-beats="7" aria-label="7/8 拍">7/8</button>
+            <span class="text-gray-600 text-xs mr-1">细分</span>
+            <button class="btn-sm active" data-sub="1" title="四分音符 — 无细分">¼</button>
+            <button class="btn-sm" data-sub="2" title="八分音符 — 每拍2下">⅛</button>
+            <button class="btn-sm" data-sub="3" title="三连音 — 每拍3下">♪3</button>
+            <button class="btn-sm" data-sub="4" title="十六分音符 — 每拍4下">1/16</button>
         </div>
 
-        <!-- Beat Count Custom Input -->
+        <!-- === Beat Presets === -->
+        <div class="flex flex-wrap items-center justify-center gap-2 select-none">
+            <button class="btn-preset active" data-beats="4">4/4</button>
+            <button class="btn-preset" data-beats="3">3/4</button>
+            <button class="btn-preset" data-beats="2">2/4</button>
+            <button class="btn-preset" data-beats="6">6/8</button>
+            <button class="btn-preset" data-beats="5">5/4</button>
+            <button class="btn-preset" data-beats="7">7/8</button>
+        </div>
+
+        <!-- === Beat Count Custom === -->
         <div class="flex items-center gap-2 text-gray-500 text-xs select-none">
             <span>每小节</span>
-            <input type="number"
-                   id="beatCountInput"
-                   value="4"
-                   min="1"
-                   max="12"
-                   class="w-12 text-center bg-[#1a1a21] border border-[#2a2a35] rounded-md text-white text-sm py-1 px-2 focus:outline-none focus:border-accent transition-colors"
-                   aria-label="每小节拍数">
+            <input type="number" id="beatCountInput" value="4" min="1" max="12"
+                   class="w-12 text-center bg-[#1a1a21] border border-[#2a2a35] rounded-md text-white text-sm py-1 px-2 focus:outline-none focus:border-accent transition-colors">
             <span>拍</span>
         </div>
 
-        <!-- Main Controls -->
+        <!-- === Sound + Volume === -->
+        <div class="flex flex-col items-center gap-3 w-full max-w-xs select-none">
+            <!-- Sound Selector -->
+            <div class="flex items-center justify-center gap-2">
+                <span class="text-gray-600 text-xs mr-1">音色</span>
+                <button class="btn-sm active btn-sound" data-sound="classic" title="经典电子音">📟 电子</button>
+                <button class="btn-sm btn-sound" data-sound="wood" title="木鱼声">🪵 木鱼</button>
+                <button class="btn-sm btn-sound" data-sound="clap" title="鼓掌声">👏 鼓掌</button>
+            </div>
+
+            <!-- Volume Toggle -->
+            <button class="settings-toggle" id="volToggle" title="音量设置">🔊 音量 ▾</button>
+
+            <!-- Volume Sliders Panel -->
+            <div class="settings-panel w-full" id="volPanel">
+                <div class="flex flex-col gap-3 bg-[#0d0d14] rounded-xl p-4 border border-[#1a1a21]">
+                    <div class="flex items-center gap-3">
+                        <span class="text-gray-500 text-xs w-12">强拍</span>
+                        <input type="range" class="volume-slider flex-1" id="volAccent" min="10" max="100" value="95" step="1">
+                        <span class="text-gray-400 text-xs w-8 text-right" id="volAccentVal">95</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-gray-500 text-xs w-12">弱拍</span>
+                        <input type="range" class="volume-slider flex-1" id="volNormal" min="10" max="100" value="65" step="1">
+                        <span class="text-gray-400 text-xs w-8 text-right" id="volNormalVal">65</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-gray-500 text-xs w-12">细分</span>
+                        <input type="range" class="volume-slider flex-1" id="volSub" min="10" max="100" value="40" step="1">
+                        <span class="text-gray-400 text-xs w-8 text-right" id="volSubVal">40</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === Play + Tap === -->
         <div class="flex items-center gap-5 select-none">
             <button class="btn-play" id="playBtn" aria-label="播放/暂停" title="播放 (空格键)">
                 <span id="playIcon">▶</span>
             </button>
-            <button class="btn-tap" id="tapBtn" aria-label="手点测速" title="手点测速 (T键)">
-                TAP
-            </button>
+            <button class="btn-tap" id="tapBtn" aria-label="手点测速" title="手点测速 (T键)">TAP</button>
         </div>
 
-        <!-- Keyboard Shortcuts Hint -->
+        <!-- Keyboard Hint -->
         <div class="text-gray-600 text-xs text-center select-none leading-relaxed">
-            空格键 开始/停止 · ← → 微调BPM · Shift+←→ 快速调节 · T 手点测速
+            空格 开始/停止 · ←→ ±1BPM · Shift+←→ ±10 · T 测速 · 1-4 切换细分
         </div>
 
     </main>
 
-    <!-- ===== Footer ===== -->
+    <!-- Footer -->
     <footer class="w-full max-w-4xl mx-auto mt-6 pt-4 border-t border-[#1a1a21] flex flex-col sm:flex-row items-center justify-between gap-2 text-gray-600 text-xs">
         <span>© 2026 在线节拍器 — 免费在线节拍器工具</span>
         <div class="flex gap-4">
@@ -431,20 +255,19 @@
         </div>
     </footer>
 
-    <!-- ===== Side Ad Slot (desktop) ===== -->
+    <!-- Side Ad (desktop) -->
     <div class="fixed right-4 top-1/2 -translate-y-1/2 hidden xl:block" style="width:300px;">
-        <div class="ad-placeholder h-[250px] w-[300px]" id="ad-side" title="Google AdSense — 侧边栏广告">
-            🎵 广告位<br>300×250
-        </div>
+        <div class="ad-placeholder h-[250px] w-[300px]" id="ad-side" title="Google AdSense">🎵 广告位<br>300×250</div>
     </div>
 
-    <!-- ===== Scripts ===== -->
+    <!-- ===== SCRIPTS ===== -->
     <script>
     (function() {
         'use strict';
 
         // =============================================
-        //  MetronomeEngine — Web Audio API 音频引擎
+        //  MetronomeEngine — Web Audio API 音频引擎 v2
+        //  支持：细分拍 / 3种音色 / 独立音量控制
         // =============================================
         class MetronomeEngine {
             constructor() {
@@ -455,216 +278,281 @@
                 this.beatsPerBar = 4;
                 this.isPlaying = false;
                 this.timerID = null;
-                this.lookAhead = 25;       // ms, scheduler check interval
-                this.scheduleAhead = 0.1;   // seconds, look-ahead window
-                this.accentBuffer = null;
-                this.normalBuffer = null;
-                this.subBuffer = null;
-                this.onBeatCallback = null;  // called on each beat for visual sync
+                this.lookAhead = 25;
+                this.scheduleAhead = 0.1;
+
+                // Phase 2: Subdivision (1=quarter, 2=eighth, 3=triplet, 4=sixteenth)
+                this.subdivision = 1;
+                this.subIndex = 0;
+
+                // Phase 2: Sound type
+                this.soundType = 'classic'; // 'classic' | 'wood' | 'clap'
+
+                // Phase 2: Volumes (0-100)
+                this.volAccent = 95;
+                this.volNormal = 65;
+                this.volSub = 40;
+
+                // Buffers: map keyed by soundType
+                this.buffers = {}; // { classic: {accent, normal, sub}, wood: {...}, clap: {...} }
+
+                this.onBeatCallback = null;   // (beatNumber, subIndex, subdivision)
+                this.onSubBeatCallback = null; // optional separate callback for sub-beats
             }
 
-            /**
-             * Initialize AudioContext and generate click sound buffers.
-             * Must be called from a user gesture (click/keypress).
-             */
             initAudio() {
                 if (this.audioCtx) return;
-
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 this.audioCtx = new AudioCtx();
-                this.accentBuffer = this._createClickBuffer(true);
-                this.normalBuffer = this._createClickBuffer(false);
-                this.subBuffer = this._createClickBuffer(false, 0.4);
+                this._generateAllBuffers();
             }
 
-            /**
-             * Generate a short percussive click in an AudioBuffer.
-             * Uses a high-frequency sine + soft noise blended, with fast decay.
-             */
-            _createClickBuffer(accented, volumeScale = 1.0) {
-                const sampleRate = this.audioCtx.sampleRate;
-                const duration = accented ? 0.04 : 0.03; // slightly longer for accent
-                const length = Math.floor(sampleRate * duration);
-                const buffer = this.audioCtx.createBuffer(1, length, sampleRate);
-                const data = buffer.getChannelData(0);
+            /** Regenerate all buffers for all sound types */
+            _generateAllBuffers() {
+                for (const type of ['classic', 'wood', 'clap']) {
+                    this.buffers[type] = {
+                        accent: this._createBuffer(type, true),
+                        normal: this._createBuffer(type, false),
+                        sub:    this._createBuffer(type, false),
+                    };
+                }
+            }
 
-                const freq = accented ? 1800 : 1200;
-                const amp = (accented ? 0.95 : 0.65) * volumeScale;
+            /** Regenerate buffers for a specific sound type (on volume change) */
+            _regenerateBuffers(type) {
+                if (!this.audioCtx) return;
+                this.buffers[type] = {
+                    accent: this._createBuffer(type, true),
+                    normal: this._createBuffer(type, false),
+                    sub:    this._createBuffer(type, false),
+                };
+            }
 
-                for (let i = 0; i < length; i++) {
-                    const t = i / sampleRate;
-                    // Fast exponential decay
-                    const envelope = Math.exp(-t * (accented ? 90 : 120));
-                    // Sine tone
-                    const tone = Math.sin(2 * Math.PI * freq * t);
-                    // A tiny bit of noise for crispness
-                    const noise = (Math.random() * 2 - 1) * 0.15;
-                    data[i] = (tone * 0.85 + noise * 0.15) * envelope * amp;
+            /** Get volume multiplier by note type */
+            _getVolume(isAccent, isSub) {
+                if (isSub) return this.volSub / 100;
+                return isAccent ? this.volAccent / 100 : this.volNormal / 100;
+            }
+
+            /** Generate click buffer: type='classic'|'wood'|'clap', accented=true|false */
+            _createBuffer(type, accented) {
+                const sr = this.audioCtx.sampleRate;
+                let dur, freq, amp;
+                const buf = this.audioCtx.createBuffer(1, Math.floor(sr * 0.08), sr);
+                const d = buf.getChannelData(0);
+
+                switch (type) {
+                    case 'classic':
+                        dur = accented ? 0.04 : 0.03;
+                        freq = accented ? 1800 : 1200;
+                        amp = accented ? 0.95 : 0.65;
+                        for (let i = 0; i < Math.floor(sr * dur); i++) {
+                            const t = i / sr;
+                            const env = Math.exp(-t * (accented ? 90 : 120));
+                            const tone = Math.sin(2 * Math.PI * freq * t);
+                            const noise = (Math.random() * 2 - 1) * 0.15;
+                            d[i] = (tone * 0.85 + noise * 0.15) * env * amp;
+                        }
+                        break;
+
+                    case 'wood':
+                        dur = accented ? 0.06 : 0.045;
+                        freq = accented ? 900 : 680;
+                        amp = accented ? 0.9 : 0.6;
+                        for (let i = 0; i < Math.floor(sr * dur); i++) {
+                            const t = i / sr;
+                            // Resonant: slower decay with slight oscillation in envelope
+                            const env = Math.exp(-t * 35) * (1 + 0.1 * Math.sin(2 * Math.PI * 200 * t));
+                            const tone = Math.sin(2 * Math.PI * freq * t) * 0.7
+                                       + Math.sin(2 * Math.PI * freq * 2.3 * t) * 0.2  // harmonic
+                                       + Math.sin(2 * Math.PI * freq * 3.7 * t) * 0.1; // harmonic
+                            d[i] = tone * env * amp;
+                        }
+                        break;
+
+                    case 'clap':
+                        dur = accented ? 0.05 : 0.04;
+                        amp = accented ? 0.9 : 0.55;
+                        for (let i = 0; i < Math.floor(sr * dur); i++) {
+                            const t = i / sr;
+                            // Noise-dominant with multi-stage envelope (clap + room)
+                            const env1 = Math.exp(-t * 200);           // initial sharp crack
+                            const env2 = Math.exp(-t * 40) * 0.3;     // body
+                            const env3 = Math.exp(-t * 15) * 0.15;    // room tail
+                            const env = env1 + env2 + env3;
+                            const noise = (Math.random() * 2 - 1);
+                            const tone = Math.sin(2 * Math.PI * 400 * t) * 0.1; // slight tone
+                            d[i] = (noise * 0.9 + tone) * env * amp;
+                        }
+                        break;
                 }
 
-                return buffer;
+                return buf;
             }
 
-            /**
-             * Play a click from a pre-generated buffer at a precise time.
-             */
-            _playClick(buffer, time) {
+            /** Play a buffer through a temporary GainNode for volume control */
+            _playClick(buffer, time, volumeMult) {
                 const src = this.audioCtx.createBufferSource();
+                const gain = this.audioCtx.createGain();
                 src.buffer = buffer;
-                src.connect(this.audioCtx.destination);
+                gain.gain.value = volumeMult;
+                src.connect(gain);
+                gain.connect(this.audioCtx.destination);
                 src.start(time);
             }
 
-            /**
-             * Advance to the next note in the sequence.
-             */
+            /** Advance to next sub-beat */
             _nextNote() {
                 const secondsPerBeat = 60.0 / this.tempo;
-                this.nextNoteTime += secondsPerBeat;
-                this.currentBeat = (this.currentBeat + 1) % this.beatsPerBar;
+                const secondsPerSub = secondsPerBeat / this.subdivision;
+                this.nextNoteTime += secondsPerSub;
+                this.subIndex++;
+                if (this.subIndex >= this.subdivision) {
+                    this.subIndex = 0;
+                    this.currentBeat = (this.currentBeat + 1) % this.beatsPerBar;
+                }
             }
 
-            /**
-             * Schedule a single note at the given time.
-             */
-            _scheduleNote(time, beatNumber) {
-                const isAccent = beatNumber === 0;
-                this._playClick(isAccent ? this.accentBuffer : this.normalBuffer, time);
+            /** Get the right buffer for current note */
+            _getBuffer() {
+                const bufs = this.buffers[this.soundType];
+                if (!bufs) return this.buffers['classic'].normal;
 
-                // Fire visual callback
+                if (this.subIndex === 0) {
+                    // Main beat
+                    return this.currentBeat === 0 ? bufs.accent : bufs.normal;
+                } else {
+                    // Subdivision
+                    return bufs.sub;
+                }
+            }
+
+            _scheduleNote(time, beatNumber, subIndex) {
+                const isAccent = beatNumber === 0 && subIndex === 0;
+                const isSub = subIndex > 0;
+                const vol = this._getVolume(isAccent, isSub);
+                const buf = this._getBuffer();
+                this._playClick(buf, time, vol);
+
+                // Visual callback
                 if (this.onBeatCallback) {
                     const delayMs = Math.max(0, (time - this.audioCtx.currentTime) * 1000);
                     setTimeout(() => {
-                        this.onBeatCallback(beatNumber, time);
+                        this.onBeatCallback(beatNumber, subIndex, this.subdivision);
                     }, delayMs);
                 }
             }
 
-            /**
-             * The look-ahead scheduler. Called every ~25ms.
-             * Schedules all notes that fall within the look-ahead window.
-             */
             _scheduler() {
                 while (this.nextNoteTime < this.audioCtx.currentTime + this.scheduleAhead) {
-                    this._scheduleNote(this.nextNoteTime, this.currentBeat);
+                    this._scheduleNote(this.nextNoteTime, this.currentBeat, this.subIndex);
                     this._nextNote();
                 }
             }
 
-            /**
-             * Start playback.
-             */
             start() {
-                if (!this.audioCtx) {
-                    this.initAudio();
-                }
-
-                if (this.audioCtx.state === 'suspended') {
-                    this.audioCtx.resume();
-                }
-
+                if (!this.audioCtx) this.initAudio();
+                if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
                 if (this.isPlaying) return;
 
                 this.isPlaying = true;
                 this.currentBeat = 0;
-                // Start the first note slightly in the future for stability
+                this.subIndex = 0;
                 this.nextNoteTime = this.audioCtx.currentTime + 0.05;
-
                 this._scheduler();
                 this.timerID = setInterval(() => this._scheduler(), this.lookAhead);
             }
 
-            /**
-             * Stop playback.
-             */
             stop() {
                 this.isPlaying = false;
-                if (this.timerID) {
-                    clearInterval(this.timerID);
-                    this.timerID = null;
-                }
+                if (this.timerID) { clearInterval(this.timerID); this.timerID = null; }
             }
 
-            /**
-             * Toggle play/pause.
-             */
             toggle() {
-                if (this.isPlaying) {
-                    this.stop();
-                } else {
-                    this.start();
-                }
+                if (this.isPlaying) { this.stop(); } else { this.start(); }
                 return this.isPlaying;
             }
 
-            /**
-             * Set tempo. If playing, the change takes effect on the next
-             * scheduled note (since _nextNote recalculates from current tempo).
-             */
             setTempo(bpm) {
                 this.tempo = Math.max(20, Math.min(300, bpm));
                 return this.tempo;
             }
 
-            /**
-             * Set beats per bar. Resets beat counter if currently beyond new range.
-             */
             setBeatsPerBar(beats) {
                 this.beatsPerBar = Math.max(1, Math.min(12, beats));
-                if (this.currentBeat >= this.beatsPerBar) {
-                    this.currentBeat = 0;
-                }
+                if (this.currentBeat >= this.beatsPerBar) this.currentBeat = 0;
                 return this.beatsPerBar;
             }
 
-            /**
-             * Cleanup: stop and close audio context.
-             */
+            setSubdivision(sub) {
+                this.subdivision = Math.max(1, Math.min(4, Math.round(sub)));
+                // Reset sub-index so we don't skip
+                this.subIndex = 0;
+                return this.subdivision;
+            }
+
+            setSoundType(type) {
+                if (!['classic', 'wood', 'clap'].includes(type)) return;
+                this.soundType = type;
+            }
+
+            setVolumes(accent, normal, sub) {
+                this.volAccent = Math.max(10, Math.min(100, accent));
+                this.volNormal = Math.max(10, Math.min(100, normal));
+                this.volSub = Math.max(10, Math.min(100, sub));
+            }
+
             destroy() {
                 this.stop();
-                if (this.audioCtx && this.audioCtx.state !== 'closed') {
-                    this.audioCtx.close();
-                }
+                if (this.audioCtx && this.audioCtx.state !== 'closed') this.audioCtx.close();
                 this.audioCtx = null;
-                this.accentBuffer = null;
-                this.normalBuffer = null;
+                this.buffers = {};
             }
         }
 
         // =============================================
-        //  UIController — DOM 交互与视觉更新
+        //  UIController — DOM 交互 v2
         // =============================================
         class UIController {
             constructor(engine) {
                 this.engine = engine;
                 this.bpm = 120;
                 this.beatsPerBar = 4;
-                this.tapTimes = [];    // for tap tempo
+                this.subdivision = 1;
+                this.tapTimes = [];
                 this.tapTimeout = null;
 
-                // Cache DOM refs
+                // DOM refs
                 this.$bpmDisplay = document.getElementById('bpmDisplay');
                 this.$bpmSlider = document.getElementById('bpmSlider');
                 this.$bpmLabel = document.getElementById('bpmLabel');
                 this.$beatIndicators = document.getElementById('beatIndicators');
+                this.$subBeatIndicators = document.getElementById('subBeatIndicators');
                 this.$beatCountInput = document.getElementById('beatCountInput');
                 this.$playBtn = document.getElementById('playBtn');
                 this.$playIcon = document.getElementById('playIcon');
                 this.$tapBtn = document.getElementById('tapBtn');
                 this.$presetBtns = document.querySelectorAll('.btn-preset');
+                this.$subBtns = document.querySelectorAll('[data-sub]');
+                this.$soundBtns = document.querySelectorAll('.btn-sound');
+                this.$tempoPresetBtns = document.querySelectorAll('#tempoPresets .btn-sm');
+                this.$volToggle = document.getElementById('volToggle');
+                this.$volPanel = document.getElementById('volPanel');
+                this.$volAccent = document.getElementById('volAccent');
+                this.$volNormal = document.getElementById('volNormal');
+                this.$volSub = document.getElementById('volSub');
+                this.$volAccentVal = document.getElementById('volAccentVal');
+                this.$volNormalVal = document.getElementById('volNormalVal');
+                this.$volSubVal = document.getElementById('volSubVal');
 
-                // Tempo label mapping
                 this.tempoLabels = [
-                    [20, 40, 'Larghissimo'],
-                    [40, 60, 'Largo'],
-                    [60, 66, 'Adagio'],
-                    [66, 76, 'Andante'],
-                    [76, 108, 'Moderato'],
-                    [108, 120, 'Allegro'],
-                    [120, 168, 'Vivace'],
-                    [168, 200, 'Presto'],
-                    [200, 300, 'Prestissimo'],
+                    [20,40,'Larghissimo'],[40,60,'Largo'],[60,66,'Adagio'],
+                    [66,76,'Andante'],[76,108,'Moderato'],[108,120,'Allegro'],
+                    [120,168,'Vivace'],[168,200,'Presto'],[200,300,'Prestissimo'],
                 ];
+
+                // Tempo preset BPMs for highlighting
+                this.presetBpms = new Set([30,50,63,72,92,120,144,184,220]);
 
                 this.init();
             }
@@ -672,93 +560,162 @@
             init() {
                 this._updateBpmLabel();
                 this._updateBeatIndicators();
+                this._updateSubBeatIndicators();
                 this._updateSliderFill();
+                this._updateTempoPresetHighlight();
                 this._bindEvents();
                 this._bindKeyboard();
             }
 
-            // ---- BPM ----
-
-            setBpm(val, source = 'ui') {
+            // ======== BPM ========
+            setBpm(val) {
                 const newBpm = Math.max(20, Math.min(300, Math.round(val)));
                 if (newBpm === this.bpm) return;
-
                 this.bpm = newBpm;
                 this.engine.setTempo(newBpm);
-
-                // Update UI
                 this.$bpmDisplay.textContent = newBpm;
                 this.$bpmSlider.value = newBpm;
                 this._updateBpmLabel();
                 this._updateSliderFill();
-
+                this._updateTempoPresetHighlight();
                 // Pop animation
                 this.$bpmDisplay.classList.remove('bpm-pop');
-                void this.$bpmDisplay.offsetWidth; // reflow
+                void this.$bpmDisplay.offsetWidth;
                 this.$bpmDisplay.classList.add('bpm-pop');
-            }
-
-            setBeatsPerBar(val) {
-                const beats = Math.max(1, Math.min(12, Math.round(val)));
-                if (beats === this.beatsPerBar) return;
-
-                this.beatsPerBar = beats;
-                this.engine.setBeatsPerBar(beats);
-
-                // Update UI
-                this.$beatCountInput.value = beats;
-                this._updateBeatIndicators();
-
-                // Update preset button active state
-                this.$presetBtns.forEach(btn => {
-                    const btnBeats = parseInt(btn.dataset.beats);
-                    btn.classList.toggle('active', btnBeats === beats);
-                });
             }
 
             _updateBpmLabel() {
                 let label = '';
                 for (const [min, max, name] of this.tempoLabels) {
-                    if (this.bpm >= min && this.bpm < max) {
-                        label = name;
-                        break;
-                    }
+                    if (this.bpm >= min && this.bpm < max) { label = name; break; }
                 }
                 this.$bpmLabel.textContent = label || '';
             }
 
             _updateSliderFill() {
-                const percent = ((this.bpm - 20) / (300 - 20)) * 100;
-                this.$bpmSlider.style.setProperty('--fill-percent', percent + '%');
+                const pct = ((this.bpm - 20) / (300 - 20)) * 100;
+                this.$bpmSlider.style.setProperty('--fill-percent', pct + '%');
             }
 
-            // ---- Beat Indicators ----
+            _updateTempoPresetHighlight() {
+                this.$tempoPresetBtns.forEach(btn => {
+                    const presetBpm = parseInt(btn.dataset.bpm);
+                    btn.classList.toggle('active', presetBpm === this.bpm);
+                });
+            }
 
+            // ======== Beats Per Bar ========
+            setBeatsPerBar(val) {
+                const beats = Math.max(1, Math.min(12, Math.round(val)));
+                if (beats === this.beatsPerBar) return;
+                this.beatsPerBar = beats;
+                this.engine.setBeatsPerBar(beats);
+                this.$beatCountInput.value = beats;
+                this._updateBeatIndicators();
+                this._updateSubBeatIndicators();
+                this.$presetBtns.forEach(btn => {
+                    btn.classList.toggle('active', parseInt(btn.dataset.beats) === beats);
+                });
+            }
+
+            // ======== Subdivision ========
+            setSubdivision(sub) {
+                const val = Math.max(1, Math.min(4, Math.round(sub)));
+                if (val === this.subdivision) return;
+                this.subdivision = val;
+                this.engine.setSubdivision(val);
+                this._updateSubBeatIndicators();
+                this.$subBtns.forEach(btn => {
+                    btn.classList.toggle('active', parseInt(btn.dataset.sub) === val);
+                });
+            }
+
+            // ======== Sound ========
+            setSound(type) {
+                this.engine.setSoundType(type);
+                this.$soundBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.sound === type);
+                });
+            }
+
+            // ======== Volume ========
+            setVolumes() {
+                const a = parseInt(this.$volAccent.value);
+                const n = parseInt(this.$volNormal.value);
+                const s = parseInt(this.$volSub.value);
+                this.engine.setVolumes(a, n, s);
+                this.$volAccentVal.textContent = a;
+                this.$volNormalVal.textContent = n;
+                this.$volSubVal.textContent = s;
+            }
+
+            // ======== Beat Indicators ========
             _updateBeatIndicators() {
                 this.$beatIndicators.innerHTML = '';
                 for (let i = 0; i < this.beatsPerBar; i++) {
                     const dot = document.createElement('div');
                     dot.className = 'beat-dot' + (i === 0 ? ' accent' : '');
-                    dot.setAttribute('data-beat', i);
+                    dot.dataset.beat = i;
                     this.$beatIndicators.appendChild(dot);
                 }
             }
 
-            highlightBeat(beatNumber) {
+            _updateSubBeatIndicators() {
+                this.$subBeatIndicators.innerHTML = '';
+                if (this.subdivision <= 1) {
+                    this.$subBeatIndicators.classList.add('hidden');
+                    return;
+                }
+                this.$subBeatIndicators.classList.remove('hidden');
+                // Show sub-beat dots for each beat
+                const subsPerBeat = this.subdivision - 1; // exclude main beat
+                for (let b = 0; b < this.beatsPerBar; b++) {
+                    const group = document.createElement('div');
+                    group.className = 'flex items-center gap-1';
+                    for (let s = 0; s < subsPerBeat; s++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'sub-beat-dot';
+                        dot.dataset.beat = b;
+                        dot.dataset.sub = s + 1;
+                        group.appendChild(dot);
+                    }
+                    this.$subBeatIndicators.appendChild(group);
+                    // Add spacer between beat groups (except last)
+                    if (b < this.beatsPerBar - 1) {
+                        const spacer = document.createElement('div');
+                        spacer.style.width = '6px';
+                        this.$subBeatIndicators.appendChild(spacer);
+                    }
+                }
+            }
+
+            highlightBeat(beatNumber, subIndex, subdivision) {
+                // Main beat dots
                 const dots = this.$beatIndicators.querySelectorAll('.beat-dot');
                 dots.forEach((dot, i) => {
-                    if (i === beatNumber) {
+                    if (i === beatNumber && subIndex === 0) {
                         dot.classList.add('active');
-                        // Auto-remove after short delay so it blinks
                         setTimeout(() => dot.classList.remove('active'), 120);
-                    } else {
+                    } else if (subIndex === 0) {
                         dot.classList.remove('active');
                     }
                 });
+
+                // Sub-beat dots
+                if (subdivision > 1) {
+                    const subDots = this.$subBeatIndicators.querySelectorAll('.sub-beat-dot');
+                    subDots.forEach(dot => {
+                        const db = parseInt(dot.dataset.beat);
+                        const ds = parseInt(dot.dataset.sub);
+                        if (db === beatNumber && ds === subIndex) {
+                            dot.classList.add('active');
+                            setTimeout(() => dot.classList.remove('active'), 100);
+                        }
+                    });
+                }
             }
 
-            // ---- Play State ----
-
+            // ======== Play State ========
             setPlayingState(playing) {
                 if (playing) {
                     this.$playBtn.classList.add('playing');
@@ -768,59 +725,40 @@
                     this.$playBtn.classList.remove('playing');
                     this.$playIcon.textContent = '▶';
                     this.$bpmDisplay.classList.remove('playing');
-                    // Clear beat indicators
                     this.$beatIndicators.querySelectorAll('.beat-dot').forEach(d => d.classList.remove('active'));
+                    if (this.$subBeatIndicators) {
+                        this.$subBeatIndicators.querySelectorAll('.sub-beat-dot').forEach(d => d.classList.remove('active'));
+                    }
                 }
             }
 
-            // ---- Tap Tempo ----
-
+            // ======== Tap Tempo ========
             handleTap() {
                 const now = performance.now();
-
-                // Reset if last tap was > 2 seconds ago
                 if (this.tapTimes.length > 0 && (now - this.tapTimes[this.tapTimes.length - 1]) > 2000) {
                     this.tapTimes = [];
                 }
-
                 this.tapTimes.push(now);
-
-                // Keep only last 8 taps
-                if (this.tapTimes.length > 8) {
-                    this.tapTimes.shift();
-                }
-
-                // Need at least 2 taps to calculate
+                if (this.tapTimes.length > 8) this.tapTimes.shift();
                 if (this.tapTimes.length >= 2) {
                     const intervals = [];
                     for (let i = 1; i < this.tapTimes.length; i++) {
                         intervals.push(this.tapTimes[i] - this.tapTimes[i - 1]);
                     }
-
-                    // Average interval in ms
-                    const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-
-                    // Convert to BPM
-                    const bpm = Math.round(60000 / avgInterval);
-                    if (bpm >= 20 && bpm <= 300) {
-                        this.setBpm(bpm);
-                    }
+                    const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+                    const bpm = Math.round(60000 / avg);
+                    if (bpm >= 20 && bpm <= 300) this.setBpm(bpm);
                 }
-
-                // Visual feedback
                 this.$tapBtn.classList.add('tapping');
                 clearTimeout(this.tapTimeout);
-                this.tapTimeout = setTimeout(() => {
-                    this.$tapBtn.classList.remove('tapping');
-                }, 300);
+                this.tapTimeout = setTimeout(() => this.$tapBtn.classList.remove('tapping'), 300);
             }
 
-            // ---- Event Binding ----
-
+            // ======== Events ========
             _bindEvents() {
-                // Play / Pause
+                // Play/Pause
                 this.$playBtn.addEventListener('click', () => {
-                    this.engine.initAudio(); // must be in user gesture
+                    this.engine.initAudio();
                     const playing = this.engine.toggle();
                     this.setPlayingState(playing);
                 });
@@ -836,23 +774,55 @@
                     this.setBpm(parseInt(this.$bpmSlider.value));
                 });
 
-                // BPM Adjustment Buttons
+                // BPM Adjustment
                 document.getElementById('bpmUp1').addEventListener('click', () => this.setBpm(this.bpm + 1));
                 document.getElementById('bpmDown1').addEventListener('click', () => this.setBpm(this.bpm - 1));
                 document.getElementById('bpmUp10').addEventListener('click', () => this.setBpm(this.bpm + 10));
                 document.getElementById('bpmDown10').addEventListener('click', () => this.setBpm(this.bpm - 10));
 
-                // BPM Display Click → Input
+                // BPM Display → input
                 this.$bpmDisplay.addEventListener('click', () => this._showBpmInput());
                 this.$bpmDisplay.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') this._showBpmInput();
                 });
 
-                // Beat Preset Buttons
+                // Tempo Presets
+                this.$tempoPresetBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.setBpm(parseInt(btn.dataset.bpm));
+                    });
+                });
+
+                // Subdivision
+                this.$subBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.setSubdivision(parseInt(btn.dataset.sub));
+                    });
+                });
+
+                // Sound
+                this.$soundBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.engine.initAudio();
+                        this.setSound(btn.dataset.sound);
+                    });
+                });
+
+                // Volume sliders
+                this.$volAccent.addEventListener('input', () => this.setVolumes());
+                this.$volNormal.addEventListener('input', () => this.setVolumes());
+                this.$volSub.addEventListener('input', () => this.setVolumes());
+
+                // Volume panel toggle
+                this.$volToggle.addEventListener('click', () => {
+                    const isOpen = this.$volPanel.classList.toggle('open');
+                    this.$volToggle.textContent = isOpen ? '🔊 音量 ▴' : '🔊 音量 ▾';
+                });
+
+                // Beat Presets
                 this.$presetBtns.forEach(btn => {
                     btn.addEventListener('click', () => {
-                        const beats = parseInt(btn.dataset.beats);
-                        this.setBeatsPerBar(beats);
+                        this.setBeatsPerBar(parseInt(btn.dataset.beats));
                     });
                 });
 
@@ -866,52 +836,37 @@
                     }
                 });
 
-                // Engine visual beat callback
-                this.engine.onBeatCallback = (beatNumber) => {
-                    this.highlightBeat(beatNumber);
+                // Engine beat callback
+                this.engine.onBeatCallback = (beatNumber, subIndex, subdivision) => {
+                    this.highlightBeat(beatNumber, subIndex, subdivision);
                 };
             }
 
             _showBpmInput() {
-                // Create a temporary input over the BPM display
                 const input = document.createElement('input');
-                input.type = 'number';
-                input.min = 20;
-                input.max = 300;
-                input.value = this.bpm;
+                input.type = 'number'; input.min = 20; input.max = 300; input.value = this.bpm;
                 input.className = 'text-8xl sm:text-9xl font-extrabold text-center bg-transparent border-b-2 border-accent text-white w-full outline-none';
-                input.style.cssText = 'font-variant-numeric:tabular-nums; -moz-appearance:textfield;';
+                input.style.cssText = 'font-variant-numeric:tabular-nums;-moz-appearance:textfield;';
                 input.setAttribute('inputmode', 'numeric');
-
-                // Replace display with input
                 this.$bpmDisplay.replaceWith(input);
-                input.focus();
-                input.select();
+                input.focus(); input.select();
 
                 const commit = () => {
                     const val = parseInt(input.value);
-                    if (!isNaN(val)) {
-                        this.setBpm(val);
-                    }
+                    if (!isNaN(val)) this.setBpm(val);
                     input.replaceWith(this.$bpmDisplay);
                     this.$bpmDisplay.textContent = this.bpm;
                 };
-
                 input.addEventListener('blur', commit);
                 input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') { input.blur(); }
-                    if (e.key === 'Escape') {
-                        input.value = this.bpm;
-                        input.blur();
-                    }
+                    if (e.key === 'Enter') input.blur();
+                    if (e.key === 'Escape') { input.value = this.bpm; input.blur(); }
                 });
             }
 
-            // ---- Keyboard Shortcuts ----
-
+            // ======== Keyboard ========
             _bindKeyboard() {
                 document.addEventListener('keydown', (e) => {
-                    // Ignore if typing in an input
                     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
                     switch (e.code) {
@@ -924,38 +879,22 @@
 
                         case 'ArrowUp':
                             e.preventDefault();
-                            if (e.shiftKey) {
-                                this.setBpm(this.bpm + 10);
-                            } else {
-                                this.setBpm(this.bpm + 1);
-                            }
+                            this.setBpm(this.bpm + (e.shiftKey ? 10 : 1));
                             break;
 
                         case 'ArrowDown':
                             e.preventDefault();
-                            if (e.shiftKey) {
-                                this.setBpm(this.bpm - 10);
-                            } else {
-                                this.setBpm(this.bpm - 1);
-                            }
+                            this.setBpm(this.bpm - (e.shiftKey ? 10 : 1));
                             break;
 
                         case 'ArrowRight':
                             e.preventDefault();
-                            if (e.shiftKey) {
-                                this.setBpm(this.bpm + 10);
-                            } else {
-                                this.setBpm(this.bpm + 1);
-                            }
+                            this.setBpm(this.bpm + (e.shiftKey ? 10 : 1));
                             break;
 
                         case 'ArrowLeft':
                             e.preventDefault();
-                            if (e.shiftKey) {
-                                this.setBpm(this.bpm - 10);
-                            } else {
-                                this.setBpm(this.bpm - 1);
-                            }
+                            this.setBpm(this.bpm - (e.shiftKey ? 10 : 1));
                             break;
 
                         case 'KeyT':
@@ -963,24 +902,40 @@
                             this.engine.initAudio();
                             this.handleTap();
                             break;
+
+                        // Subdivision hotkeys: 1-4
+                        case 'Digit1': case 'Numpad1':
+                            e.preventDefault();
+                            this.setSubdivision(1);
+                            break;
+                        case 'Digit2': case 'Numpad2':
+                            e.preventDefault();
+                            this.setSubdivision(2);
+                            break;
+                        case 'Digit3': case 'Numpad3':
+                            e.preventDefault();
+                            this.setSubdivision(3);
+                            break;
+                        case 'Digit4': case 'Numpad4':
+                            e.preventDefault();
+                            this.setSubdivision(4);
+                            break;
                     }
                 });
             }
         }
 
         // =============================================
-        //  App Initialization
+        //  Init
         // =============================================
         const engine = new MetronomeEngine();
         const ui = new UIController(engine);
-
-        // Expose for debugging
         window.__metronome = { engine, ui };
 
-        console.log('%c🎵 在线节拍器已就绪 %c| %c120 BPM %c| %c4/4 拍',
-            'font-size:16px;', '', 'color:#4F8CFF;', '', 'color:#4F8CFF;');
-        console.log('%c空格键播放 · 方向键调BPM · T键测速 · 点击数字直接输入',
-            'color:#888;');
+        console.log('%c🎵 在线节拍器 v2 (Phase 2) 已就绪',
+            'font-size:16px;');
+        console.log('%c细分拍 %c| %c3种音色 %c| %c独立音量控制 %c| %c速度预设',
+            'color:#4F8CFF;','','color:#4F8CFF;','','color:#4F8CFF;','','color:#4F8CFF;');
 
     })();
     </script>
