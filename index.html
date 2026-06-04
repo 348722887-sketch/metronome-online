@@ -450,6 +450,7 @@
                             <span data-i18n="train-speed-step-bars">小节 +</span>
                             <input type="number" id="speedStepBpm" value="5" min="1" max="20" class="w-10 text-center bg-[#e8efe8] border border-[#c8dcc8] rounded text-gray-900 text-xs py-1 focus:outline-none focus:border-train-dim">
                             <span>BPM</span>
+                            <span class="text-gray-500 ml-1" id="speedBarCounter" style="display:none;">0/2 小节</span>
                             <label class="flex items-center cursor-pointer ml-auto" style="gap:2px;">
                                 <input type="checkbox" id="speedBarCheck" class="sr-only">
                                 <div class="custom-check" style="width:18px;height:18px;border-radius:4px;" id="speedBarCheckMark"></div>
@@ -461,6 +462,7 @@
                             <span data-i18n="train-speed-mins">分钟 +</span>
                             <input type="number" id="speedStepBpmTime" value="5" min="1" max="20" class="w-10 text-center bg-[#e8efe8] border border-[#c8dcc8] rounded text-gray-900 text-xs py-1 focus:outline-none focus:border-train-dim">
                             <span>BPM</span>
+                            <span class="text-gray-500 ml-1" id="speedTimeCounter" style="display:none;">2:00</span>
                             <label class="flex items-center cursor-pointer ml-auto" style="gap:2px;">
                                 <input type="checkbox" id="speedTimeCheck" class="sr-only">
                                 <div class="custom-check" style="width:18px;height:18px;border-radius:4px;" id="speedTimeCheckMark"></div>
@@ -1724,6 +1726,10 @@
                 this.$speedBarCheckMark = document.getElementById('speedBarCheckMark');
                 this.$speedTimeCheck = document.getElementById('speedTimeCheck');
                 this.$speedTimeCheckMark = document.getElementById('speedTimeCheckMark');
+                this.$speedBarCounter = document.getElementById('speedBarCounter');
+                this.$speedTimeCounter = document.getElementById('speedTimeCounter');
+                this._timeSpeedCountdown = 0; // countdown in seconds
+                this._timeSpeedCountdownInterval = null;
                 this.$speedStartBtn = document.getElementById('speedStartBtn');
                 this.$speedStatus = document.getElementById('speedStatus');
 
@@ -1754,6 +1760,50 @@
                 this.$speedTimeCheck.addEventListener('change', () => {
                     this.$speedTimeCheckMark.classList.toggle('checked', this.$speedTimeCheck.checked);
                 });
+
+                // Dynamic value changes during training (bar-based)
+                const onBarInputChange = () => {
+                    if (!this.running || this.mode !== 'speed') return;
+                    this.speedStepBars = Math.max(1, Math.min(8, parseInt(this.$speedStepBars.value) || 2));
+                    this.speedStepBpm = Math.max(1, Math.min(20, parseInt(this.$speedStepBpm.value) || 5));
+                    this.speedBarCount = 0;
+                    if (this.$speedBarCounter) this.$speedBarCounter.textContent = '0/' + this.speedStepBars + ' 小节';
+                };
+                this.$speedStepBars.addEventListener('input', onBarInputChange);
+                this.$speedStepBpm.addEventListener('input', onBarInputChange);
+
+                // Dynamic value changes during training (time-based)
+                const onTimeInputChange = () => {
+                    if (!this.running || this.mode !== 'speed') return;
+                    const mins = Math.max(1, Math.min(30, parseInt(this.$speedStepMins.value) || 2));
+                    const bpmInc = Math.max(1, Math.min(20, parseInt(this.$speedStepBpmTime.value) || 5));
+                    this._clearTimeSpeed();
+                    // Restart time speed with new values, keep same BPM trajectory
+                    this._timeSpeedCountdown = mins * 60;
+                    this._updateTimeCounter();
+                    if (this.$speedTimeCounter) this.$speedTimeCounter.style.display = 'inline';
+                    this._timeSpeedCountdownInterval = setInterval(() => {
+                        if (!this.running || this.mode !== 'speed') return;
+                        this._timeSpeedCountdown--;
+                        this._updateTimeCounter();
+                    }, 1000);
+                    this._timeSpeedInterval = setInterval(() => {
+                        if (!this.running || this.mode !== 'speed') return;
+                        this._timeSpeedCountdown = mins * 60;
+                        this._updateTimeCounter();
+                        this.speedCurrentBpm += bpmInc;
+                        if (this.speedCurrentBpm >= this.speedEndBpm) {
+                            this.speedCurrentBpm = this.speedEndBpm;
+                            this.ui.setBpm(this.speedEndBpm);
+                            this._stopSpeedTrainer();
+                            return;
+                        }
+                        this.ui.setBpm(this.speedCurrentBpm);
+                        this.$speedStatus.textContent = this._speedStatusText();
+                    }, mins * 60000);
+                };
+                this.$speedStepMins.addEventListener('input', onTimeInputChange);
+                this.$speedStepBpmTime.addEventListener('input', onTimeInputChange);
 
                 // Engine bar callback
                 this.engine.onBarCallback = (barCount) => {
@@ -1858,6 +1908,13 @@
                 this.speedCurrentBpm = this.speedStartBpm;
                 this.running = true;
 
+                // Reset counters
+                this.speedBarCount = 0;
+                if (this.$speedBarCounter) {
+                    this.$speedBarCounter.style.display = 'inline';
+                    this.$speedBarCounter.textContent = '0/' + this.speedStepBars + ' 小节';
+                }
+
                 // Set start BPM
                 this.ui.setBpm(this.speedStartBpm);
 
@@ -1882,8 +1939,20 @@
                 const bpmInc = parseInt(this.$speedStepBpmTime.value) || 5;
                 if (mins <= 0 || bpmInc <= 0) return;
                 this._clearTimeSpeed();
+                this._timeSpeedCountdown = mins * 60;
+                this._updateTimeCounter();
+                if (this.$speedTimeCounter) this.$speedTimeCounter.style.display = 'inline';
+                // 1-second tick for countdown display
+                this._timeSpeedCountdownInterval = setInterval(() => {
+                    if (!this.running || this.mode !== 'speed') return;
+                    this._timeSpeedCountdown--;
+                    this._updateTimeCounter();
+                }, 1000);
+                // Actual BPM change at the minute interval
                 this._timeSpeedInterval = setInterval(() => {
                     if (!this.running || this.mode !== 'speed') return;
+                    this._timeSpeedCountdown = mins * 60;
+                    this._updateTimeCounter();
                     this.speedCurrentBpm += bpmInc;
                     if (this.speedCurrentBpm >= this.speedEndBpm) {
                         this.speedCurrentBpm = this.speedEndBpm;
@@ -1896,13 +1965,23 @@
                 }, mins * 60000);
             }
 
+            _updateTimeCounter() {
+                if (!this.$speedTimeCounter) return;
+                const m = Math.floor(this._timeSpeedCountdown / 60);
+                const s = this._timeSpeedCountdown % 60;
+                this.$speedTimeCounter.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+            }
+
             _clearTimeSpeed() {
                 if (this._timeSpeedInterval) { clearInterval(this._timeSpeedInterval); this._timeSpeedInterval = null; }
+                if (this._timeSpeedCountdownInterval) { clearInterval(this._timeSpeedCountdownInterval); this._timeSpeedCountdownInterval = null; }
             }
 
             _stopSpeedTrainer() {
                 this.running = false;
                 this._clearTimeSpeed();
+                if (this.$speedBarCounter) this.$speedBarCounter.style.display = 'none';
+                if (this.$speedTimeCounter) this.$speedTimeCounter.style.display = 'none';
                 this.$speedStatus.classList.add('hidden');
                 this._setTrainBtnText(this.$speedStartBtn, false);
                 this.ui.$playBtn.classList.remove('training');
@@ -1911,6 +1990,11 @@
             _onSpeedBar() {
                 if (!this.$speedBarCheck.checked) return;
                 this.speedBarCount++;
+                // Update bar counter display
+                if (this.$speedBarCounter) {
+                    this.$speedBarCounter.style.display = 'inline';
+                    this.$speedBarCounter.textContent = this.speedBarCount + '/' + this.speedStepBars + ' 小节';
+                }
                 if (this.speedBarCount >= this.speedStepBars) {
                     this.speedBarCount = 0;
                     this.speedCurrentBpm += this.speedStepBpm;
