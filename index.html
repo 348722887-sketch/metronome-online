@@ -58,7 +58,7 @@
         input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.1);box-shadow:0 0 30px rgba(79,140,255,.6),0 2px 12px rgba(0,0,0,.4)}
         input[type="range"]::-webkit-slider-thumb:active{transform:scale(1.15);cursor:grabbing}
         input[type="range"]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #4F8CFF;cursor:pointer;box-shadow:0 0 20px rgba(79,140,255,.4)}
-        .vol-slider{height:4px;background:linear-gradient(to right,#4F8CFF 0%,#4F8CFF var(--fill,50%),#d0ddd0 var(--fill,50%),#d0ddd0 100%)}.vol-slider::-webkit-slider-thumb{width:20px;height:20px;border-width:2px}
+        input.vol-slider{height:4px;background:linear-gradient(to right,#4F8CFF 0%,#4F8CFF var(--fill,50%),#d0ddd0 var(--fill,50%),#d0ddd0 100%)}input.vol-slider::-webkit-slider-thumb{width:20px;height:20px;border-width:2px}
 
         /* BPM Display */
         .bpm-display{font-variant-numeric:tabular-nums;text-shadow:0 0 60px rgba(79,140,255,.3);transition:text-shadow .6s ease}
@@ -1655,20 +1655,26 @@
                 this.$volNormal.addEventListener('input', () => this.setVolumes());
                 this.$volSub.addEventListener('input', () => this.setVolumes());
 
-                // Panel tab switching (音量 | 训练 | 音色)
+                // Panel tab switching — dropdown pattern
+                this._openPanel = 'vol'; // currently open panel
                 this.$panelTabs.forEach(tab => {
                     tab.addEventListener('click', () => {
                         const panelName = tab.dataset.panel;
-                        // Toggle active state on tabs
-                        this.$panelTabs.forEach(t => t.classList.remove('active'));
-                        tab.classList.add('active');
-                        // Show/hide panels
-                        const isVol = panelName === 'vol';
-                        const isTrain = panelName === 'train';
-                        const isSound = panelName === 'sound';
-                        this.$volPanel.classList.toggle('open', isVol);
-                        this.$trainPanel.classList.toggle('open', isTrain);
-                        this.$soundPanel.classList.toggle('open', isSound);
+                        // If clicking the already-open panel, close it
+                        if (this._openPanel === panelName) {
+                            this._openPanel = null;
+                            this.$panelTabs.forEach(t => t.classList.remove('active'));
+                            this.$volPanel.classList.remove('open');
+                            this.$trainPanel.classList.remove('open');
+                            this.$soundPanel.classList.remove('open');
+                            return;
+                        }
+                        // Otherwise, switch to the clicked panel
+                        this._openPanel = panelName;
+                        this.$panelTabs.forEach(t => t.classList.toggle('active', t.dataset.panel === panelName));
+                        this.$volPanel.classList.toggle('open', panelName === 'vol');
+                        this.$trainPanel.classList.toggle('open', panelName === 'train');
+                        this.$soundPanel.classList.toggle('open', panelName === 'sound');
                     });
                 });
 
