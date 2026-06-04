@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>在线节拍器 — 免费精准在线节拍器 | Online Metronome</title>
-    <meta name="description" content="免费在线节拍器，专业级精准节拍器。支持Tap Tempo手点测速、多拍号切换、拍子细分、3种音色、独立音量控制、键盘快捷键。深色主题，无需下载，打开即用。">
-    <meta name="keywords" content="在线节拍器,节拍器,metronome,online metronome,免费节拍器,free metronome,节拍器在线,节奏器,拍子细分,subdivision">
+    <title data-i18n="title">在线节拍器 — 免费精准在线节拍器 | Online Metronome</title>
+    <meta name="description" data-i18n="meta-desc" content="免费在线节拍器，专业级精准节拍器。支持Tap Tempo、拍子细分、3种音色、训练模式、多语言。深色主题，无需下载，打开即用。">
+    <meta name="keywords" content="在线节拍器,节拍器,metronome,online metronome,免费节拍器,free metronome,节拍器在线,节奏器,拍子细分">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://metronome-online-mvp.vercel.app/">
     <meta property="og:title" content="在线节拍器 — 免费精准在线节拍器">
-    <meta property="og:description" content="专业级在线节拍器，支持Tap Tempo、多拍号、拍子细分、3种音色。深色主题，打开即用。">
+    <meta property="og:description" content="专业级在线节拍器，支持Tap Tempo、拍子细分、3种音色、训练模式。深色主题，打开即用。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://metronome-online-mvp.vercel.app/">
     <meta name="twitter:card" content="summary_large_image">
@@ -28,6 +28,7 @@
         tailwind.config = { theme: { extend: { colors: {
             surface: '#141419', 'surface-light': '#1a1a21',
             accent: '#4F8CFF', 'accent-strong': '#6BA0FF', 'accent-dim': '#3A6FCC',
+            train: '#4ECB71', 'train-dim': '#2d8a4a',
         } } } }
     </script>
 
@@ -42,7 +43,7 @@
         input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.1);box-shadow:0 0 30px rgba(79,140,255,.6),0 2px 12px rgba(0,0,0,.4)}
         input[type="range"]::-webkit-slider-thumb:active{transform:scale(1.15);cursor:grabbing}
         input[type="range"]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #4F8CFF;cursor:pointer;box-shadow:0 0 20px rgba(79,140,255,.4)}
-        .volume-slider{height:4px}.volume-slider::-webkit-slider-thumb{width:20px;height:20px;border-width:2px}
+        .vol-slider{height:4px}.vol-slider::-webkit-slider-thumb{width:20px;height:20px;border-width:2px}
 
         /* BPM Display */
         .bpm-display{font-variant-numeric:tabular-nums;text-shadow:0 0 60px rgba(79,140,255,.3);transition:text-shadow .6s ease}
@@ -64,6 +65,8 @@
         .btn-play:active{transform:scale(.96)}
         .btn-play.playing{background:linear-gradient(135deg,#FF5C5C 0%,#FF3B3B 100%);box-shadow:0 4px 24px rgba(255,92,92,.35)}
         .btn-play.playing:hover{box-shadow:0 6px 32px rgba(255,92,92,.5)}
+        .btn-play.training{background:linear-gradient(135deg,#4ECB71 0%,#3AAF5C 100%);box-shadow:0 4px 24px rgba(78,203,113,.35)}
+        .btn-play.training:hover{box-shadow:0 6px 32px rgba(78,203,113,.5)}
 
         /* Tap Button */
         .btn-tap{padding:12px 28px;border-radius:30px;background:#1a1a21;color:#aaa;font-size:15px;font-weight:600;cursor:pointer;border:2px solid #2a2a35;transition:all .2s ease}
@@ -72,33 +75,46 @@
         .btn-tap.tapping{background:#4F8CFF;border-color:#4F8CFF;color:#fff;animation:tapPulse .3s ease}
         @keyframes tapPulse{0%{transform:scale(1)}50%{transform:scale(.9)}100%{transform:scale(1)}}
 
-        /* Generic small toggle buttons */
+        /* Small buttons */
         .btn-sm{padding:6px 14px;border-radius:16px;background:#1a1a21;color:#777;font-size:12px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .2s ease;white-space:nowrap}
         .btn-sm:hover{border-color:#333;color:#ccc}
         .btn-sm.active{background:rgba(79,140,255,.15);border-color:#4F8CFF;color:#4F8CFF}
 
-        /* Beat Preset Buttons */
+        /* Beat Presets */
         .btn-preset{padding:8px 20px;border-radius:20px;background:#1a1a21;color:#888;font-size:14px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .2s ease}
         .btn-preset:hover{border-color:#333;color:#ccc}
         .btn-preset.active{background:rgba(79,140,255,.15);border-color:#4F8CFF;color:#4F8CFF}
 
-        /* BPM Adjustment */
+        /* BPM Adj */
         .btn-bpm-adj{width:44px;height:44px;border-radius:50%;background:#1a1a21;color:#aaa;font-size:22px;font-weight:300;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #2a2a35;transition:all .15s ease;user-select:none}
         .btn-bpm-adj:hover{border-color:#4F8CFF;color:#fff}
         .btn-bpm-adj:active{transform:scale(.9);background:#4F8CFF;border-color:#4F8CFF}
 
         /* Settings toggle */
-        .settings-toggle{background:none;border:none;color:#444;cursor:pointer;font-size:18px;padding:4px 8px;border-radius:8px;transition:all .2s ease}
-        .settings-toggle:hover{color:#888;background:#1a1a21}
-        .settings-panel{max-height:0;overflow:hidden;transition:max-height .35s ease,opacity .35s ease;opacity:0}
-        .settings-panel.open{max-height:300px;opacity:1}
+        .panel-toggle{background:none;border:none;color:#444;cursor:pointer;font-size:14px;padding:4px 12px;border-radius:8px;transition:all .2s ease;font-weight:600}
+        .panel-toggle:hover{color:#888;background:#1a1a21}
+        .panel-collapse{max-height:0;overflow:hidden;transition:max-height .35s ease,opacity .35s ease;opacity:0}
+        .panel-collapse.open{max-height:400px;opacity:1}
+
+        /* Training panel */
+        .training-panel{border:1px solid #1e2a1e;background:#0d120d}
+        .train-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:#1a2a1a;outline:none;cursor:pointer}
+        .train-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #4ECB71;cursor:pointer}
+        .train-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #4ECB71;cursor:pointer}
+        .btn-train{padding:6px 18px;border-radius:14px;background:#1a2a1a;color:#4ECB71;font-size:13px;font-weight:600;cursor:pointer;border:2px solid #1e3a1e;transition:all .2s ease}
+        .btn-train:hover{background:#1e3a1e;border-color:#2d8a4a}
+        .btn-train.active{background:#4ECB71;border-color:#4ECB71;color:#0a0a0f}
+
+        /* Toast */
+        .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:#4F8CFF;color:#fff;padding:10px 24px;border-radius:24px;font-size:14px;font-weight:600;z-index:999;transition:transform .3s ease;pointer-events:none}
+        .toast.show{transform:translateX(-50%) translateY(0)}
 
         @keyframes bpmPop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
         .bpm-pop{animation:bpmPop .25s ease-out}
 
         .ad-placeholder{border:1px dashed #2a2a35;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#333;font-size:12px}
 
-        .btn-play,.btn-tap,.btn-preset,.btn-bpm-adj,.beat-dot,.btn-sm,.btn-sound{touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+        .btn-play,.btn-tap,.btn-preset,.btn-bpm-adj,.beat-dot,.btn-sm,.btn-sound,.btn-train{touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
         input[type="range"]{touch-action:pan-x}
         main{touch-action:manipulation}
 
@@ -115,27 +131,26 @@
         @media(max-height:500px) and (orientation:landscape){
             .bpm-display{font-size:3rem!important}
             .btn-play{width:54px;height:54px;font-size:24px}
-            .btn-sm{padding:3px 8px;font-size:10px}
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-between py-6 px-4" style="background:#0a0a0f;">
 
-    <!-- Top Ad Slot -->
+    <!-- Top Ad -->
     <div class="w-full max-w-4xl mx-auto mb-4">
-        <div class="ad-placeholder h-[90px] w-full" id="ad-top" title="Google AdSense">🎵 广告位 — 728×90</div>
+        <div class="ad-placeholder h-[90px] w-full" id="ad-top">🎵 广告位 — 728×90</div>
     </div>
 
-    <main class="flex-1 flex flex-col items-center justify-center w-full max-w-lg mx-auto gap-5">
+    <main class="flex-1 flex flex-col items-center justify-center w-full max-w-lg mx-auto gap-4">
 
-        <!-- === BPM Display === -->
+        <!-- ===== BPM Display ===== -->
         <div class="text-center select-none">
             <div class="bpm-display text-8xl sm:text-9xl font-extrabold text-white tracking-tight cursor-pointer"
                  id="bpmDisplay" title="点击输入BPM" role="button" tabindex="0">120</div>
-            <div class="text-gray-500 text-xs tracking-[0.2em] uppercase mt-1">bpm</div>
+            <div class="text-gray-500 text-xs tracking-[0.2em] uppercase mt-1" data-i18n="bpm-label">bpm</div>
         </div>
 
-        <!-- === Tempo Presets === -->
+        <!-- ===== Tempo Presets ===== -->
         <div class="flex flex-wrap items-center justify-center gap-1.5 select-none" id="tempoPresets">
             <button class="btn-sm" data-bpm="30">Larghissimo</button>
             <button class="btn-sm" data-bpm="50">Largo</button>
@@ -148,12 +163,12 @@
             <button class="btn-sm" data-bpm="220">Prestissimo</button>
         </div>
 
-        <!-- === BPM Slider === -->
+        <!-- ===== BPM Slider ===== -->
         <div class="w-full px-2">
-            <input type="range" id="bpmSlider" min="20" max="300" value="120" step="1" aria-label="BPM 滑块" title="拖动调节 BPM (20-300)">
+            <input type="range" id="bpmSlider" min="20" max="300" value="120" step="1" aria-label="BPM 滑块">
         </div>
 
-        <!-- === BPM Fine-tune === -->
+        <!-- ===== BPM Fine-tune ===== -->
         <div class="flex items-center gap-3 select-none">
             <button class="btn-bpm-adj" id="bpmDown10" title="-10 BPM">«</button>
             <button class="btn-bpm-adj" id="bpmDown1" title="-1 BPM">−</button>
@@ -162,22 +177,22 @@
             <button class="btn-bpm-adj" id="bpmUp10" title="+10 BPM">»</button>
         </div>
 
-        <!-- === Beat Indicators === -->
+        <!-- ===== Beat Indicators ===== -->
         <div class="flex items-center justify-center gap-2 sm:gap-2.5 select-none" id="beatIndicators"></div>
 
-        <!-- === Sub-beat indicators (shown when subdivision > 1) === -->
+        <!-- ===== Sub-beat Indicators ===== -->
         <div class="flex items-center justify-center gap-1.5 select-none hidden" id="subBeatIndicators"></div>
 
-        <!-- === Subdivision Selector === -->
+        <!-- ===== Subdivision ===== -->
         <div class="flex flex-wrap items-center justify-center gap-2 select-none">
-            <span class="text-gray-600 text-xs mr-1">细分</span>
-            <button class="btn-sm active" data-sub="1" title="四分音符 — 无细分">¼</button>
-            <button class="btn-sm" data-sub="2" title="八分音符 — 每拍2下">⅛</button>
-            <button class="btn-sm" data-sub="3" title="三连音 — 每拍3下">♪3</button>
-            <button class="btn-sm" data-sub="4" title="十六分音符 — 每拍4下">1/16</button>
+            <span class="text-gray-600 text-xs mr-1" data-i18n="sub-label">细分</span>
+            <button class="btn-sm active" data-sub="1" title="四分音符">¼</button>
+            <button class="btn-sm" data-sub="2" title="八分音符">⅛</button>
+            <button class="btn-sm" data-sub="3" title="三连音">♪3</button>
+            <button class="btn-sm" data-sub="4" title="十六分音符">1/16</button>
         </div>
 
-        <!-- === Beat Presets === -->
+        <!-- ===== Beat Presets ===== -->
         <div class="flex flex-wrap items-center justify-center gap-2 select-none">
             <button class="btn-preset active" data-beats="4">4/4</button>
             <button class="btn-preset" data-beats="3">3/4</button>
@@ -187,78 +202,143 @@
             <button class="btn-preset" data-beats="7">7/8</button>
         </div>
 
-        <!-- === Beat Count Custom === -->
+        <!-- ===== Beat Count ===== -->
         <div class="flex items-center gap-2 text-gray-500 text-xs select-none">
-            <span>每小节</span>
+            <span data-i18n="beats-label1">每小节</span>
             <input type="number" id="beatCountInput" value="4" min="1" max="12"
                    class="w-12 text-center bg-[#1a1a21] border border-[#2a2a35] rounded-md text-white text-sm py-1 px-2 focus:outline-none focus:border-accent transition-colors">
-            <span>拍</span>
+            <span data-i18n="beats-label2">拍</span>
         </div>
 
-        <!-- === Sound + Volume === -->
+        <!-- ===== Sound + Volume ===== -->
         <div class="flex flex-col items-center gap-3 w-full max-w-xs select-none">
-            <!-- Sound Selector -->
             <div class="flex items-center justify-center gap-2">
-                <span class="text-gray-600 text-xs mr-1">音色</span>
-                <button class="btn-sm active btn-sound" data-sound="classic" title="经典电子音">📟 电子</button>
-                <button class="btn-sm btn-sound" data-sound="wood" title="木鱼声">🪵 木鱼</button>
-                <button class="btn-sm btn-sound" data-sound="clap" title="鼓掌声">👏 鼓掌</button>
+                <span class="text-gray-600 text-xs mr-1" data-i18n="sound-label">音色</span>
+                <button class="btn-sm active btn-sound" data-sound="classic" title="经典电子音">📟 <span data-i18n="sound-classic">电子</span></button>
+                <button class="btn-sm btn-sound" data-sound="wood" title="木鱼声">🪵 <span data-i18n="sound-wood">木鱼</span></button>
+                <button class="btn-sm btn-sound" data-sound="clap" title="鼓掌声">👏 <span data-i18n="sound-clap">鼓掌</span></button>
             </div>
 
-            <!-- Volume Toggle -->
-            <button class="settings-toggle" id="volToggle" title="音量设置">🔊 音量 ▾</button>
-
-            <!-- Volume Sliders Panel -->
-            <div class="settings-panel w-full" id="volPanel">
+            <button class="panel-toggle" id="volToggle" data-i18n="vol-toggle">🔊 音量 ▾</button>
+            <div class="panel-collapse w-full" id="volPanel">
                 <div class="flex flex-col gap-3 bg-[#0d0d14] rounded-xl p-4 border border-[#1a1a21]">
                     <div class="flex items-center gap-3">
-                        <span class="text-gray-500 text-xs w-12">强拍</span>
-                        <input type="range" class="volume-slider flex-1" id="volAccent" min="10" max="100" value="95" step="1">
+                        <span class="text-gray-500 text-xs w-12" data-i18n="vol-accent">强拍</span>
+                        <input type="range" class="vol-slider flex-1" id="volAccent" min="10" max="100" value="95" step="1">
                         <span class="text-gray-400 text-xs w-8 text-right" id="volAccentVal">95</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="text-gray-500 text-xs w-12">弱拍</span>
-                        <input type="range" class="volume-slider flex-1" id="volNormal" min="10" max="100" value="65" step="1">
+                        <span class="text-gray-500 text-xs w-12" data-i18n="vol-normal">弱拍</span>
+                        <input type="range" class="vol-slider flex-1" id="volNormal" min="10" max="100" value="65" step="1">
                         <span class="text-gray-400 text-xs w-8 text-right" id="volNormalVal">65</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="text-gray-500 text-xs w-12">细分</span>
-                        <input type="range" class="volume-slider flex-1" id="volSub" min="10" max="100" value="40" step="1">
+                        <span class="text-gray-500 text-xs w-12" data-i18n="vol-sub">细分</span>
+                        <input type="range" class="vol-slider flex-1" id="volSub" min="10" max="100" value="40" step="1">
                         <span class="text-gray-400 text-xs w-8 text-right" id="volSubVal">40</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- === Play + Tap === -->
-        <div class="flex items-center gap-5 select-none">
-            <button class="btn-play" id="playBtn" aria-label="播放/暂停" title="播放 (空格键)">
-                <span id="playIcon">▶</span>
-            </button>
-            <button class="btn-tap" id="tapBtn" aria-label="手点测速" title="手点测速 (T键)">TAP</button>
+        <!-- ===== Training Mode ===== -->
+        <div class="flex flex-col items-center gap-3 w-full max-w-xs select-none">
+            <button class="panel-toggle" id="trainToggle" data-i18n="train-toggle">🎯 训练模式 ▾</button>
+            <div class="panel-collapse w-full" id="trainPanel">
+                <div class="training-panel rounded-xl p-4">
+                    <!-- Mode Tabs -->
+                    <div class="flex gap-1 mb-3" id="trainTabs">
+                        <button class="btn-train active flex-1" data-train="mute" data-i18n="train-mute-tab">静音训练</button>
+                        <button class="btn-train flex-1" data-train="speed" data-i18n="train-speed-tab">渐进加速</button>
+                    </div>
+
+                    <!-- Mute Trainer -->
+                    <div id="trainMutePanel" class="flex flex-col gap-3">
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span data-i18n="train-mute-play">播放</span>
+                            <input type="number" id="mutePlayBars" value="2" min="1" max="8"
+                                   class="w-10 text-center bg-[#1a1a21] border border-[#1e2a1e] rounded text-white text-xs py-1 focus:outline-none focus:border-train-dim">
+                            <span data-i18n="train-mute-bars">小节</span>
+                            <span class="mx-1">→</span>
+                            <span data-i18n="train-mute-silence">静音</span>
+                            <input type="number" id="muteSilenceBars" value="2" min="1" max="8"
+                                   class="w-10 text-center bg-[#1a1a21] border border-[#1e2a1e] rounded text-white text-xs py-1 focus:outline-none focus:border-train-dim">
+                            <span data-i18n="train-mute-bars">小节</span>
+                        </div>
+                        <div id="muteStatus" class="text-center text-xs text-gray-500 hidden"></div>
+                        <button class="btn-train w-full" id="muteStartBtn" data-i18n="train-start">开始训练</button>
+                    </div>
+
+                    <!-- Speed Trainer -->
+                    <div id="trainSpeedPanel" class="flex flex-col gap-3 hidden">
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span data-i18n="train-speed-from">从</span>
+                            <input type="number" id="speedStartBpm" value="60" min="20" max="280"
+                                   class="w-12 text-center bg-[#1a1a21] border border-[#1e2a1e] rounded text-white text-xs py-1 focus:outline-none focus:border-train-dim">
+                            <span data-i18n="train-speed-to">到</span>
+                            <input type="number" id="speedEndBpm" value="160" min="30" max="300"
+                                   class="w-12 text-center bg-[#1a1a21] border border-[#1e2a1e] rounded text-white text-xs py-1 focus:outline-none focus:border-train-dim">
+                            <span>BPM</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span data-i18n="train-speed-step">每</span>
+                            <input type="number" id="speedStepBars" value="2" min="1" max="8"
+                                   class="w-10 text-center bg-[#1a1a21] border border-[#1e2a1e] rounded text-white text-xs py-1 focus:outline-none focus:border-train-dim">
+                            <span data-i18n="train-speed-step-bars">小节 +</span>
+                            <input type="number" id="speedStepBpm" value="5" min="1" max="20"
+                                   class="w-10 text-center bg-[#1a1a21] border border-[#1e2a1e] rounded text-white text-xs py-1 focus:outline-none focus:border-train-dim">
+                            <span>BPM</span>
+                        </div>
+                        <div id="speedStatus" class="text-center text-xs text-gray-500 hidden"></div>
+                        <button class="btn-train w-full" id="speedStartBtn" data-i18n="train-start">开始训练</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Keyboard Hint -->
-        <div class="text-gray-600 text-xs text-center select-none leading-relaxed">
-            空格 开始/停止 · ←→ ±1BPM · Shift+←→ ±10 · T 测速 · 1-4 切换细分
+        <!-- ===== Play + Tap ===== -->
+        <div class="flex items-center gap-5 select-none">
+            <button class="btn-play" id="playBtn" aria-label="播放/暂停">
+                <span id="playIcon">▶</span>
+            </button>
+            <button class="btn-tap" id="tapBtn" aria-label="手点测速">TAP</button>
+        </div>
+
+        <!-- ===== Share + Hint ===== -->
+        <div class="flex flex-col items-center gap-2 select-none">
+            <div class="text-gray-600 text-xs text-center leading-relaxed" data-i18n="keyboard-hint">
+                空格 开始/停止 · ←→ ±1BPM · Shift+←→ ±10 · T 测速 · 1-4 切换细分
+            </div>
+            <button class="btn-sm flex items-center gap-1" id="shareBtn" title="复制分享链接">
+                🔗 <span data-i18n="share-btn">分享当前设置</span>
+            </button>
         </div>
 
     </main>
 
-    <!-- Footer -->
+    <!-- ===== Footer ===== -->
     <footer class="w-full max-w-4xl mx-auto mt-6 pt-4 border-t border-[#1a1a21] flex flex-col sm:flex-row items-center justify-between gap-2 text-gray-600 text-xs">
-        <span>© 2026 在线节拍器 — 免费在线节拍器工具</span>
-        <div class="flex gap-4">
-            <a href="./privacy.html" class="hover:text-gray-400 transition-colors">隐私政策</a>
-            <a href="./about.html" class="hover:text-gray-400 transition-colors">关于</a>
-            <span class="text-gray-700">🌐 中文</span>
+        <span data-i18n="footer-copy">© 2026 在线节拍器 — 免费在线节拍器工具</span>
+        <div class="flex gap-4 items-center">
+            <a href="./privacy.html" class="hover:text-gray-400 transition-colors" data-i18n="footer-privacy">隐私政策</a>
+            <a href="./about.html" class="hover:text-gray-400 transition-colors" data-i18n="footer-about">关于</a>
+            <select id="langSelect" class="bg-transparent border border-[#2a2a35] rounded text-gray-500 text-xs py-0.5 px-1 focus:outline-none focus:border-accent cursor-pointer">
+                <option value="zh-CN">🇨🇳 中文</option>
+                <option value="en">🇺🇸 English</option>
+                <option value="ja">🇯🇵 日本語</option>
+                <option value="es">🇪🇸 Español</option>
+                <option value="pt">🇧🇷 Português</option>
+            </select>
         </div>
     </footer>
 
-    <!-- Side Ad (desktop) -->
+    <!-- Side Ad -->
     <div class="fixed right-4 top-1/2 -translate-y-1/2 hidden xl:block" style="width:300px;">
-        <div class="ad-placeholder h-[250px] w-[300px]" id="ad-side" title="Google AdSense">🎵 广告位<br>300×250</div>
+        <div class="ad-placeholder h-[250px] w-[300px]" id="ad-side">🎵 广告位<br>300×250</div>
     </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
     <!-- ===== SCRIPTS ===== -->
     <script>
@@ -266,8 +346,281 @@
         'use strict';
 
         // =============================================
-        //  MetronomeEngine — Web Audio API 音频引擎 v2
-        //  支持：细分拍 / 3种音色 / 独立音量控制
+        //  i18n — 多语言翻译
+        // =============================================
+        const I18N = {
+            'zh-CN': {
+                'title': '在线节拍器 — 免费精准在线节拍器 | Online Metronome',
+                'meta-desc': '免费在线节拍器，专业级精准节拍器。支持Tap Tempo、拍子细分、3种音色、训练模式、多语言。深色主题，无需下载，打开即用。',
+                'bpm-label': 'bpm',
+                'sub-label': '细分',
+                'beats-label1': '每小节',
+                'beats-label2': '拍',
+                'sound-label': '音色',
+                'sound-classic': '电子',
+                'sound-wood': '木鱼',
+                'sound-clap': '鼓掌',
+                'vol-toggle': '🔊 音量 ▾',
+                'vol-accent': '强拍',
+                'vol-normal': '弱拍',
+                'vol-sub': '细分',
+                'train-toggle': '🎯 训练模式 ▾',
+                'train-mute-tab': '静音训练',
+                'train-speed-tab': '渐进加速',
+                'train-mute-play': '播放',
+                'train-mute-bars': '小节',
+                'train-mute-silence': '静音',
+                'train-speed-from': '从',
+                'train-speed-to': '到',
+                'train-speed-step': '每',
+                'train-speed-step-bars': '小节 +',
+                'train-start': '开始训练',
+                'keyboard-hint': '空格 开始/停止 · ←→ ±1BPM · Shift+←→ ±10 · T 测速 · 1-4 切换细分',
+                'share-btn': '分享当前设置',
+                'footer-copy': '© 2026 在线节拍器 — 免费在线节拍器工具',
+                'footer-privacy': '隐私政策',
+                'footer-about': '关于',
+            },
+            'en': {
+                'title': 'Online Metronome — Free Professional Metronome',
+                'meta-desc': 'Free online metronome with Web Audio precision. Tap Tempo, subdivisions, 3 sounds, training mode, multi-language. Dark theme, no install needed.',
+                'bpm-label': 'bpm',
+                'sub-label': 'Sub',
+                'beats-label1': 'Beats per',
+                'beats-label2': 'bar',
+                'sound-label': 'Sound',
+                'sound-classic': 'Classic',
+                'sound-wood': 'Wood',
+                'sound-clap': 'Clap',
+                'vol-toggle': '🔊 Volume ▾',
+                'vol-accent': 'Accent',
+                'vol-normal': 'Normal',
+                'vol-sub': 'Sub',
+                'train-toggle': '🎯 Training ▾',
+                'train-mute-tab': 'Mute Drill',
+                'train-speed-tab': 'Speed Ramp',
+                'train-mute-play': 'Play',
+                'train-mute-bars': 'bars',
+                'train-mute-silence': 'mute',
+                'train-speed-from': 'From',
+                'train-speed-to': 'to',
+                'train-speed-step': 'Every',
+                'train-speed-step-bars': 'bars +',
+                'train-start': 'Start Training',
+                'keyboard-hint': 'Space Play/Stop · ←→ ±1BPM · Shift+←→ ±10 · T Tap · 1-4 Subdivision',
+                'share-btn': 'Share Settings',
+                'footer-copy': '© 2026 Online Metronome — Free Metronome Tool',
+                'footer-privacy': 'Privacy',
+                'footer-about': 'About',
+            },
+            'ja': {
+                'title': 'オンラインメトロノーム — 無料の高精度メトロノーム',
+                'meta-desc': '無料オンラインメトロノーム。タップテンポ、分割、3つの音色、トレーニングモード、多言語対応。ダークテーマ、インストール不要。',
+                'bpm-label': 'bpm',
+                'sub-label': '分割',
+                'beats-label1': '1小節',
+                'beats-label2': '拍',
+                'sound-label': '音色',
+                'sound-classic': '電子',
+                'sound-wood': '木魚',
+                'sound-clap': '拍手',
+                'vol-toggle': '🔊 音量 ▾',
+                'vol-accent': '強拍',
+                'vol-normal': '弱拍',
+                'vol-sub': '分割',
+                'train-toggle': '🎯 トレーニング ▾',
+                'train-mute-tab': 'ミュート練習',
+                'train-speed-tab': '速度上昇',
+                'train-mute-play': '再生',
+                'train-mute-bars': '小節',
+                'train-mute-silence': '消音',
+                'train-speed-from': '開始',
+                'train-speed-to': '終了',
+                'train-speed-step': '間隔',
+                'train-speed-step-bars': '小節 +',
+                'train-start': '開始',
+                'keyboard-hint': 'Space 再生 · ←→ ±1BPM · Shift+←→ ±10 · T タップ · 1-4 分割',
+                'share-btn': '設定を共有',
+                'footer-copy': '© 2026 オンラインメトロノーム',
+                'footer-privacy': 'プライバシー',
+                'footer-about': '概要',
+            },
+            'es': {
+                'title': 'Metrónomo Online — Metrónomo Profesional Gratuito',
+                'meta-desc': 'Metrónomo online gratuito con precisión Web Audio. Tap Tempo, subdivisiones, 3 sonidos, modo entrenamiento, multi-idioma. Tema oscuro, sin instalación.',
+                'bpm-label': 'bpm',
+                'sub-label': 'Subdiv',
+                'beats-label1': 'Pulsos por',
+                'beats-label2': 'compás',
+                'sound-label': 'Sonido',
+                'sound-classic': 'Clásico',
+                'sound-wood': 'Madera',
+                'sound-clap': 'Palmas',
+                'vol-toggle': '🔊 Volumen ▾',
+                'vol-accent': 'Fuerte',
+                'vol-normal': 'Débil',
+                'vol-sub': 'Subdiv',
+                'train-toggle': '🎯 Entrenamiento ▾',
+                'train-mute-tab': 'Silencio',
+                'train-speed-tab': 'Aceleración',
+                'train-mute-play': 'Tocar',
+                'train-mute-bars': 'comp.',
+                'train-mute-silence': 'silencio',
+                'train-speed-from': 'De',
+                'train-speed-to': 'a',
+                'train-speed-step': 'Cada',
+                'train-speed-step-bars': 'comp. +',
+                'train-start': 'Comenzar',
+                'keyboard-hint': 'Espacio Iniciar · ←→ ±1BPM · Shift+←→ ±10 · T Tap · 1-4 Subdiv',
+                'share-btn': 'Compartir',
+                'footer-copy': '© 2026 Metrónomo Online — Herramienta Gratuita',
+                'footer-privacy': 'Privacidad',
+                'footer-about': 'Acerca de',
+            },
+            'pt': {
+                'title': 'Metrônomo Online — Metrônomo Profissional Grátis',
+                'meta-desc': 'Metrônomo online gratuito com precisão Web Audio. Tap Tempo, subdivisões, 3 sons, modo treino, multi-idioma. Tema escuro, sem instalação.',
+                'bpm-label': 'bpm',
+                'sub-label': 'Subdiv',
+                'beats-label1': 'Batidas por',
+                'beats-label2': 'compasso',
+                'sound-label': 'Som',
+                'sound-classic': 'Clássico',
+                'sound-wood': 'Madeira',
+                'sound-clap': 'Palmas',
+                'vol-toggle': '🔊 Volume ▾',
+                'vol-accent': 'Forte',
+                'vol-normal': 'Fraco',
+                'vol-sub': 'Subdiv',
+                'train-toggle': '🎯 Treino ▾',
+                'train-mute-tab': 'Silêncio',
+                'train-speed-tab': 'Aceleração',
+                'train-mute-play': 'Tocar',
+                'train-mute-bars': 'comp.',
+                'train-mute-silence': 'silêncio',
+                'train-speed-from': 'De',
+                'train-speed-to': 'a',
+                'train-speed-step': 'A cada',
+                'train-speed-step-bars': 'comp. +',
+                'train-start': 'Começar',
+                'keyboard-hint': 'Espaço Iniciar · ←→ ±1BPM · Shift+←→ ±10 · T Tap · 1-4 Subdiv',
+                'share-btn': 'Compartilhar',
+                'footer-copy': '© 2026 Metrônomo Online — Ferramenta Gratuita',
+                'footer-privacy': 'Privacidade',
+                'footer-about': 'Sobre',
+            }
+        };
+
+        let currentLang = 'zh-CN';
+
+        /** Get browser language, matching our supported list */
+        function detectLang() {
+            const navLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+            if (navLang.startsWith('zh')) return 'zh-CN';
+            if (navLang.startsWith('ja')) return 'ja';
+            if (navLang.startsWith('es')) return 'es';
+            if (navLang.startsWith('pt')) return 'pt';
+            return 'en';
+        }
+
+        /** Apply translations to all [data-i18n] elements */
+        function applyLang(lang) {
+            currentLang = lang;
+            const dict = I18N[lang] || I18N['en'];
+
+            // Update elements with data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    if (el.tagName === 'META') {
+                        el.setAttribute('content', dict[key]);
+                    } else if (el.tagName === 'TITLE') {
+                        document.title = dict[key];
+                    } else {
+                        el.textContent = dict[key];
+                    }
+                }
+            });
+
+            // Update volume toggle text based on open state
+            const volOpen = document.getElementById('volPanel').classList.contains('open');
+            const volText = volOpen ? {'zh-CN':'🔊 音量 ▴','en':'🔊 Volume ▴','ja':'🔊 音量 ▴','es':'🔊 Volumen ▴','pt':'🔊 Volume ▴'}[lang]
+                                    : {'zh-CN':'🔊 音量 ▾','en':'🔊 Volume ▾','ja':'🔊 音量 ▾','es':'🔊 Volumen ▾','pt':'🔊 Volume ▾'}[lang];
+            document.getElementById('volToggle').textContent = volText;
+
+            const trainOpen = document.getElementById('trainPanel').classList.contains('open');
+            const trainText = trainOpen ? {'zh-CN':'🎯 训练模式 ▴','en':'🎯 Training ▴','ja':'🎯 トレーニング ▴','es':'🎯 Entrenamiento ▴','pt':'🎯 Treino ▴'}[lang]
+                                        : {'zh-CN':'🎯 训练模式 ▾','en':'🎯 Training ▾','ja':'🎯 トレーニング ▾','es':'🎯 Entrenamiento ▾','pt':'🎯 Treino ▾'}[lang];
+            document.getElementById('trainToggle').textContent = trainText;
+
+            document.documentElement.lang = lang;
+            document.getElementById('langSelect').value = lang;
+        }
+
+        // =============================================
+        //  SettingsManager — localStorage + URL params
+        // =============================================
+        const SettingsManager = {
+            STORAGE_KEY: 'metronome-settings',
+            defaults: {
+                bpm: 120,
+                beatsPerBar: 4,
+                subdivision: 1,
+                soundType: 'classic',
+                volAccent: 95,
+                volNormal: 65,
+                volSub: 40,
+                lang: null, // set by detection
+            },
+
+            /** Load from URL params + localStorage (URL takes priority) */
+            load() {
+                const saved = {};
+                // Try localStorage
+                try {
+                    const raw = localStorage.getItem(this.STORAGE_KEY);
+                    if (raw) Object.assign(saved, JSON.parse(raw));
+                } catch(e) {}
+
+                // Override with URL params
+                const params = new URLSearchParams(window.location.search);
+                if (params.has('bpm')) saved.bpm = parseInt(params.get('bpm'));
+                if (params.has('beat')) saved.beatsPerBar = parseInt(params.get('beat'));
+                if (params.has('sub')) saved.subdivision = parseInt(params.get('sub'));
+                if (params.has('sound')) saved.soundType = params.get('sound');
+                if (params.has('va')) saved.volAccent = parseInt(params.get('va'));
+                if (params.has('vn')) saved.volNormal = parseInt(params.get('vn'));
+                if (params.has('vs')) saved.volSub = parseInt(params.get('vs'));
+
+                // Merge with defaults
+                const merged = { ...this.defaults, ...saved };
+                return merged;
+            },
+
+            /** Save current settings to localStorage */
+            save(settings) {
+                try {
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(settings));
+                } catch(e) {}
+            },
+
+            /** Generate shareable URL */
+            buildUrl(settings) {
+                const url = new URL(window.location.origin + window.location.pathname);
+                if (settings.bpm !== this.defaults.bpm) url.searchParams.set('bpm', settings.bpm);
+                if (settings.beatsPerBar !== this.defaults.beatsPerBar) url.searchParams.set('beat', settings.beatsPerBar);
+                if (settings.subdivision !== this.defaults.subdivision) url.searchParams.set('sub', settings.subdivision);
+                if (settings.soundType !== this.defaults.soundType) url.searchParams.set('sound', settings.soundType);
+                if (settings.volAccent !== this.defaults.volAccent) url.searchParams.set('va', settings.volAccent);
+                if (settings.volNormal !== this.defaults.volNormal) url.searchParams.set('vn', settings.volNormal);
+                if (settings.volSub !== this.defaults.volSub) url.searchParams.set('vs', settings.volSub);
+                return url.toString();
+            },
+        };
+
+        // =============================================
+        //  MetronomeEngine — Web Audio API 音频引擎 v3
+        //  新增：mute支持（训练模式用）
         // =============================================
         class MetronomeEngine {
             constructor() {
@@ -280,24 +633,17 @@
                 this.timerID = null;
                 this.lookAhead = 25;
                 this.scheduleAhead = 0.1;
-
-                // Phase 2: Subdivision (1=quarter, 2=eighth, 3=triplet, 4=sixteenth)
                 this.subdivision = 1;
                 this.subIndex = 0;
-
-                // Phase 2: Sound type
-                this.soundType = 'classic'; // 'classic' | 'wood' | 'clap'
-
-                // Phase 2: Volumes (0-100)
+                this.soundType = 'classic';
                 this.volAccent = 95;
                 this.volNormal = 65;
                 this.volSub = 40;
-
-                // Buffers: map keyed by soundType
-                this.buffers = {}; // { classic: {accent, normal, sub}, wood: {...}, clap: {...} }
-
-                this.onBeatCallback = null;   // (beatNumber, subIndex, subdivision)
-                this.onSubBeatCallback = null; // optional separate callback for sub-beats
+                this.muted = false;        // for mute trainer
+                this.buffers = {};
+                this.onBeatCallback = null; // (beatNumber, subIndex, subdivision)
+                this.onBarCallback = null;  // (barCount) — fired when beat 0, sub 0
+                this._barCount = 0;
             }
 
             initAudio() {
@@ -307,7 +653,6 @@
                 this._generateAllBuffers();
             }
 
-            /** Regenerate all buffers for all sound types */
             _generateAllBuffers() {
                 for (const type of ['classic', 'wood', 'clap']) {
                     this.buffers[type] = {
@@ -318,23 +663,6 @@
                 }
             }
 
-            /** Regenerate buffers for a specific sound type (on volume change) */
-            _regenerateBuffers(type) {
-                if (!this.audioCtx) return;
-                this.buffers[type] = {
-                    accent: this._createBuffer(type, true),
-                    normal: this._createBuffer(type, false),
-                    sub:    this._createBuffer(type, false),
-                };
-            }
-
-            /** Get volume multiplier by note type */
-            _getVolume(isAccent, isSub) {
-                if (isSub) return this.volSub / 100;
-                return isAccent ? this.volAccent / 100 : this.volNormal / 100;
-            }
-
-            /** Generate click buffer: type='classic'|'wood'|'clap', accented=true|false */
             _createBuffer(type, accented) {
                 const sr = this.audioCtx.sampleRate;
                 let dur, freq, amp;
@@ -349,9 +677,7 @@
                         for (let i = 0; i < Math.floor(sr * dur); i++) {
                             const t = i / sr;
                             const env = Math.exp(-t * (accented ? 90 : 120));
-                            const tone = Math.sin(2 * Math.PI * freq * t);
-                            const noise = (Math.random() * 2 - 1) * 0.15;
-                            d[i] = (tone * 0.85 + noise * 0.15) * env * amp;
+                            d[i] = (Math.sin(2 * Math.PI * freq * t) * 0.85 + (Math.random() * 2 - 1) * 0.15) * env * amp;
                         }
                         break;
 
@@ -361,11 +687,10 @@
                         amp = accented ? 0.9 : 0.6;
                         for (let i = 0; i < Math.floor(sr * dur); i++) {
                             const t = i / sr;
-                            // Resonant: slower decay with slight oscillation in envelope
                             const env = Math.exp(-t * 35) * (1 + 0.1 * Math.sin(2 * Math.PI * 200 * t));
                             const tone = Math.sin(2 * Math.PI * freq * t) * 0.7
-                                       + Math.sin(2 * Math.PI * freq * 2.3 * t) * 0.2  // harmonic
-                                       + Math.sin(2 * Math.PI * freq * 3.7 * t) * 0.1; // harmonic
+                                       + Math.sin(2 * Math.PI * freq * 2.3 * t) * 0.2
+                                       + Math.sin(2 * Math.PI * freq * 3.7 * t) * 0.1;
                             d[i] = tone * env * amp;
                         }
                         break;
@@ -375,33 +700,24 @@
                         amp = accented ? 0.9 : 0.55;
                         for (let i = 0; i < Math.floor(sr * dur); i++) {
                             const t = i / sr;
-                            // Noise-dominant with multi-stage envelope (clap + room)
-                            const env1 = Math.exp(-t * 200);           // initial sharp crack
-                            const env2 = Math.exp(-t * 40) * 0.3;     // body
-                            const env3 = Math.exp(-t * 15) * 0.15;    // room tail
-                            const env = env1 + env2 + env3;
-                            const noise = (Math.random() * 2 - 1);
-                            const tone = Math.sin(2 * Math.PI * 400 * t) * 0.1; // slight tone
-                            d[i] = (noise * 0.9 + tone) * env * amp;
+                            const env = Math.exp(-t * 200) + Math.exp(-t * 40) * 0.3 + Math.exp(-t * 15) * 0.15;
+                            d[i] = ((Math.random() * 2 - 1) * 0.9 + Math.sin(2 * Math.PI * 400 * t) * 0.1) * env * amp;
                         }
                         break;
                 }
-
                 return buf;
             }
 
-            /** Play a buffer through a temporary GainNode for volume control */
             _playClick(buffer, time, volumeMult) {
                 const src = this.audioCtx.createBufferSource();
                 const gain = this.audioCtx.createGain();
                 src.buffer = buffer;
-                gain.gain.value = volumeMult;
+                gain.gain.value = this.muted ? 0 : volumeMult;
                 src.connect(gain);
                 gain.connect(this.audioCtx.destination);
                 src.start(time);
             }
 
-            /** Advance to next sub-beat */
             _nextNote() {
                 const secondsPerBeat = 60.0 / this.tempo;
                 const secondsPerSub = secondsPerBeat / this.subdivision;
@@ -410,36 +726,38 @@
                 if (this.subIndex >= this.subdivision) {
                     this.subIndex = 0;
                     this.currentBeat = (this.currentBeat + 1) % this.beatsPerBar;
+                    // Fire bar callback when returning to beat 0
+                    if (this.currentBeat === 0 && this.onBarCallback) {
+                        this._barCount++;
+                        // Schedule bar callback slightly after the beat
+                        const barTime = this.nextNoteTime;
+                        const barDelay = Math.max(0, (barTime - this.audioCtx.currentTime) * 1000);
+                        setTimeout(() => this.onBarCallback(this._barCount), barDelay);
+                    }
                 }
             }
 
-            /** Get the right buffer for current note */
             _getBuffer() {
-                const bufs = this.buffers[this.soundType];
-                if (!bufs) return this.buffers['classic'].normal;
-
+                const bufs = this.buffers[this.soundType] || this.buffers['classic'];
                 if (this.subIndex === 0) {
-                    // Main beat
                     return this.currentBeat === 0 ? bufs.accent : bufs.normal;
-                } else {
-                    // Subdivision
-                    return bufs.sub;
                 }
+                return bufs.sub;
+            }
+
+            _getVolume(isAccent, isSub) {
+                if (isSub) return this.volSub / 100;
+                return isAccent ? this.volAccent / 100 : this.volNormal / 100;
             }
 
             _scheduleNote(time, beatNumber, subIndex) {
                 const isAccent = beatNumber === 0 && subIndex === 0;
                 const isSub = subIndex > 0;
-                const vol = this._getVolume(isAccent, isSub);
-                const buf = this._getBuffer();
-                this._playClick(buf, time, vol);
+                this._playClick(this._getBuffer(), time, this._getVolume(isAccent, isSub));
 
-                // Visual callback
                 if (this.onBeatCallback) {
                     const delayMs = Math.max(0, (time - this.audioCtx.currentTime) * 1000);
-                    setTimeout(() => {
-                        this.onBeatCallback(beatNumber, subIndex, this.subdivision);
-                    }, delayMs);
+                    setTimeout(() => this.onBeatCallback(beatNumber, subIndex, this.subdivision), delayMs);
                 }
             }
 
@@ -454,10 +772,10 @@
                 if (!this.audioCtx) this.initAudio();
                 if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
                 if (this.isPlaying) return;
-
                 this.isPlaying = true;
                 this.currentBeat = 0;
                 this.subIndex = 0;
+                this._barCount = 0;
                 this.nextNoteTime = this.audioCtx.currentTime + 0.05;
                 this._scheduler();
                 this.timerID = setInterval(() => this._scheduler(), this.lookAhead);
@@ -473,45 +791,255 @@
                 return this.isPlaying;
             }
 
-            setTempo(bpm) {
-                this.tempo = Math.max(20, Math.min(300, bpm));
-                return this.tempo;
-            }
-
-            setBeatsPerBar(beats) {
-                this.beatsPerBar = Math.max(1, Math.min(12, beats));
-                if (this.currentBeat >= this.beatsPerBar) this.currentBeat = 0;
-                return this.beatsPerBar;
-            }
-
-            setSubdivision(sub) {
-                this.subdivision = Math.max(1, Math.min(4, Math.round(sub)));
-                // Reset sub-index so we don't skip
-                this.subIndex = 0;
-                return this.subdivision;
-            }
-
-            setSoundType(type) {
-                if (!['classic', 'wood', 'clap'].includes(type)) return;
-                this.soundType = type;
-            }
-
-            setVolumes(accent, normal, sub) {
-                this.volAccent = Math.max(10, Math.min(100, accent));
-                this.volNormal = Math.max(10, Math.min(100, normal));
-                this.volSub = Math.max(10, Math.min(100, sub));
-            }
+            setTempo(bpm) { this.tempo = Math.max(20, Math.min(300, bpm)); return this.tempo; }
+            setBeatsPerBar(b) { this.beatsPerBar = Math.max(1, Math.min(12, b)); if (this.currentBeat >= this.beatsPerBar) this.currentBeat = 0; return this.beatsPerBar; }
+            setSubdivision(s) { this.subdivision = Math.max(1, Math.min(4, Math.round(s))); this.subIndex = 0; return this.subdivision; }
+            setSoundType(t) { if (['classic','wood','clap'].includes(t)) this.soundType = t; }
+            setVolumes(a, n, s) { this.volAccent = Math.max(10,Math.min(100,a)); this.volNormal = Math.max(10,Math.min(100,n)); this.volSub = Math.max(10,Math.min(100,s)); }
+            setMuted(m) { this.muted = !!m; }
 
             destroy() {
                 this.stop();
                 if (this.audioCtx && this.audioCtx.state !== 'closed') this.audioCtx.close();
-                this.audioCtx = null;
-                this.buffers = {};
+                this.audioCtx = null; this.buffers = {};
             }
         }
 
         // =============================================
-        //  UIController — DOM 交互 v2
+        //  TrainingController — 训练模式
+        // =============================================
+        class TrainingController {
+            constructor(engine, ui) {
+                this.engine = engine;
+                this.ui = ui;
+                this.mode = 'mute'; // 'mute' | 'speed'
+                this.running = false;
+
+                // Mute trainer state
+                this.mutePlayBars = 2;
+                this.muteSilenceBars = 2;
+                this.muteBarCount = 0;
+                this.muteInSilence = false;
+
+                // Speed trainer state
+                this.speedStartBpm = 60;
+                this.speedEndBpm = 160;
+                this.speedStepBars = 2;
+                this.speedStepBpm = 5;
+                this.speedBarCount = 0;
+                this.speedCurrentBpm = 60;
+
+                // DOM
+                this.$panel = document.getElementById('trainPanel');
+                this.$toggle = document.getElementById('trainToggle');
+                this.$tabs = document.getElementById('trainTabs').querySelectorAll('.btn-train');
+                this.$mutePanel = document.getElementById('trainMutePanel');
+                this.$speedPanel = document.getElementById('trainSpeedPanel');
+                this.$mutePlayBars = document.getElementById('mutePlayBars');
+                this.$muteSilenceBars = document.getElementById('muteSilenceBars');
+                this.$muteStartBtn = document.getElementById('muteStartBtn');
+                this.$muteStatus = document.getElementById('muteStatus');
+                this.$speedStartBpm = document.getElementById('speedStartBpm');
+                this.$speedEndBpm = document.getElementById('speedEndBpm');
+                this.$speedStepBars = document.getElementById('speedStepBars');
+                this.$speedStepBpm = document.getElementById('speedStepBpm');
+                this.$speedStartBtn = document.getElementById('speedStartBtn');
+                this.$speedStatus = document.getElementById('speedStatus');
+
+                this._bind();
+            }
+
+            _bind() {
+                // Toggle panel
+                this.$toggle.addEventListener('click', () => {
+                    const isOpen = this.$panel.classList.toggle('open');
+                    const lang = currentLang;
+                    this.$toggle.textContent = isOpen
+                        ? {'zh-CN':'🎯 训练模式 ▴','en':'🎯 Training ▴','ja':'🎯 トレーニング ▴','es':'🎯 Entrenamiento ▴','pt':'🎯 Treino ▴'}[lang]
+                        : {'zh-CN':'🎯 训练模式 ▾','en':'🎯 Training ▾','ja':'🎯 トレーニング ▾','es':'🎯 Entrenamiento ▾','pt':'🎯 Treino ▾'}[lang];
+                });
+
+                // Mode tabs
+                this.$tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.mode = tab.dataset.train;
+                        this.$tabs.forEach(t => t.classList.toggle('active', t === tab));
+                        this.$mutePanel.classList.toggle('hidden', this.mode !== 'mute');
+                        this.$speedPanel.classList.toggle('hidden', this.mode !== 'speed');
+                    });
+                });
+
+                // Mute trainer start
+                this.$muteStartBtn.addEventListener('click', () => this._toggleMuteTrainer());
+
+                // Speed trainer start
+                this.$speedStartBtn.addEventListener('click', () => this._toggleSpeedTrainer());
+
+                // Engine bar callback
+                this.engine.onBarCallback = (barCount) => {
+                    if (this.running) {
+                        if (this.mode === 'mute') this._onMuteBar();
+                        if (this.mode === 'speed') this._onSpeedBar();
+                    }
+                };
+            }
+
+            /** Update training button label */
+            _setTrainBtnText(btn, isRunning) {
+                const stopText = {'zh-CN':'停止训练','en':'Stop','ja':'停止','es':'Detener','pt':'Parar'}[currentLang] || 'Stop';
+                const startText = I18N[currentLang]?.['train-start'] || 'Start Training';
+                btn.textContent = isRunning ? stopText : startText;
+                btn.classList.toggle('active', isRunning);
+            }
+
+            // ======== Mute Trainer ========
+            _toggleMuteTrainer() {
+                if (this.running && this.mode === 'mute') {
+                    this._stopMuteTrainer();
+                    return;
+                }
+                this.mode = 'mute';
+                this._startMuteTrainer();
+            }
+
+            _startMuteTrainer() {
+                this.mutePlayBars = Math.max(1, Math.min(8, parseInt(this.$mutePlayBars.value) || 2));
+                this.muteSilenceBars = Math.max(1, Math.min(8, parseInt(this.$muteSilenceBars.value) || 2));
+                this.muteBarCount = 0;
+                this.muteInSilence = false;
+                this.running = true;
+
+                // Ensure engine is playing
+                if (!this.engine.isPlaying) {
+                    this.engine.initAudio();
+                    this.engine.start();
+                    this.ui.setPlayingState(true);
+                }
+
+                this.engine.setMuted(false);
+                this.$muteStatus.classList.remove('hidden');
+                this.$muteStatus.textContent = this._muteStatusText('play', 1);
+                this._setTrainBtnText(this.$muteStartBtn, true);
+                this.ui.$playBtn.classList.add('training');
+            }
+
+            _stopMuteTrainer() {
+                this.running = false;
+                this.engine.setMuted(false);
+                this.$muteStatus.classList.add('hidden');
+                this._setTrainBtnText(this.$muteStartBtn, false);
+                this.ui.$playBtn.classList.remove('training');
+                // Don't stop engine — user might still want to play
+            }
+
+            _onMuteBar() {
+                this.muteBarCount++;
+                const cycleLen = this.mutePlayBars + this.muteSilenceBars;
+                const pos = (this.muteBarCount - 1) % cycleLen;
+
+                if (pos < this.mutePlayBars) {
+                    // Play phase
+                    this.engine.setMuted(false);
+                    this.muteInSilence = false;
+                    this.$muteStatus.textContent = this._muteStatusText('play', pos + 1);
+                } else {
+                    // Silence phase
+                    this.engine.setMuted(true);
+                    this.muteInSilence = true;
+                    this.$muteStatus.textContent = this._muteStatusText('silence', pos - this.mutePlayBars + 1);
+                }
+            }
+
+            _muteStatusText(phase, bar) {
+                const playWords = {'zh-CN':['🔊','播放中'],'en':['🔊','Playing'],'ja':['🔊','再生中'],'es':['🔊','Sonando'],'pt':['🔊','Tocando']};
+                const muteWords = {'zh-CN':['🔇','静音中'],'en':['🔇','Muted'],'ja':['🔇','消音中'],'es':['🔇','Silencio'],'pt':['🔇','Silêncio']};
+                const barWord = {'zh-CN':'小节','en':'bar','ja':'小節','es':'comp.','pt':'comp.'};
+                const dict = phase === 'play' ? playWords : muteWords;
+                const words = dict[currentLang] || dict['en'];
+                return `${words[0]} ${words[1]} · ${bar}/${phase === 'play' ? this.mutePlayBars : this.muteSilenceBars} ${barWord[currentLang] || 'bar'}`;
+            }
+
+            // ======== Speed Trainer ========
+            _toggleSpeedTrainer() {
+                if (this.running && this.mode === 'speed') {
+                    this._stopSpeedTrainer();
+                    return;
+                }
+                this.mode = 'speed';
+                this._startSpeedTrainer();
+            }
+
+            _startSpeedTrainer() {
+                this.speedStartBpm = Math.max(20, Math.min(280, parseInt(this.$speedStartBpm.value) || 60));
+                this.speedEndBpm = Math.max(30, Math.min(300, parseInt(this.$speedEndBpm.value) || 160));
+                this.speedStepBars = Math.max(1, Math.min(8, parseInt(this.$speedStepBars.value) || 2));
+                this.speedStepBpm = Math.max(1, Math.min(20, parseInt(this.$speedStepBpm.value) || 5));
+                this.speedBarCount = 0;
+                this.speedCurrentBpm = this.speedStartBpm;
+                this.running = true;
+
+                // Set start BPM
+                this.ui.setBpm(this.speedStartBpm);
+
+                if (!this.engine.isPlaying) {
+                    this.engine.initAudio();
+                    this.engine.start();
+                    this.ui.setPlayingState(true);
+                }
+
+                this.$speedStatus.classList.remove('hidden');
+                this.$speedStatus.textContent = this._speedStatusText();
+                this._setTrainBtnText(this.$speedStartBtn, true);
+                this.ui.$playBtn.classList.add('training');
+            }
+
+            _stopSpeedTrainer() {
+                this.running = false;
+                this.$speedStatus.classList.add('hidden');
+                this._setTrainBtnText(this.$speedStartBtn, false);
+                this.ui.$playBtn.classList.remove('training');
+            }
+
+            _onSpeedBar() {
+                this.speedBarCount++;
+                if (this.speedBarCount >= this.speedStepBars) {
+                    this.speedBarCount = 0;
+                    this.speedCurrentBpm += this.speedStepBpm;
+
+                    if (this.speedCurrentBpm >= this.speedEndBpm) {
+                        this.speedCurrentBpm = this.speedEndBpm;
+                        this.ui.setBpm(this.speedEndBpm);
+                        this._stopSpeedTrainer();
+                        return;
+                    }
+
+                    this.ui.setBpm(this.speedCurrentBpm);
+                    this.$speedStatus.textContent = this._speedStatusText();
+                }
+            }
+
+            _speedStatusText() {
+                const currentWord = {'zh-CN':'当前','en':'Now','ja':'現在','es':'Ahora','pt':'Agora'}[currentLang] || 'Now';
+                const targetWord = {'zh-CN':'目标','en':'Target','ja':'目標','es':'Meta','pt':'Meta'}[currentLang] || 'Target';
+                return `${currentWord}: ${this.speedCurrentBpm} BPM → ${targetWord}: ${this.speedEndBpm} BPM`;
+            }
+
+            /** Cleanup when engine stops externally */
+            onEngineStop() {
+                if (this.running) {
+                    this.running = false;
+                    this.engine.setMuted(false);
+                    this.$muteStatus.classList.add('hidden');
+                    this.$speedStatus.classList.add('hidden');
+                    this._setTrainBtnText(this.$muteStartBtn, false);
+                    this._setTrainBtnText(this.$speedStartBtn, false);
+                    this.ui.$playBtn.classList.remove('training');
+                }
+            }
+        }
+
+        // =============================================
+        //  UIController — DOM 交互 v3
         // =============================================
         class UIController {
             constructor(engine) {
@@ -519,10 +1047,13 @@
                 this.bpm = 120;
                 this.beatsPerBar = 4;
                 this.subdivision = 1;
+                this.soundType = 'classic';
                 this.tapTimes = [];
                 this.tapTimeout = null;
+                this._saveTimeout = null;
+                this._toastTimer = null;
 
-                // DOM refs
+                // DOM
                 this.$bpmDisplay = document.getElementById('bpmDisplay');
                 this.$bpmSlider = document.getElementById('bpmSlider');
                 this.$bpmLabel = document.getElementById('bpmLabel');
@@ -544,16 +1075,19 @@
                 this.$volAccentVal = document.getElementById('volAccentVal');
                 this.$volNormalVal = document.getElementById('volNormalVal');
                 this.$volSubVal = document.getElementById('volSubVal');
+                this.$shareBtn = document.getElementById('shareBtn');
+                this.$toast = document.getElementById('toast');
+                this.$langSelect = document.getElementById('langSelect');
 
                 this.tempoLabels = [
                     [20,40,'Larghissimo'],[40,60,'Largo'],[60,66,'Adagio'],
                     [66,76,'Andante'],[76,108,'Moderato'],[108,120,'Allegro'],
                     [120,168,'Vivace'],[168,200,'Presto'],[200,300,'Prestissimo'],
                 ];
-
-                // Tempo preset BPMs for highlighting
                 this.presetBpms = new Set([30,50,63,72,92,120,144,184,220]);
 
+                this._loadSettings();
+                this.trainingCtrl = new TrainingController(engine, this);
                 this.init();
             }
 
@@ -567,6 +1101,80 @@
                 this._bindKeyboard();
             }
 
+            /** Load settings from localStorage/URL, apply to UI & engine */
+            _loadSettings() {
+                const s = SettingsManager.load();
+
+                // Language
+                const lang = s.lang || detectLang();
+                currentLang = lang;
+                applyLang(lang);
+                if (!s.lang) {
+                    // Save detected language
+                    try { localStorage.setItem('metronome-lang', lang); } catch(e) {}
+                }
+
+                // Apply settings
+                this.bpm = s.bpm;
+                this.beatsPerBar = s.beatsPerBar;
+                this.subdivision = s.subdivision;
+                this.soundType = s.soundType;
+
+                // Engine
+                this.engine.setTempo(s.bpm);
+                this.engine.setBeatsPerBar(s.beatsPerBar);
+                this.engine.setSubdivision(s.subdivision);
+                this.engine.setSoundType(s.soundType);
+                this.engine.setVolumes(s.volAccent, s.volNormal, s.volSub);
+
+                // UI — update after DOM is ready
+                const self = this;
+                requestAnimationFrame(() => {
+                    self.$bpmDisplay.textContent = s.bpm;
+                    self.$bpmSlider.value = s.bpm;
+                    self.$beatCountInput.value = s.beatsPerBar;
+                    self.$volAccent.value = s.volAccent;
+                    self.$volNormal.value = s.volNormal;
+                    self.$volSub.value = s.volSub;
+                    self.$volAccentVal.textContent = s.volAccent;
+                    self.$volNormalVal.textContent = s.volNormal;
+                    self.$volSubVal.textContent = s.volSub;
+
+                    // Highlight correct buttons
+                    self.$subBtns.forEach(b => b.classList.toggle('active', parseInt(b.dataset.sub) === s.subdivision));
+                    self.$soundBtns.forEach(b => b.classList.toggle('active', b.dataset.sound === s.soundType));
+                    self.$presetBtns.forEach(b => b.classList.toggle('active', parseInt(b.dataset.beats) === s.beatsPerBar));
+                    self._updateTempoPresetHighlight();
+                    self._updateSubBeatIndicators();
+                    self._updateBeatIndicators();
+                });
+            }
+
+            /** Save current settings to localStorage, debounced */
+            _scheduleSave() {
+                clearTimeout(this._saveTimeout);
+                this._saveTimeout = setTimeout(() => {
+                    SettingsManager.save({
+                        bpm: this.bpm,
+                        beatsPerBar: this.beatsPerBar,
+                        subdivision: this.subdivision,
+                        soundType: this.soundType,
+                        volAccent: parseInt(this.$volAccent.value),
+                        volNormal: parseInt(this.$volNormal.value),
+                        volSub: parseInt(this.$volSub.value),
+                        lang: currentLang,
+                    });
+                }, 500);
+            }
+
+            /** Show toast notification */
+            _toast(msg) {
+                this.$toast.textContent = msg;
+                this.$toast.classList.add('show');
+                clearTimeout(this._toastTimer);
+                this._toastTimer = setTimeout(() => this.$toast.classList.remove('show'), 2000);
+            }
+
             // ======== BPM ========
             setBpm(val) {
                 const newBpm = Math.max(20, Math.min(300, Math.round(val)));
@@ -578,10 +1186,10 @@
                 this._updateBpmLabel();
                 this._updateSliderFill();
                 this._updateTempoPresetHighlight();
-                // Pop animation
                 this.$bpmDisplay.classList.remove('bpm-pop');
                 void this.$bpmDisplay.offsetWidth;
                 this.$bpmDisplay.classList.add('bpm-pop');
+                this._scheduleSave();
             }
 
             _updateBpmLabel() {
@@ -599,8 +1207,7 @@
 
             _updateTempoPresetHighlight() {
                 this.$tempoPresetBtns.forEach(btn => {
-                    const presetBpm = parseInt(btn.dataset.bpm);
-                    btn.classList.toggle('active', presetBpm === this.bpm);
+                    btn.classList.toggle('active', parseInt(btn.dataset.bpm) === this.bpm);
                 });
             }
 
@@ -616,6 +1223,7 @@
                 this.$presetBtns.forEach(btn => {
                     btn.classList.toggle('active', parseInt(btn.dataset.beats) === beats);
                 });
+                this._scheduleSave();
             }
 
             // ======== Subdivision ========
@@ -628,14 +1236,17 @@
                 this.$subBtns.forEach(btn => {
                     btn.classList.toggle('active', parseInt(btn.dataset.sub) === val);
                 });
+                this._scheduleSave();
             }
 
             // ======== Sound ========
             setSound(type) {
+                this.soundType = type;
                 this.engine.setSoundType(type);
                 this.$soundBtns.forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.sound === type);
                 });
+                this._scheduleSave();
             }
 
             // ======== Volume ========
@@ -647,6 +1258,7 @@
                 this.$volAccentVal.textContent = a;
                 this.$volNormalVal.textContent = n;
                 this.$volSubVal.textContent = s;
+                this._scheduleSave();
             }
 
             // ======== Beat Indicators ========
@@ -667,8 +1279,7 @@
                     return;
                 }
                 this.$subBeatIndicators.classList.remove('hidden');
-                // Show sub-beat dots for each beat
-                const subsPerBeat = this.subdivision - 1; // exclude main beat
+                const subsPerBeat = this.subdivision - 1;
                 for (let b = 0; b < this.beatsPerBar; b++) {
                     const group = document.createElement('div');
                     group.className = 'flex items-center gap-1';
@@ -680,7 +1291,6 @@
                         group.appendChild(dot);
                     }
                     this.$subBeatIndicators.appendChild(group);
-                    // Add spacer between beat groups (except last)
                     if (b < this.beatsPerBar - 1) {
                         const spacer = document.createElement('div');
                         spacer.style.width = '6px';
@@ -690,7 +1300,6 @@
             }
 
             highlightBeat(beatNumber, subIndex, subdivision) {
-                // Main beat dots
                 const dots = this.$beatIndicators.querySelectorAll('.beat-dot');
                 dots.forEach((dot, i) => {
                     if (i === beatNumber && subIndex === 0) {
@@ -701,13 +1310,10 @@
                     }
                 });
 
-                // Sub-beat dots
                 if (subdivision > 1) {
                     const subDots = this.$subBeatIndicators.querySelectorAll('.sub-beat-dot');
                     subDots.forEach(dot => {
-                        const db = parseInt(dot.dataset.beat);
-                        const ds = parseInt(dot.dataset.sub);
-                        if (db === beatNumber && ds === subIndex) {
+                        if (parseInt(dot.dataset.beat) === beatNumber && parseInt(dot.dataset.sub) === subIndex) {
                             dot.classList.add('active');
                             setTimeout(() => dot.classList.remove('active'), 100);
                         }
@@ -729,6 +1335,8 @@
                     if (this.$subBeatIndicators) {
                         this.$subBeatIndicators.querySelectorAll('.sub-beat-dot').forEach(d => d.classList.remove('active'));
                     }
+                    // Notify training controller
+                    if (this.trainingCtrl) this.trainingCtrl.onEngineStop();
                 }
             }
 
@@ -754,53 +1362,73 @@
                 this.tapTimeout = setTimeout(() => this.$tapBtn.classList.remove('tapping'), 300);
             }
 
+            // ======== Share ========
+            _share() {
+                const settings = {
+                    bpm: this.bpm,
+                    beatsPerBar: this.beatsPerBar,
+                    subdivision: this.subdivision,
+                    soundType: this.soundType,
+                    volAccent: parseInt(this.$volAccent.value),
+                    volNormal: parseInt(this.$volNormal.value),
+                    volSub: parseInt(this.$volSub.value),
+                };
+                const url = SettingsManager.buildUrl(settings);
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(url).then(() => {
+                        this._toast({'zh-CN':'✅ 链接已复制到剪贴板','en':'✅ Link copied!','ja':'✅ リンクをコピーしました','es':'✅ Enlace copiado','pt':'✅ Link copiado'}[currentLang]);
+                    }).catch(() => {
+                        this._toast(url);
+                    });
+                } else {
+                    // Fallback
+                    const ta = document.createElement('textarea');
+                    ta.value = url; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    this._toast({'zh-CN':'✅ 链接已复制','en':'✅ Link copied!','ja':'✅ コピー完了','es':'✅ Copiado','pt':'✅ Copiado'}[currentLang]);
+                }
+            }
+
             // ======== Events ========
             _bindEvents() {
-                // Play/Pause
                 this.$playBtn.addEventListener('click', () => {
                     this.engine.initAudio();
                     const playing = this.engine.toggle();
                     this.setPlayingState(playing);
+                    if (!playing && this.trainingCtrl) this.trainingCtrl.onEngineStop();
                 });
 
-                // Tap Tempo
                 this.$tapBtn.addEventListener('click', () => {
                     this.engine.initAudio();
                     this.handleTap();
                 });
 
-                // BPM Slider
                 this.$bpmSlider.addEventListener('input', () => {
                     this.setBpm(parseInt(this.$bpmSlider.value));
                 });
 
-                // BPM Adjustment
                 document.getElementById('bpmUp1').addEventListener('click', () => this.setBpm(this.bpm + 1));
                 document.getElementById('bpmDown1').addEventListener('click', () => this.setBpm(this.bpm - 1));
                 document.getElementById('bpmUp10').addEventListener('click', () => this.setBpm(this.bpm + 10));
                 document.getElementById('bpmDown10').addEventListener('click', () => this.setBpm(this.bpm - 10));
 
-                // BPM Display → input
                 this.$bpmDisplay.addEventListener('click', () => this._showBpmInput());
                 this.$bpmDisplay.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') this._showBpmInput();
                 });
 
-                // Tempo Presets
                 this.$tempoPresetBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        this.setBpm(parseInt(btn.dataset.bpm));
-                    });
+                    btn.addEventListener('click', () => this.setBpm(parseInt(btn.dataset.bpm)));
                 });
 
-                // Subdivision
                 this.$subBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        this.setSubdivision(parseInt(btn.dataset.sub));
-                    });
+                    btn.addEventListener('click', () => this.setSubdivision(parseInt(btn.dataset.sub)));
                 });
 
-                // Sound
                 this.$soundBtns.forEach(btn => {
                     btn.addEventListener('click', () => {
                         this.engine.initAudio();
@@ -808,25 +1436,21 @@
                     });
                 });
 
-                // Volume sliders
                 this.$volAccent.addEventListener('input', () => this.setVolumes());
                 this.$volNormal.addEventListener('input', () => this.setVolumes());
                 this.$volSub.addEventListener('input', () => this.setVolumes());
 
-                // Volume panel toggle
                 this.$volToggle.addEventListener('click', () => {
                     const isOpen = this.$volPanel.classList.toggle('open');
-                    this.$volToggle.textContent = isOpen ? '🔊 音量 ▴' : '🔊 音量 ▾';
+                    this.$volToggle.textContent = isOpen
+                        ? {'zh-CN':'🔊 音量 ▴','en':'🔊 Volume ▴','ja':'🔊 音量 ▴','es':'🔊 Volumen ▴','pt':'🔊 Volume ▴'}[currentLang]
+                        : {'zh-CN':'🔊 音量 ▾','en':'🔊 Volume ▾','ja':'🔊 音量 ▾','es':'🔊 Volumen ▾','pt':'🔊 Volume ▾'}[currentLang];
                 });
 
-                // Beat Presets
                 this.$presetBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        this.setBeatsPerBar(parseInt(btn.dataset.beats));
-                    });
+                    btn.addEventListener('click', () => this.setBeatsPerBar(parseInt(btn.dataset.beats)));
                 });
 
-                // Beat Count Input
                 this.$beatCountInput.addEventListener('change', () => {
                     const val = parseInt(this.$beatCountInput.value);
                     if (!isNaN(val) && val >= 1 && val <= 12) {
@@ -834,6 +1458,15 @@
                     } else {
                         this.$beatCountInput.value = this.beatsPerBar;
                     }
+                });
+
+                this.$shareBtn.addEventListener('click', () => this._share());
+
+                // Language selector
+                this.$langSelect.addEventListener('change', () => {
+                    const lang = this.$langSelect.value;
+                    applyLang(lang);
+                    try { localStorage.setItem('metronome-lang', lang); } catch(e) {}
                 });
 
                 // Engine beat callback
@@ -867,7 +1500,7 @@
             // ======== Keyboard ========
             _bindKeyboard() {
                 document.addEventListener('keydown', (e) => {
-                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
 
                     switch (e.code) {
                         case 'Space':
@@ -875,23 +1508,21 @@
                             this.engine.initAudio();
                             const playing = this.engine.toggle();
                             this.setPlayingState(playing);
+                            if (!playing && this.trainingCtrl) this.trainingCtrl.onEngineStop();
                             break;
 
                         case 'ArrowUp':
                             e.preventDefault();
                             this.setBpm(this.bpm + (e.shiftKey ? 10 : 1));
                             break;
-
                         case 'ArrowDown':
                             e.preventDefault();
                             this.setBpm(this.bpm - (e.shiftKey ? 10 : 1));
                             break;
-
                         case 'ArrowRight':
                             e.preventDefault();
                             this.setBpm(this.bpm + (e.shiftKey ? 10 : 1));
                             break;
-
                         case 'ArrowLeft':
                             e.preventDefault();
                             this.setBpm(this.bpm - (e.shiftKey ? 10 : 1));
@@ -903,7 +1534,6 @@
                             this.handleTap();
                             break;
 
-                        // Subdivision hotkeys: 1-4
                         case 'Digit1': case 'Numpad1':
                             e.preventDefault();
                             this.setSubdivision(1);
@@ -932,10 +1562,10 @@
         const ui = new UIController(engine);
         window.__metronome = { engine, ui };
 
-        console.log('%c🎵 在线节拍器 v2 (Phase 2) 已就绪',
+        console.log('%c🎵 在线节拍器 v3 (Phase 3) 已就绪',
             'font-size:16px;');
-        console.log('%c细分拍 %c| %c3种音色 %c| %c独立音量控制 %c| %c速度预设',
-            'color:#4F8CFF;','','color:#4F8CFF;','','color:#4F8CFF;','','color:#4F8CFF;');
+        console.log('%c训练模式 %c| %c多语言(5语) %c| %c设置保存 %c| %cURL分享',
+            'color:#4ECB71;','','color:#4ECB71;','','color:#4ECB71;','','color:#4ECB71;');
 
     })();
     </script>
