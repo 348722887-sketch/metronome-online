@@ -149,6 +149,31 @@
         .nav-pill:hover{box-shadow:0 4px 16px rgba(79,140,255,.4);transform:translateY(-1px)}
         .nav-pill.active{background:#4F8CFF;box-shadow:0 2px 8px rgba(79,140,255,.3)}
 
+        .theme-btn{background:none;border:1px solid #d0ddd0;border-radius:6px;font-size:16px;cursor:pointer;padding:2px 5px;line-height:1;transition:all .2s ease;flex-shrink:0;outline:none}
+        .theme-btn:hover{background:#e8efe8;border-color:#4F8CFF}
+        body.dark,body.dark main{background:#0a0a0f!important}
+        body.dark{color:#e0e0e0}
+        body.dark main{background:#141419!important;border-color:#2a2a35!important}
+        body.dark .bpm-display{color:#fff!important}
+        body.dark .text-gray-900{color:#e0e0e0!important}
+        body.dark .text-gray-600,body.dark .text-gray-500,body.dark .text-gray-400{color:#999!important}
+        body.dark .btn-sm,body.dark .btn-preset,body.dark .btn-bpm-adj,body.dark .btn-tap-pill{background:#1a1a21!important;color:#aaa!important;border-color:#2a2a35!important}
+        body.dark .btn-sm.active,body.dark .btn-preset.active{background:rgba(79,140,255,.2)!important;border-color:#4F8CFF!important;color:#4F8CFF!important}
+        body.dark .beat-dot,body.dark .sub-beat-dot{background:#2a2a35!important}
+        body.dark .settings-row,body.dark .panel-collapse>div{border-color:#2a2a35!important}
+        body.dark .panel-collapse>div{background:#0d0d14!important}
+        body.dark .settings-row span[style]{color:#e0e0e0!important}
+        body.dark input[type=number]{background:#1a1a21!important;color:#e0e0e0!important;border-color:#2a2a35!important}
+        body.dark .panel-tab{color:#888!important}.dark .panel-tab:hover{background:#1a1a21!important}
+        body.dark .note-btn{color:#ccc!important}.dark .note-btn:hover{background:#1a1a21!important}
+        body.dark .custom-check{border-color:#444!important}
+        body.dark .timer-badge{background:#2a2a35!important;color:#e0e0e0!important}
+        body.dark .training-panel{background:#0d120d!important;border-color:#1e3a1e!important}
+        body.dark .btn-train{background:#1a2a1a!important;border-color:#1e3a1e!important}
+        body.dark .theme-btn{background:#1a1a21;border-color:#2a2a35}
+        body.dark footer{border-color:#2a2a35!important}
+        body.dark .beat-counter-btn{color:#999;border-color:#444}
+
         .ad-placeholder{border:1px dashed #d0ddd0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9a8a;font-size:12px}
 
         .btn-play-pill,.btn-tap-pill,.btn-preset,.btn-bpm-adj,.beat-dot,.btn-sm,.btn-sound,.btn-train{touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -239,6 +264,7 @@
                 <a href="./index.html" class="nav-pill active">免费在线节拍器</a>
                 <a href="./ear-training.html" class="nav-pill">视唱练耳训练</a>
             </div>
+            <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
             <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer" style="max-width:120px;">
                 <option value="en">🇬🇧 English</option>
                 <option value="fr">🇫🇷 Français</option>
@@ -2582,6 +2608,22 @@
                 if ($langSelectTop) {
                     $langSelectTop.addEventListener('change', () => setLang($langSelectTop.value));
                 }
+
+                // Theme toggle
+                const $themeBtn = document.getElementById('themeToggle');
+                const isDark = () => document.body.classList.contains('dark');
+                const setThemeIcon = () => { $themeBtn.textContent = isDark() ? '🌙' : '☀️'; };
+                setThemeIcon();
+                $themeBtn.addEventListener('click', () => {
+                    document.body.classList.toggle('dark');
+                    setThemeIcon();
+                    try { localStorage.setItem('metronome-theme', isDark() ? 'dark' : 'light'); } catch(e) {}
+                });
+                try {
+                    if (localStorage.getItem('metronome-theme') === 'dark') {
+                        document.body.classList.add('dark'); setThemeIcon();
+                    }
+                } catch(e) {}
 
                 // Beat counter +/−
                 document.getElementById('beatMinus').addEventListener('click', () => {
