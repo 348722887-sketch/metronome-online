@@ -126,6 +126,18 @@
         @keyframes bpmPop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
         .bpm-pop{animation:bpmPop .25s ease-out}
 
+        /* Settings panel */
+        .beat-counter-btn{width:28px;height:28px;border:2px solid #C2C6D0;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#C2C6D0;padding:0;transition:all .2s ease;outline:none;flex-shrink:0}
+        .beat-counter-btn:hover{border-color:#58B25D;color:#58B25D}
+        .beat-counter-btn svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+        .custom-check{width:22px;height:22px;border:2px solid #C2C6D0;border-radius:5px;display:flex;align-items:center;justify-content:center;transition:all .2s ease;flex-shrink:0}
+        .custom-check.checked{background:#58B25D;border-color:#58B25D}
+        .custom-check.checked::after{content:'';display:block;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);margin-bottom:2px}
+        .timer-badge{background:#ECEFF6;color:#2C313C;font-weight:600;font-size:14px;padding:6px 16px;border-radius:6px;transition:all .2s ease;letter-spacing:.5px;min-width:56px;text-align:center}
+        .timer-badge.disabled{background:#f5f7fa;color:#C2C6D0}
+        .timer-badge.active-timer{background:#FFE0E0;color:#e04040;animation:timerPulse 1s ease-in-out infinite}
+        @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.6}}
+
         .ad-placeholder{border:1px dashed #d0ddd0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9a8a;font-size:12px}
 
         .btn-play-pill,.btn-tap-pill,.btn-preset,.btn-bpm-adj,.beat-dot,.btn-sm,.btn-sound,.btn-train{touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -260,6 +272,40 @@
                 <span id="playIcon">▶</span>
             </button>
             <button class="btn-tap-pill" id="tapBtn" aria-label="手点测速">TAP</button>
+        </div>
+
+        <!-- ===== Settings Panel ===== -->
+        <div class="w-full max-w-sm mx-auto select-none rounded-xl overflow-hidden border border-[#d0ddd0]" style="background:#fff;">
+            <!-- 行1: 节拍数 -->
+            <div class="flex items-center justify-between px-4 h-14 border-b border-[#d0ddd0]">
+                <span class="text-base font-medium" style="color:#2C313C;">节拍</span>
+                <div class="flex items-center gap-3">
+                    <button class="beat-counter-btn" id="beatMinus" aria-label="减少节拍">
+                        <svg width="10" height="2" viewBox="0 0 10 2"><path d="M1 1h8"/></svg>
+                    </button>
+                    <span class="w-5 text-center text-base font-bold" style="color:#2C313C;" id="beatCountDisplay">4</span>
+                    <button class="beat-counter-btn" id="beatPlus" aria-label="增加节拍">
+                        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 1v8M1 5h8"/></svg>
+                    </button>
+                </div>
+            </div>
+            <!-- 行2: 重音第一拍 -->
+            <div class="flex items-center px-4 h-14 border-b border-[#d0ddd0]">
+                <label class="flex items-center cursor-pointer w-full h-full">
+                    <input type="checkbox" id="accentCheck" checked class="sr-only">
+                    <div class="custom-check" id="accentCheckMark"></div>
+                    <span class="ml-3 text-base font-medium" style="color:#2C313C;">重音第一拍</span>
+                </label>
+            </div>
+            <!-- 行3: 定时器 -->
+            <div class="flex items-center justify-between px-4 h-14">
+                <label class="flex items-center cursor-pointer h-full">
+                    <input type="checkbox" id="timerCheck" class="sr-only">
+                    <div class="custom-check" id="timerCheckMark"></div>
+                    <span class="ml-3 text-base font-medium" style="color:#2C313C;">定时器</span>
+                </label>
+                <div class="timer-badge cursor-pointer" id="timerDisplay" title="点击设置时间">1:00</div>
+            </div>
         </div>
 
         <!-- ===== Sound + Volume ===== -->
@@ -689,7 +735,14 @@
                 this.volAccent = 95;
                 this.volNormal = 65;
                 this.volSub = 40;
-                this.muted = false;        // for mute trainer
+                this.accentEnabled = true;   // accent on first beat
+                this.timerSeconds = 60;      // default 1 minute
+                this.timerEnabled = false;
+                this.timerRemaining = 60;
+                this.timerInterval = null;
+                this.onTimerTick = null;     // callback each second
+                this.onTimerEnd = null;      // callback when timer hits 0
+                this.muted = false;          // for mute trainer
                 this.buffers = {};
                 this.onBeatCallback = null; // (beatNumber, subIndex, subdivision)
                 this.onBarCallback = null;  // (barCount) — fired when beat 0, sub 0
@@ -790,7 +843,8 @@
             _getBuffer() {
                 const bufs = this.buffers[this.soundType] || this.buffers['classic'];
                 if (this.subIndex === 0) {
-                    return this.currentBeat === 0 ? bufs.accent : bufs.normal;
+                    if (this.currentBeat === 0 && this.accentEnabled) return bufs.accent;
+                    return bufs.normal;
                 }
                 return bufs.sub;
             }
@@ -847,6 +901,30 @@
             setSoundType(t) { if (['classic','wood','clap'].includes(t)) this.soundType = t; }
             setVolumes(a, n, s) { this.volAccent = Math.max(10,Math.min(100,a)); this.volNormal = Math.max(10,Math.min(100,n)); this.volSub = Math.max(10,Math.min(100,s)); }
             setMuted(m) { this.muted = !!m; }
+
+            startTimer() {
+                if (!this.timerEnabled) return;
+                this.timerRemaining = this.timerSeconds;
+                this._clearTimer();
+                this.timerInterval = setInterval(() => {
+                    this.timerRemaining--;
+                    if (this.onTimerTick) this.onTimerTick(this.timerRemaining);
+                    if (this.timerRemaining <= 0) {
+                        this._clearTimer();
+                        if (this.onTimerEnd) this.onTimerEnd();
+                    }
+                }, 1000);
+            }
+
+            pauseTimer() {
+                this._clearTimer();
+                this.timerRemaining = this.timerSeconds;
+                if (this.onTimerTick) this.onTimerTick(this.timerRemaining);
+            }
+
+            _clearTimer() {
+                if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
+            }
 
             destroy() {
                 this.stop();
@@ -1128,6 +1206,13 @@
                 this.$shareBtn = document.getElementById('shareBtn');
                 this.$toast = document.getElementById('toast');
                 this.$langSelect = document.getElementById('langSelect');
+                this.$beatCountDisplay = document.getElementById('beatCountDisplay');
+                this.$accentCheck = document.getElementById('accentCheck');
+                this.$accentCheckMark = document.getElementById('accentCheckMark');
+                this.$timerCheck = document.getElementById('timerCheck');
+                this.$timerCheckMark = document.getElementById('timerCheckMark');
+                this.$timerDisplay = document.getElementById('timerDisplay');
+                this.timerEditing = false;
 
                 this.tempoLabels = [
                     [20,40,'Larghissimo'],[40,60,'Largo'],[60,66,'Adagio'],
@@ -1147,6 +1232,9 @@
                 this._updateSliderFill();
                 this._bindEvents();
                 this._bindKeyboard();
+                // Init checkboxes
+                this.$accentCheckMark.classList.add('checked');
+                this._updateTimerDisplay();
             }
 
             /** Load settings from localStorage/URL, apply to UI & engine */
@@ -1194,6 +1282,7 @@
 
                     self._updateSubBeatIndicators();
                     self._updateBeatIndicators();
+                    if (self.$beatCountDisplay) self.$beatCountDisplay.textContent = s.beatsPerBar;
                 });
             }
 
@@ -1260,8 +1349,21 @@
 
                 this._updateBeatIndicators();
                 this._updateSubBeatIndicators();
+                if (this.$beatCountDisplay) this.$beatCountDisplay.textContent = beats;
 
                 this._scheduleSave();
+            }
+
+            _updateTimerDisplay(remaining) {
+                const secs = remaining !== undefined ? remaining : this.engine.timerSeconds;
+                const min = Math.floor(secs / 60);
+                const s = secs % 60;
+                this.$timerDisplay.textContent = min + ':' + (s < 10 ? '0' : '') + s;
+                if (this.engine.timerEnabled && this.engine.isPlaying && secs <= 10 && secs > 0) {
+                    this.$timerDisplay.classList.add('active-timer');
+                } else {
+                    this.$timerDisplay.classList.remove('active-timer');
+                }
             }
 
             // ======== Subdivision ========
@@ -1365,6 +1467,8 @@
                     this.$playBtn.classList.add('playing');
                     this.$playIcon.textContent = '⏸';
                     this.$bpmDisplay.classList.add('playing');
+                    // Start timer if enabled
+                    if (this.engine.timerEnabled) this.engine.startTimer();
                 } else {
                     this.$playBtn.classList.remove('playing');
                     this.$playIcon.textContent = '▶';
@@ -1373,6 +1477,8 @@
                     if (this.$subBeatIndicators) {
                         this.$subBeatIndicators.querySelectorAll('.sub-beat-dot').forEach(d => d.classList.remove('active'));
                     }
+                    // Pause timer (reset to set time)
+                    if (this.engine.timerEnabled) this.engine.pauseTimer();
                     // Notify training controller
                     if (this.trainingCtrl) this.trainingCtrl.onEngineStop();
                 }
@@ -1491,6 +1597,82 @@
                     applyLang(lang);
                     try { localStorage.setItem('metronome-lang', lang); } catch(e) {}
                 });
+
+                // Beat counter +/−
+                document.getElementById('beatMinus').addEventListener('click', () => {
+                    if (this.beatsPerBar > 1) this.setBeatsPerBar(this.beatsPerBar - 1);
+                });
+                document.getElementById('beatPlus').addEventListener('click', () => {
+                    if (this.beatsPerBar < 12) this.setBeatsPerBar(this.beatsPerBar + 1);
+                });
+
+                // Accent checkbox
+                this.$accentCheck.addEventListener('change', () => {
+                    const checked = this.$accentCheck.checked;
+                    this.engine.accentEnabled = checked;
+                    this.$accentCheckMark.classList.toggle('checked', checked);
+                });
+
+                // Timer checkbox
+                this.$timerCheck.addEventListener('change', () => {
+                    const checked = this.$timerCheck.checked;
+                    this.engine.timerEnabled = checked;
+                    this.$timerCheckMark.classList.toggle('checked', checked);
+                    this.$timerDisplay.classList.toggle('disabled', !checked);
+                    if (checked) {
+                        this.engine.timerRemaining = this.engine.timerSeconds;
+                        this._updateTimerDisplay();
+                    }
+                });
+
+                // Timer display click → edit
+                this.$timerDisplay.addEventListener('click', () => {
+                    if (this.timerEditing) return;
+                    this.timerEditing = true;
+                    const current = this.engine.timerSeconds;
+                    const min = Math.floor(current / 60);
+                    const sec = current % 60;
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = min + ':' + (sec < 10 ? '0' : '') + sec;
+                    input.style.cssText = 'width:56px;text-align:center;font-weight:600;font-size:14px;border:2px solid #58B25D;border-radius:6px;padding:4px 6px;outline:none;background:#fff;color:#2C313C;';
+                    this.$timerDisplay.replaceWith(input);
+                    input.focus();
+                    input.select();
+                    const commit = () => {
+                        const parts = input.value.split(':');
+                        let mins = parseInt(parts[0]) || 0;
+                        let secs = parts.length > 1 ? (parseInt(parts[1]) || 0) : 0;
+                        if (mins < 0) mins = 0;
+                        if (mins > 99) mins = 99;
+                        if (secs < 0) secs = 0;
+                        if (secs > 59) secs = 59;
+                        const total = mins * 60 + secs;
+                        this.engine.timerSeconds = Math.max(1, total);
+                        this.engine.timerRemaining = this.engine.timerSeconds;
+                        input.replaceWith(this.$timerDisplay);
+                        this._updateTimerDisplay();
+                        this.timerEditing = false;
+                    };
+                    input.addEventListener('blur', commit);
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') input.blur();
+                        if (e.key === 'Escape') { input.replaceWith(this.$timerDisplay); this.timerEditing = false; }
+                    });
+                });
+
+                // Timer tick callback
+                this.engine.onTimerTick = (remaining) => {
+                    this._updateTimerDisplay(remaining);
+                };
+
+                // Timer end callback
+                this.engine.onTimerEnd = () => {
+                    this.engine.stop();
+                    this.setPlayingState(false);
+                    this.engine.timerRemaining = this.engine.timerSeconds;
+                    this._updateTimerDisplay();
+                };
 
                 // Engine beat callback
                 this.engine.onBeatCallback = (beatNumber, subIndex, subdivision) => {
