@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线节拍器 — 免费精准在线节拍器 | Online Metronome</title>
+    <meta name="description" content="免费在线节拍器，专业级精准节拍器。支持Tap Tempo手点测速、多拍号切换、键盘快捷键。深色主题，手机电脑都能用，无需下载，打开即用。">
+    <meta name="keywords" content="在线节拍器,节拍器,metronome,online metronome,免费节拍器,free metronome,节拍器在线,节奏器">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://metronome-online.vercel.app/">
+    <meta property="og:title" content="在线节拍器 — 免费精准在线节拍器">
+    <meta property="og:description" content="专业级在线节拍器，支持Tap Tempo、多拍号、键盘快捷键。深色主题，打开即用。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://metronome-online.vercel.app/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="节拍器">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><text y='.8em' font-size='80' text-anchor='middle' x='50'>🎵</text></svg>">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        surface: '#141419',
+                        'surface-light': '#1a1a21',
+                        accent: '#4F8CFF',
+                        'accent-strong': '#6BA0FF',
+                        'accent-dim': '#3A6FCC',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ===== Base ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* ===== BPM Range Slider ===== */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, #4F8CFF 0%, #4F8CFF var(--fill-percent, 40%), #2a2a35 var(--fill-percent, 40%), #2a2a35 100%);
+            outline: none;
+            cursor: pointer;
+            transition: background 0.05s linear;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid #4F8CFF;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(79, 140, 255, 0.4), 0 2px 8px rgba(0,0,0,0.3);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(79, 140, 255, 0.6), 0 2px 12px rgba(0,0,0,0.4);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.15);
+            cursor: grabbing;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid #4F8CFF;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(79, 140, 255, 0.4);
+        }
+
+        /* ===== BPM Display Glow ===== */
+        .bpm-display {
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+            text-shadow: 0 0 60px rgba(79, 140, 255, 0.3);
+            transition: text-shadow 0.6s ease;
+        }
+
+        .bpm-display.playing {
+            text-shadow: 0 0 80px rgba(79, 140, 255, 0.5), 0 0 20px rgba(79, 140, 255, 0.3);
+        }
+
+        /* ===== Beat Indicators ===== */
+        .beat-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #2a2a35;
+            transition: all 0.12s ease;
+            position: relative;
+        }
+
+        .beat-dot.active {
+            background: #4F8CFF;
+            box-shadow: 0 0 16px rgba(79, 140, 255, 0.7), 0 0 4px rgba(79, 140, 255, 0.5);
+            transform: scale(1.35);
+        }
+
+        .beat-dot.accent {
+            width: 22px;
+            height: 22px;
+        }
+
+        .beat-dot.accent.active {
+            background: #ffffff;
+            box-shadow: 0 0 22px rgba(255, 255, 255, 0.8), 0 0 8px rgba(79, 140, 255, 0.6);
+            transform: scale(1.45);
+        }
+
+        /* ===== Play Button ===== */
+        .btn-play {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4F8CFF 0%, #6B5CFF 100%);
+            color: white;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 24px rgba(79, 140, 255, 0.35);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-play::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-play:hover {
+            transform: scale(1.06);
+            box-shadow: 0 6px 32px rgba(79, 140, 255, 0.5);
+        }
+        .btn-play:hover::after { opacity: 1; }
+        .btn-play:active { transform: scale(0.96); }
+        .btn-play.playing {
+            background: linear-gradient(135deg, #FF5C5C 0%, #FF3B3B 100%);
+            box-shadow: 0 4px 24px rgba(255, 92, 92, 0.35);
+        }
+        .btn-play.playing:hover {
+            box-shadow: 0 6px 32px rgba(255, 92, 92, 0.5);
+        }
+
+        /* ===== Tap Button ===== */
+        .btn-tap {
+            padding: 12px 28px;
+            border-radius: 30px;
+            background: #1a1a21;
+            color: #aaa;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            border: 2px solid #2a2a35;
+            transition: all 0.2s ease;
+        }
+
+        .btn-tap:hover {
+            border-color: #4F8CFF;
+            color: #fff;
+            background: #1e1e28;
+        }
+        .btn-tap:active {
+            transform: scale(0.96);
+            background: #4F8CFF;
+            border-color: #4F8CFF;
+            color: #fff;
+        }
+        .btn-tap.tapping {
+            background: #4F8CFF;
+            border-color: #4F8CFF;
+            color: #fff;
+            animation: tapPulse 0.3s ease;
+        }
+
+        @keyframes tapPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        /* ===== Beat Preset Buttons ===== */
+        .btn-preset {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background: #1a1a21;
+            color: #888;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .btn-preset:hover {
+            border-color: #333;
+            color: #ccc;
+        }
+        .btn-preset.active {
+            background: rgba(79, 140, 255, 0.15);
+            border-color: #4F8CFF;
+            color: #4F8CFF;
+        }
+
+        /* ===== BPM Adjustment Buttons ===== */
+        .btn-bpm-adj {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #1a1a21;
+            color: #aaa;
+            font-size: 22px;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #2a2a35;
+            transition: all 0.15s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .btn-bpm-adj:hover {
+            border-color: #4F8CFF;
+            color: #fff;
+        }
+        .btn-bpm-adj:active {
+            transform: scale(0.9);
+            background: #4F8CFF;
+            border-color: #4F8CFF;
+        }
+
+        /* ===== Animation: BPM number change ===== */
+        @keyframes bpmPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+            100% { transform: scale(1); }
+        }
+        .bpm-pop { animation: bpmPop 0.25s ease-out; }
+
+        /* ===== Scrollbar ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0f; }
+        ::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 3px; }
+
+        /* ===== Ad placeholder ===== */
+        .ad-placeholder {
+            border: 1px dashed #2a2a35;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-size: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        /* ===== Touch & Mobile Optimizations ===== */
+        .btn-play, .btn-tap, .btn-preset, .btn-bpm-adj, .beat-dot {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        input[type="range"] {
+            touch-action: pan-x;
+        }
+
+        /* Prevent iOS zoom on double-tap for the whole controls area */
+        main {
+            touch-action: manipulation;
+        }
+
+        /* ===== Mobile tweaks ===== */
+        @media (max-width: 480px) {
+            .btn-play { width: 68px; height: 68px; font-size: 28px; }
+            .beat-dot { width: 14px; height: 14px; }
+            .beat-dot.accent { width: 18px; height: 18px; }
+            input[type="range"]::-webkit-slider-thumb { width: 32px; height: 32px; }
+            input[type="range"]::-moz-range-thumb { width: 32px; height: 32px; }
+            .btn-preset { padding: 6px 14px; font-size: 13px; }
+            .btn-bpm-adj { width: 38px; height: 38px; font-size: 18px; }
+        }
+
+        /* Landscape phone: limit height usage */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .bpm-display { font-size: 3rem !important; }
+            .btn-play { width: 54px; height: 54px; font-size: 24px; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between py-6 px-4" style="background: #0a0a0f;">
+
+    <!-- ===== Top Ad Slot ===== -->
+    <div class="w-full max-w-4xl mx-auto mb-4">
+        <div class="ad-placeholder h-[90px] w-full" id="ad-top" title="Google AdSense — 顶部横幅广告">
+            🎵 广告位 — 728×90 (Google AdSense)
+        </div>
+    </div>
+
+    <!-- ===== Main Content ===== -->
+    <main class="flex-1 flex flex-col items-center justify-center w-full max-w-lg mx-auto gap-6">
+
+        <!-- BPM Display -->
+        <div class="text-center select-none">
+            <div class="bpm-display text-8xl sm:text-9xl font-extrabold text-white tracking-tight cursor-pointer"
+                 id="bpmDisplay"
+                 title="点击输入 BPM"
+                 role="button"
+                 tabindex="0"
+                 aria-label="当前速度 120 BPM，点击可输入数值">
+                120
+            </div>
+            <div class="text-gray-500 text-xs tracking-[0.2em] uppercase mt-1">bpm</div>
+        </div>
+
+        <!-- BPM Slider -->
+        <div class="w-full px-2" id="sliderContainer">
+            <input type="range"
+                   id="bpmSlider"
+                   min="20"
+                   max="300"
+                   value="120"
+                   step="1"
+                   aria-label="BPM 滑块调节"
+                   title="拖动调节 BPM (20-300)">
+        </div>
+
+        <!-- BPM Fine-tune Buttons -->
+        <div class="flex items-center gap-3 select-none">
+            <button class="btn-bpm-adj" id="bpmDown10" title="-10 BPM (Shift+←)" aria-label="减10 BPM">«</button>
+            <button class="btn-bpm-adj" id="bpmDown1" title="-1 BPM (←)" aria-label="减1 BPM">−</button>
+            <span class="text-gray-600 text-xs mx-1 w-16 text-center" id="bpmLabel">Largo</span>
+            <button class="btn-bpm-adj" id="bpmUp1" title="+1 BPM (→)" aria-label="加1 BPM">+</button>
+            <button class="btn-bpm-adj" id="bpmUp10" title="+10 BPM (Shift+→)" aria-label="加10 BPM">»</button>
+        </div>
+
+        <!-- Beat Indicators -->
+        <div class="flex items-center justify-center gap-2 sm:gap-2.5 select-none" id="beatIndicators" aria-label="节拍指示灯">
+            <!-- Generated by JS -->
+        </div>
+
+        <!-- Beat Presets -->
+        <div class="flex flex-wrap items-center justify-center gap-2 select-none">
+            <button class="btn-preset active" data-beats="4" aria-label="4/4 拍">4/4</button>
+            <button class="btn-preset" data-beats="3" aria-label="3/4 拍">3/4</button>
+            <button class="btn-preset" data-beats="2" aria-label="2/4 拍">2/4</button>
+            <button class="btn-preset" data-beats="6" aria-label="6/8 拍">6/8</button>
+            <button class="btn-preset" data-beats="5" aria-label="5/4 拍">5/4</button>
+            <button class="btn-preset" data-beats="7" aria-label="7/8 拍">7/8</button>
+        </div>
+
+        <!-- Beat Count Custom Input -->
+        <div class="flex items-center gap-2 text-gray-500 text-xs select-none">
+            <span>每小节</span>
+            <input type="number"
+                   id="beatCountInput"
+                   value="4"
+                   min="1"
+                   max="12"
+                   class="w-12 text-center bg-[#1a1a21] border border-[#2a2a35] rounded-md text-white text-sm py-1 px-2 focus:outline-none focus:border-accent transition-colors"
+                   aria-label="每小节拍数">
+            <span>拍</span>
+        </div>
+
+        <!-- Main Controls -->
+        <div class="flex items-center gap-5 select-none">
+            <button class="btn-play" id="playBtn" aria-label="播放/暂停" title="播放 (空格键)">
+                <span id="playIcon">▶</span>
+            </button>
+            <button class="btn-tap" id="tapBtn" aria-label="手点测速" title="手点测速 (T键)">
+                TAP
+            </button>
+        </div>
+
+        <!-- Keyboard Shortcuts Hint -->
+        <div class="text-gray-600 text-xs text-center select-none leading-relaxed">
+            空格键 开始/停止 · ← → 微调BPM · Shift+←→ 快速调节 · T 手点测速
+        </div>
+
+    </main>
+
+    <!-- ===== Footer ===== -->
+    <footer class="w-full max-w-4xl mx-auto mt-6 pt-4 border-t border-[#1a1a21] flex flex-col sm:flex-row items-center justify-between gap-2 text-gray-600 text-xs">
+        <span>© 2026 在线节拍器 — 免费在线节拍器工具</span>
+        <div class="flex gap-4">
+            <a href="./privacy.html" class="hover:text-gray-400 transition-colors">隐私政策</a>
+            <a href="./about.html" class="hover:text-gray-400 transition-colors">关于</a>
+            <span class="text-gray-700">🌐 中文</span>
+        </div>
+    </footer>
+
+    <!-- ===== Side Ad Slot (desktop) ===== -->
+    <div class="fixed right-4 top-1/2 -translate-y-1/2 hidden xl:block" style="width:300px;">
+        <div class="ad-placeholder h-[250px] w-[300px]" id="ad-side" title="Google AdSense — 侧边栏广告">
+            🎵 广告位<br>300×250
+        </div>
+    </div>
+
+    <!-- ===== Scripts ===== -->
+    <script>
+    (function() {
+        'use strict';
+
+        // =============================================
+        //  MetronomeEngine — Web Audio API 音频引擎
+        // =============================================
+        class MetronomeEngine {
+            constructor() {
+                this.audioCtx = null;
+                this.nextNoteTime = 0;
+                this.currentBeat = 0;
+                this.tempo = 120;
+                this.beatsPerBar = 4;
+                this.isPlaying = false;
+                this.timerID = null;
+                this.lookAhead = 25;       // ms, scheduler check interval
+                this.scheduleAhead = 0.1;   // seconds, look-ahead window
+                this.accentBuffer = null;
+                this.normalBuffer = null;
+                this.subBuffer = null;
+                this.onBeatCallback = null;  // called on each beat for visual sync
+            }
+
+            /**
+             * Initialize AudioContext and generate click sound buffers.
+             * Must be called from a user gesture (click/keypress).
+             */
+            initAudio() {
+                if (this.audioCtx) return;
+
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                this.audioCtx = new AudioCtx();
+                this.accentBuffer = this._createClickBuffer(true);
+                this.normalBuffer = this._createClickBuffer(false);
+                this.subBuffer = this._createClickBuffer(false, 0.4);
+            }
+
+            /**
+             * Generate a short percussive click in an AudioBuffer.
+             * Uses a high-frequency sine + soft noise blended, with fast decay.
+             */
+            _createClickBuffer(accented, volumeScale = 1.0) {
+                const sampleRate = this.audioCtx.sampleRate;
+                const duration = accented ? 0.04 : 0.03; // slightly longer for accent
+                const length = Math.floor(sampleRate * duration);
+                const buffer = this.audioCtx.createBuffer(1, length, sampleRate);
+                const data = buffer.getChannelData(0);
+
+                const freq = accented ? 1800 : 1200;
+                const amp = (accented ? 0.95 : 0.65) * volumeScale;
+
+                for (let i = 0; i < length; i++) {
+                    const t = i / sampleRate;
+                    // Fast exponential decay
+                    const envelope = Math.exp(-t * (accented ? 90 : 120));
+                    // Sine tone
+                    const tone = Math.sin(2 * Math.PI * freq * t);
+                    // A tiny bit of noise for crispness
+                    const noise = (Math.random() * 2 - 1) * 0.15;
+                    data[i] = (tone * 0.85 + noise * 0.15) * envelope * amp;
+                }
+
+                return buffer;
+            }
+
+            /**
+             * Play a click from a pre-generated buffer at a precise time.
+             */
+            _playClick(buffer, time) {
+                const src = this.audioCtx.createBufferSource();
+                src.buffer = buffer;
+                src.connect(this.audioCtx.destination);
+                src.start(time);
+            }
+
+            /**
+             * Advance to the next note in the sequence.
+             */
+            _nextNote() {
+                const secondsPerBeat = 60.0 / this.tempo;
+                this.nextNoteTime += secondsPerBeat;
+                this.currentBeat = (this.currentBeat + 1) % this.beatsPerBar;
+            }
+
+            /**
+             * Schedule a single note at the given time.
+             */
+            _scheduleNote(time, beatNumber) {
+                const isAccent = beatNumber === 0;
+                this._playClick(isAccent ? this.accentBuffer : this.normalBuffer, time);
+
+                // Fire visual callback
+                if (this.onBeatCallback) {
+                    const delayMs = Math.max(0, (time - this.audioCtx.currentTime) * 1000);
+                    setTimeout(() => {
+                        this.onBeatCallback(beatNumber, time);
+                    }, delayMs);
+                }
+            }
+
+            /**
+             * The look-ahead scheduler. Called every ~25ms.
+             * Schedules all notes that fall within the look-ahead window.
+             */
+            _scheduler() {
+                while (this.nextNoteTime < this.audioCtx.currentTime + this.scheduleAhead) {
+                    this._scheduleNote(this.nextNoteTime, this.currentBeat);
+                    this._nextNote();
+                }
+            }
+
+            /**
+             * Start playback.
+             */
+            start() {
+                if (!this.audioCtx) {
+                    this.initAudio();
+                }
+
+                if (this.audioCtx.state === 'suspended') {
+                    this.audioCtx.resume();
+                }
+
+                if (this.isPlaying) return;
+
+                this.isPlaying = true;
+                this.currentBeat = 0;
+                // Start the first note slightly in the future for stability
+                this.nextNoteTime = this.audioCtx.currentTime + 0.05;
+
+                this._scheduler();
+                this.timerID = setInterval(() => this._scheduler(), this.lookAhead);
+            }
+
+            /**
+             * Stop playback.
+             */
+            stop() {
+                this.isPlaying = false;
+                if (this.timerID) {
+                    clearInterval(this.timerID);
+                    this.timerID = null;
+                }
+            }
+
+            /**
+             * Toggle play/pause.
+             */
+            toggle() {
+                if (this.isPlaying) {
+                    this.stop();
+                } else {
+                    this.start();
+                }
+                return this.isPlaying;
+            }
+
+            /**
+             * Set tempo. If playing, the change takes effect on the next
+             * scheduled note (since _nextNote recalculates from current tempo).
+             */
+            setTempo(bpm) {
+                this.tempo = Math.max(20, Math.min(300, bpm));
+                return this.tempo;
+            }
+
+            /**
+             * Set beats per bar. Resets beat counter if currently beyond new range.
+             */
+            setBeatsPerBar(beats) {
+                this.beatsPerBar = Math.max(1, Math.min(12, beats));
+                if (this.currentBeat >= this.beatsPerBar) {
+                    this.currentBeat = 0;
+                }
+                return this.beatsPerBar;
+            }
+
+            /**
+             * Cleanup: stop and close audio context.
+             */
+            destroy() {
+                this.stop();
+                if (this.audioCtx && this.audioCtx.state !== 'closed') {
+                    this.audioCtx.close();
+                }
+                this.audioCtx = null;
+                this.accentBuffer = null;
+                this.normalBuffer = null;
+            }
+        }
+
+        // =============================================
+        //  UIController — DOM 交互与视觉更新
+        // =============================================
+        class UIController {
+            constructor(engine) {
+                this.engine = engine;
+                this.bpm = 120;
+                this.beatsPerBar = 4;
+                this.tapTimes = [];    // for tap tempo
+                this.tapTimeout = null;
+
+                // Cache DOM refs
+                this.$bpmDisplay = document.getElementById('bpmDisplay');
+                this.$bpmSlider = document.getElementById('bpmSlider');
+                this.$bpmLabel = document.getElementById('bpmLabel');
+                this.$beatIndicators = document.getElementById('beatIndicators');
+                this.$beatCountInput = document.getElementById('beatCountInput');
+                this.$playBtn = document.getElementById('playBtn');
+                this.$playIcon = document.getElementById('playIcon');
+                this.$tapBtn = document.getElementById('tapBtn');
+                this.$presetBtns = document.querySelectorAll('.btn-preset');
+
+                // Tempo label mapping
+                this.tempoLabels = [
+                    [20, 40, 'Larghissimo'],
+                    [40, 60, 'Largo'],
+                    [60, 66, 'Adagio'],
+                    [66, 76, 'Andante'],
+                    [76, 108, 'Moderato'],
+                    [108, 120, 'Allegro'],
+                    [120, 168, 'Vivace'],
+                    [168, 200, 'Presto'],
+                    [200, 300, 'Prestissimo'],
+                ];
+
+                this.init();
+            }
+
+            init() {
+                this._updateBpmLabel();
+                this._updateBeatIndicators();
+                this._updateSliderFill();
+                this._bindEvents();
+                this._bindKeyboard();
+            }
+
+            // ---- BPM ----
+
+            setBpm(val, source = 'ui') {
+                const newBpm = Math.max(20, Math.min(300, Math.round(val)));
+                if (newBpm === this.bpm) return;
+
+                this.bpm = newBpm;
+                this.engine.setTempo(newBpm);
+
+                // Update UI
+                this.$bpmDisplay.textContent = newBpm;
+                this.$bpmSlider.value = newBpm;
+                this._updateBpmLabel();
+                this._updateSliderFill();
+
+                // Pop animation
+                this.$bpmDisplay.classList.remove('bpm-pop');
+                void this.$bpmDisplay.offsetWidth; // reflow
+                this.$bpmDisplay.classList.add('bpm-pop');
+            }
+
+            setBeatsPerBar(val) {
+                const beats = Math.max(1, Math.min(12, Math.round(val)));
+                if (beats === this.beatsPerBar) return;
+
+                this.beatsPerBar = beats;
+                this.engine.setBeatsPerBar(beats);
+
+                // Update UI
+                this.$beatCountInput.value = beats;
+                this._updateBeatIndicators();
+
+                // Update preset button active state
+                this.$presetBtns.forEach(btn => {
+                    const btnBeats = parseInt(btn.dataset.beats);
+                    btn.classList.toggle('active', btnBeats === beats);
+                });
+            }
+
+            _updateBpmLabel() {
+                let label = '';
+                for (const [min, max, name] of this.tempoLabels) {
+                    if (this.bpm >= min && this.bpm < max) {
+                        label = name;
+                        break;
+                    }
+                }
+                this.$bpmLabel.textContent = label || '';
+            }
+
+            _updateSliderFill() {
+                const percent = ((this.bpm - 20) / (300 - 20)) * 100;
+                this.$bpmSlider.style.setProperty('--fill-percent', percent + '%');
+            }
+
+            // ---- Beat Indicators ----
+
+            _updateBeatIndicators() {
+                this.$beatIndicators.innerHTML = '';
+                for (let i = 0; i < this.beatsPerBar; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'beat-dot' + (i === 0 ? ' accent' : '');
+                    dot.setAttribute('data-beat', i);
+                    this.$beatIndicators.appendChild(dot);
+                }
+            }
+
+            highlightBeat(beatNumber) {
+                const dots = this.$beatIndicators.querySelectorAll('.beat-dot');
+                dots.forEach((dot, i) => {
+                    if (i === beatNumber) {
+                        dot.classList.add('active');
+                        // Auto-remove after short delay so it blinks
+                        setTimeout(() => dot.classList.remove('active'), 120);
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+
+            // ---- Play State ----
+
+            setPlayingState(playing) {
+                if (playing) {
+                    this.$playBtn.classList.add('playing');
+                    this.$playIcon.textContent = '⏸';
+                    this.$bpmDisplay.classList.add('playing');
+                } else {
+                    this.$playBtn.classList.remove('playing');
+                    this.$playIcon.textContent = '▶';
+                    this.$bpmDisplay.classList.remove('playing');
+                    // Clear beat indicators
+                    this.$beatIndicators.querySelectorAll('.beat-dot').forEach(d => d.classList.remove('active'));
+                }
+            }
+
+            // ---- Tap Tempo ----
+
+            handleTap() {
+                const now = performance.now();
+
+                // Reset if last tap was > 2 seconds ago
+                if (this.tapTimes.length > 0 && (now - this.tapTimes[this.tapTimes.length - 1]) > 2000) {
+                    this.tapTimes = [];
+                }
+
+                this.tapTimes.push(now);
+
+                // Keep only last 8 taps
+                if (this.tapTimes.length > 8) {
+                    this.tapTimes.shift();
+                }
+
+                // Need at least 2 taps to calculate
+                if (this.tapTimes.length >= 2) {
+                    const intervals = [];
+                    for (let i = 1; i < this.tapTimes.length; i++) {
+                        intervals.push(this.tapTimes[i] - this.tapTimes[i - 1]);
+                    }
+
+                    // Average interval in ms
+                    const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+
+                    // Convert to BPM
+                    const bpm = Math.round(60000 / avgInterval);
+                    if (bpm >= 20 && bpm <= 300) {
+                        this.setBpm(bpm);
+                    }
+                }
+
+                // Visual feedback
+                this.$tapBtn.classList.add('tapping');
+                clearTimeout(this.tapTimeout);
+                this.tapTimeout = setTimeout(() => {
+                    this.$tapBtn.classList.remove('tapping');
+                }, 300);
+            }
+
+            // ---- Event Binding ----
+
+            _bindEvents() {
+                // Play / Pause
+                this.$playBtn.addEventListener('click', () => {
+                    this.engine.initAudio(); // must be in user gesture
+                    const playing = this.engine.toggle();
+                    this.setPlayingState(playing);
+                });
+
+                // Tap Tempo
+                this.$tapBtn.addEventListener('click', () => {
+                    this.engine.initAudio();
+                    this.handleTap();
+                });
+
+                // BPM Slider
+                this.$bpmSlider.addEventListener('input', () => {
+                    this.setBpm(parseInt(this.$bpmSlider.value));
+                });
+
+                // BPM Adjustment Buttons
+                document.getElementById('bpmUp1').addEventListener('click', () => this.setBpm(this.bpm + 1));
+                document.getElementById('bpmDown1').addEventListener('click', () => this.setBpm(this.bpm - 1));
+                document.getElementById('bpmUp10').addEventListener('click', () => this.setBpm(this.bpm + 10));
+                document.getElementById('bpmDown10').addEventListener('click', () => this.setBpm(this.bpm - 10));
+
+                // BPM Display Click → Input
+                this.$bpmDisplay.addEventListener('click', () => this._showBpmInput());
+                this.$bpmDisplay.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') this._showBpmInput();
+                });
+
+                // Beat Preset Buttons
+                this.$presetBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const beats = parseInt(btn.dataset.beats);
+                        this.setBeatsPerBar(beats);
+                    });
+                });
+
+                // Beat Count Input
+                this.$beatCountInput.addEventListener('change', () => {
+                    const val = parseInt(this.$beatCountInput.value);
+                    if (!isNaN(val) && val >= 1 && val <= 12) {
+                        this.setBeatsPerBar(val);
+                    } else {
+                        this.$beatCountInput.value = this.beatsPerBar;
+                    }
+                });
+
+                // Engine visual beat callback
+                this.engine.onBeatCallback = (beatNumber) => {
+                    this.highlightBeat(beatNumber);
+                };
+            }
+
+            _showBpmInput() {
+                // Create a temporary input over the BPM display
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = 20;
+                input.max = 300;
+                input.value = this.bpm;
+                input.className = 'text-8xl sm:text-9xl font-extrabold text-center bg-transparent border-b-2 border-accent text-white w-full outline-none';
+                input.style.cssText = 'font-variant-numeric:tabular-nums; -moz-appearance:textfield;';
+                input.setAttribute('inputmode', 'numeric');
+
+                // Replace display with input
+                this.$bpmDisplay.replaceWith(input);
+                input.focus();
+                input.select();
+
+                const commit = () => {
+                    const val = parseInt(input.value);
+                    if (!isNaN(val)) {
+                        this.setBpm(val);
+                    }
+                    input.replaceWith(this.$bpmDisplay);
+                    this.$bpmDisplay.textContent = this.bpm;
+                };
+
+                input.addEventListener('blur', commit);
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { input.blur(); }
+                    if (e.key === 'Escape') {
+                        input.value = this.bpm;
+                        input.blur();
+                    }
+                });
+            }
+
+            // ---- Keyboard Shortcuts ----
+
+            _bindKeyboard() {
+                document.addEventListener('keydown', (e) => {
+                    // Ignore if typing in an input
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+                    switch (e.code) {
+                        case 'Space':
+                            e.preventDefault();
+                            this.engine.initAudio();
+                            const playing = this.engine.toggle();
+                            this.setPlayingState(playing);
+                            break;
+
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            if (e.shiftKey) {
+                                this.setBpm(this.bpm + 10);
+                            } else {
+                                this.setBpm(this.bpm + 1);
+                            }
+                            break;
+
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            if (e.shiftKey) {
+                                this.setBpm(this.bpm - 10);
+                            } else {
+                                this.setBpm(this.bpm - 1);
+                            }
+                            break;
+
+                        case 'ArrowRight':
+                            e.preventDefault();
+                            if (e.shiftKey) {
+                                this.setBpm(this.bpm + 10);
+                            } else {
+                                this.setBpm(this.bpm + 1);
+                            }
+                            break;
+
+                        case 'ArrowLeft':
+                            e.preventDefault();
+                            if (e.shiftKey) {
+                                this.setBpm(this.bpm - 10);
+                            } else {
+                                this.setBpm(this.bpm - 1);
+                            }
+                            break;
+
+                        case 'KeyT':
+                            e.preventDefault();
+                            this.engine.initAudio();
+                            this.handleTap();
+                            break;
+                    }
+                });
+            }
+        }
+
+        // =============================================
+        //  App Initialization
+        // =============================================
+        const engine = new MetronomeEngine();
+        const ui = new UIController(engine);
+
+        // Expose for debugging
+        window.__metronome = { engine, ui };
+
+        console.log('%c🎵 在线节拍器已就绪 %c| %c120 BPM %c| %c4/4 拍',
+            'font-size:16px;', '', 'color:#4F8CFF;', '', 'color:#4F8CFF;');
+        console.log('%c空格键播放 · 方向键调BPM · T键测速 · 点击数字直接输入',
+            'color:#888;');
+
+    })();
+    </script>
+</body>
+</html>
