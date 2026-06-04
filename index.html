@@ -48,17 +48,6 @@
     </script>
 
     <style>
-        :root {
-            --bg-body: #f2f7f2; --bg-card: #ffffff; --text-main: #1a2a1a; --text-sub: #6a7a6a;
-            --border: #d0ddd0; --btn-bg: #e8efe8; --btn-text: #4a5a4a;
-            --inactive: #d0ddd0; --panel-bg: #f8fcf8;
-        }
-        [data-theme="dark"] {
-            --bg-body: #0a0a0f; --bg-card: #141419; --text-main: #e0e0e0; --text-sub: #888;
-            --border: #2a2a35; --btn-bg: #1a1a21; --btn-text: #aaa;
-            --inactive: #2a2a35; --panel-bg: #0d0d14;
-        }
-
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
         ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#f2f7f2}::-webkit-scrollbar-thumb{background:#d0ddd0;border-radius:3px}
@@ -160,12 +149,6 @@
         .nav-pill:hover{box-shadow:0 4px 16px rgba(79,140,255,.4);transform:translateY(-1px)}
         .nav-pill.active{background:#4F8CFF;box-shadow:0 2px 8px rgba(79,140,255,.3)}
 
-        .theme-toggle{display:flex;align-items:center;cursor:pointer;flex-shrink:0}
-        .theme-switch{position:relative;width:40px;height:22px;background:#c0c8d0;border-radius:999px;transition:background .25s ease}
-        .theme-switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .25s ease;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-        [data-theme="dark"] .theme-switch{background:#4F8CFF}
-        [data-theme="dark"] .theme-switch::after{transform:translateX(18px)}
-
         .ad-placeholder{border:1px dashed #d0ddd0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9a8a;font-size:12px}
 
         .btn-play-pill,.btn-tap-pill,.btn-preset,.btn-bpm-adj,.beat-dot,.btn-sm,.btn-sound,.btn-train{touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -240,7 +223,7 @@
     }
     </script>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between py-6 px-4" style="background:var(--bg-body);" data-theme="light">
+<body class="min-h-screen flex flex-col items-center justify-between py-6 px-4" style="background:#f2f7f2;">
 
     <!-- Top Ad -->
     <div class="w-full max-w-4xl mx-auto mb-4">
@@ -250,18 +233,13 @@
     <main class="flex-1 flex flex-col items-center justify-center w-full max-w-lg mx-auto gap-4">
 
         <!-- ===== Nav + Lang ===== -->
-        <div class="w-full max-w-sm mx-auto flex items-center justify-between mb-1 gap-2">
+        <div class="w-full max-w-sm mx-auto flex items-center justify-between mb-1">
             <div class="flex gap-2">
                 <a href="./staff.html" class="nav-pill">认识五线谱</a>
                 <a href="./index.html" class="nav-pill active">免费在线节拍器</a>
                 <a href="./ear-training.html" class="nav-pill">视唱练耳训练</a>
             </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <!-- Theme toggle -->
-                <div class="theme-toggle" id="themeToggle" title="日间/夜间模式">
-                    <div class="theme-switch"></div>
-                </div>
-                <select id="langSelectTop" class="bg-transparent border rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer" style="max-width:110px;border-color:var(--border);">
+            <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer" style="max-width:120px;">
                 <option value="en">🇬🇧 English</option>
                 <option value="fr">🇫🇷 Français</option>
                 <option value="de">🇩🇪 Deutsch</option>
@@ -2593,21 +2571,6 @@
                 if ($langSelectTop) {
                     $langSelectTop.addEventListener('change', () => setLang($langSelectTop.value));
                 }
-
-                // Theme toggle
-                const $themeToggle = document.getElementById('themeToggle');
-                $themeToggle.addEventListener('click', () => {
-                    const html = document.documentElement;
-                    const isDark = html.getAttribute('data-theme') === 'dark';
-                    const newTheme = isDark ? 'light' : 'dark';
-                    html.setAttribute('data-theme', newTheme);
-                    try { localStorage.setItem('metronome-theme', newTheme); } catch(e) {}
-                });
-                // Load saved theme
-                try {
-                    const saved = localStorage.getItem('metronome-theme');
-                    if (saved) document.documentElement.setAttribute('data-theme', saved);
-                } catch(e) {}
 
                 // Beat counter +/−
                 document.getElementById('beatMinus').addEventListener('click', () => {
