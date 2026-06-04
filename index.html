@@ -450,6 +450,10 @@
                             <span data-i18n="train-speed-step-bars">小节 +</span>
                             <input type="number" id="speedStepBpm" value="5" min="1" max="20" class="w-10 text-center bg-[#e8efe8] border border-[#c8dcc8] rounded text-gray-900 text-xs py-1 focus:outline-none focus:border-train-dim">
                             <span>BPM</span>
+                            <label class="flex items-center cursor-pointer ml-auto" style="gap:2px;">
+                                <input type="checkbox" id="speedBarCheck" checked class="sr-only">
+                                <div class="custom-check checked" style="width:18px;height:18px;border-radius:4px;" id="speedBarCheckMark"></div>
+                            </label>
                         </div>
                         <div class="flex items-center gap-2 text-xs text-gray-400">
                             <span data-i18n="train-speed-step">每</span>
@@ -457,6 +461,10 @@
                             <span data-i18n="train-speed-mins">分钟 +</span>
                             <input type="number" id="speedStepBpmTime" value="5" min="1" max="20" class="w-10 text-center bg-[#e8efe8] border border-[#c8dcc8] rounded text-gray-900 text-xs py-1 focus:outline-none focus:border-train-dim">
                             <span>BPM</span>
+                            <label class="flex items-center cursor-pointer ml-auto" style="gap:2px;">
+                                <input type="checkbox" id="speedTimeCheck" checked class="sr-only">
+                                <div class="custom-check checked" style="width:18px;height:18px;border-radius:4px;" id="speedTimeCheckMark"></div>
+                            </label>
                         </div>
                         <div id="speedStatus" class="text-center text-xs text-gray-500 hidden"></div>
                         <button class="btn-train w-full" id="speedStartBtn" data-i18n="train-start">开始训练</button>
@@ -1712,6 +1720,10 @@
                 this.$speedStepMins = document.getElementById('speedStepMins');
                 this.$speedStepBpmTime = document.getElementById('speedStepBpmTime');
                 this._timeSpeedInterval = null;
+                this.$speedBarCheck = document.getElementById('speedBarCheck');
+                this.$speedBarCheckMark = document.getElementById('speedBarCheckMark');
+                this.$speedTimeCheck = document.getElementById('speedTimeCheck');
+                this.$speedTimeCheckMark = document.getElementById('speedTimeCheckMark');
                 this.$speedStartBtn = document.getElementById('speedStartBtn');
                 this.$speedStatus = document.getElementById('speedStatus');
 
@@ -1734,6 +1746,14 @@
 
                 // Speed trainer start
                 this.$speedStartBtn.addEventListener('click', () => this._toggleSpeedTrainer());
+
+                // Speed mode checkboxes
+                this.$speedBarCheck.addEventListener('change', () => {
+                    this.$speedBarCheckMark.classList.toggle('checked', this.$speedBarCheck.checked);
+                });
+                this.$speedTimeCheck.addEventListener('change', () => {
+                    this.$speedTimeCheckMark.classList.toggle('checked', this.$speedTimeCheck.checked);
+                });
 
                 // Engine bar callback
                 this.engine.onBarCallback = (barCount) => {
@@ -1857,6 +1877,7 @@
             }
 
             _startTimeSpeed() {
+                if (!this.$speedTimeCheck.checked) return;
                 const mins = parseInt(this.$speedStepMins.value) || 2;
                 const bpmInc = parseInt(this.$speedStepBpmTime.value) || 5;
                 if (mins <= 0 || bpmInc <= 0) return;
@@ -1888,6 +1909,7 @@
             }
 
             _onSpeedBar() {
+                if (!this.$speedBarCheck.checked) return;
                 this.speedBarCount++;
                 if (this.speedBarCount >= this.speedStepBars) {
                     this.speedBarCount = 0;
