@@ -371,17 +371,17 @@
                 <div class="flex flex-col gap-3 bg-[#f8fcf8] rounded-xl p-4 border border-[#e8efe8] mt-1.5">
                     <div class="flex items-center gap-3">
                         <span class="text-gray-500 text-xs w-12" data-i18n="vol-accent">强拍</span>
-                        <input type="range" class="vol-slider flex-1" id="volAccent" min="10" max="100" value="95" step="1">
+                        <input type="range" class="vol-slider flex-1" id="volAccent" min="10" max="100" value="50" step="1">
                         <span class="text-gray-400 text-xs w-8 text-right" id="volAccentVal">95</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <span class="text-gray-500 text-xs w-12" data-i18n="vol-normal">弱拍</span>
-                        <input type="range" class="vol-slider flex-1" id="volNormal" min="10" max="100" value="65" step="1">
+                        <input type="range" class="vol-slider flex-1" id="volNormal" min="10" max="100" value="50" step="1">
                         <span class="text-gray-400 text-xs w-8 text-right" id="volNormalVal">65</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <span class="text-gray-500 text-xs w-12" data-i18n="vol-sub">细分</span>
-                        <input type="range" class="vol-slider flex-1" id="volSub" min="10" max="100" value="40" step="1">
+                        <input type="range" class="vol-slider flex-1" id="volSub" min="10" max="100" value="50" step="1">
                         <span class="text-gray-400 text-xs w-8 text-right" id="volSubVal">40</span>
                     </div>
                 </div>
@@ -695,9 +695,9 @@
                 beatsPerBar: 4,
                 subdivision: 1,
                 soundType: 'classic',
-                volAccent: 95,
-                volNormal: 65,
-                volSub: 40,
+                volAccent: 50,
+                volNormal: 50,
+                volSub: 50,
                 lang: null, // set by detection
             },
 
@@ -1313,6 +1313,10 @@
                     self.$volAccentVal.textContent = s.volAccent;
                     self.$volNormalVal.textContent = s.volNormal;
                     self.$volSubVal.textContent = s.volSub;
+                    // Init volume slider fills
+                    self.$volAccent.style.setProperty('--fill', ((s.volAccent-10)/90*100)+'%');
+                    self.$volNormal.style.setProperty('--fill', ((s.volNormal-10)/90*100)+'%');
+                    self.$volSub.style.setProperty('--fill', ((s.volSub-10)/90*100)+'%');
 
                     // Highlight correct buttons
                     self.$subBtns.forEach(b => b.classList.toggle('active', parseInt(b.dataset.sub) === s.subdivision));
