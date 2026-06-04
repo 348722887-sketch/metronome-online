@@ -225,31 +225,6 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-between py-6 px-4" style="background:#f2f7f2;">
 
-    <!-- Header Bar -->
-    <div class="w-full max-w-4xl mx-auto flex items-center justify-between px-2 py-2">
-        <div class="flex gap-2">
-            <a href="./index.html" class="nav-pill active">免费在线节拍器</a>
-            <a href="./ear-training.html" class="nav-pill">音程练耳训练</a>
-        </div>
-        <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1 focus:outline-none focus:border-accent cursor-pointer">
-            <option value="en">🇬🇧 EN</option>
-            <option value="fr">🇫🇷 FR</option>
-            <option value="de">🇩🇪 DE</option>
-            <option value="it">🇮🇹 IT</option>
-            <option value="es">🇪🇸 ES</option>
-            <option value="pt">🇧🇷 PT</option>
-            <option value="el">🇬🇷 EL</option>
-            <option value="ru">🇷🇺 RU</option>
-            <option value="pl">🇵🇱 PL</option>
-            <option value="zh-CN">🇨🇳 中文</option>
-            <option value="ja">🇯🇵 日本語</option>
-            <option value="ko">🇰🇷 한국어</option>
-            <option value="th">🇹🇭 ไทย</option>
-            <option value="vi">🇻🇳 TV</option>
-            <option value="my">🇲🇲 MY</option>
-        </select>
-    </div>
-
     <!-- Top Ad -->
     <div class="w-full max-w-4xl mx-auto mb-4">
         <div class="ad-placeholder h-[90px] w-full" id="ad-top">🎵 广告位 — 728×90</div>
@@ -257,8 +232,32 @@
 
     <main class="flex-1 flex flex-col items-center justify-center w-full max-w-lg mx-auto gap-4">
 
+        <!-- ===== Nav + Lang ===== -->
+        <div class="w-full max-w-sm mx-auto flex items-center justify-between mb-1">
+            <div class="flex gap-2">
+                <a href="./index.html" class="nav-pill active">免费在线节拍器</a>
+                <a href="./ear-training.html" class="nav-pill">音程练耳训练</a>
+            </div>
+            <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1 focus:outline-none focus:border-accent cursor-pointer">
+                <option value="en">🇬🇧 EN</option>
+                <option value="fr">🇫🇷 FR</option>
+                <option value="de">🇩🇪 DE</option>
+                <option value="it">🇮🇹 IT</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="pt">🇧🇷 PT</option>
+                <option value="el">🇬🇷 EL</option>
+                <option value="ru">🇷🇺 RU</option>
+                <option value="pl">🇵🇱 PL</option>
+                <option value="zh-CN">🇨🇳 中文</option>
+                <option value="ja">🇯🇵 日本語</option>
+                <option value="ko">🇰🇷 한국어</option>
+                <option value="th">🇹🇭 ไทย</option>
+                <option value="vi">🇻🇳 TV</option>
+                <option value="my">🇲🇲 MY</option>
+            </select>
+        </div>
+
         <!-- ===== BPM Display ===== -->
-        <h1 class="text-center text-gray-400 text-xs tracking-[0.15em] font-medium mb-0 select-none" data-i18n="page-heading">免费在线节拍器</h1>
         <div class="text-center select-none">
             <div class="bpm-display text-8xl sm:text-9xl font-extrabold text-gray-900 tracking-tight cursor-pointer"
                  id="bpmDisplay" title="点击输入BPM" role="button" tabindex="0">120</div>
@@ -1758,7 +1757,40 @@
                     this.$speedBarCheckMark.classList.toggle('checked', this.$speedBarCheck.checked);
                 });
                 this.$speedTimeCheck.addEventListener('change', () => {
-                    this.$speedTimeCheckMark.classList.toggle('checked', this.$speedTimeCheck.checked);
+                    const checked = this.$speedTimeCheck.checked;
+                    this.$speedTimeCheckMark.classList.toggle('checked', checked);
+                    if (!this.running || this.mode !== 'speed') return;
+                    if (checked) {
+                        // Resume: restart countdown + interval from saved remaining
+                        const mins = Math.max(1, Math.min(30, parseInt(this.$speedStepMins.value) || 2));
+                        const bpmInc = Math.max(1, Math.min(20, parseInt(this.$speedStepBpmTime.value) || 5));
+                        if (this._timeSpeedCountdown <= 0) this._timeSpeedCountdown = mins * 60;
+                        this._updateTimeCounter();
+                        if (this.$speedTimeCounter) this.$speedTimeCounter.style.display = 'inline';
+                        this._timeSpeedCountdownInterval = setInterval(() => {
+                            if (!this.running || this.mode !== 'speed' || !this.$speedTimeCheck.checked) return;
+                            this._timeSpeedCountdown--;
+                            this._updateTimeCounter();
+                        }, 1000);
+                        this._timeSpeedInterval = setInterval(() => {
+                            if (!this.running || this.mode !== 'speed' || !this.$speedTimeCheck.checked) return;
+                            this._timeSpeedCountdown = mins * 60;
+                            this._updateTimeCounter();
+                            this.speedCurrentBpm += bpmInc;
+                            if (this.speedCurrentBpm >= this.speedEndBpm) {
+                                this.speedCurrentBpm = this.speedEndBpm;
+                                this.ui.setBpm(this.speedEndBpm);
+                                this._stopSpeedTrainer();
+                                return;
+                            }
+                            this.ui.setBpm(this.speedCurrentBpm);
+                            this.$speedStatus.textContent = this._speedStatusText();
+                        }, mins * 60000);
+                    } else {
+                        // Pause: clear intervals, keep countdown value
+                        this._clearTimeSpeed();
+                        if (this.$speedTimeCounter) this.$speedTimeCounter.style.display = 'none';
+                    }
                 });
 
                 // Dynamic value changes during training (bar-based)
@@ -1944,13 +1976,13 @@
                 if (this.$speedTimeCounter) this.$speedTimeCounter.style.display = 'inline';
                 // 1-second tick for countdown display
                 this._timeSpeedCountdownInterval = setInterval(() => {
-                    if (!this.running || this.mode !== 'speed') return;
+                    if (!this.running || this.mode !== 'speed' || !this.$speedTimeCheck.checked) return;
                     this._timeSpeedCountdown--;
                     this._updateTimeCounter();
                 }, 1000);
                 // Actual BPM change at the minute interval
                 this._timeSpeedInterval = setInterval(() => {
-                    if (!this.running || this.mode !== 'speed') return;
+                    if (!this.running || this.mode !== 'speed' || !this.$speedTimeCheck.checked) return;
                     this._timeSpeedCountdown = mins * 60;
                     this._updateTimeCounter();
                     this.speedCurrentBpm += bpmInc;
