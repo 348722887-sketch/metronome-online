@@ -218,19 +218,6 @@
             <div class="text-gray-500 text-xs tracking-[0.2em] uppercase mt-1" data-i18n="bpm-label">bpm</div>
         </div>
 
-        <!-- ===== Tempo Presets ===== -->
-        <div class="flex flex-wrap items-center justify-center gap-1.5 select-none" id="tempoPresets">
-            <button class="btn-sm" data-bpm="30">Larghissimo</button>
-            <button class="btn-sm" data-bpm="50">Largo</button>
-            <button class="btn-sm" data-bpm="63">Adagio</button>
-            <button class="btn-sm" data-bpm="72">Andante</button>
-            <button class="btn-sm" data-bpm="92">Moderato</button>
-            <button class="btn-sm active" data-bpm="120">Allegro</button>
-            <button class="btn-sm" data-bpm="144">Vivace</button>
-            <button class="btn-sm" data-bpm="184">Presto</button>
-            <button class="btn-sm" data-bpm="220">Prestissimo</button>
-        </div>
-
         <!-- ===== BPM Slider ===== -->
         <div class="w-full px-2">
             <input type="range" id="bpmSlider" min="20" max="300" value="120" step="1" aria-label="BPM 滑块">
@@ -1140,7 +1127,7 @@
                 this.$presetBtns = document.querySelectorAll('.btn-preset');
                 this.$subBtns = document.querySelectorAll('[data-sub]');
                 this.$soundBtns = document.querySelectorAll('.btn-sound');
-                this.$tempoPresetBtns = document.querySelectorAll('#tempoPresets .btn-sm');
+
                 this.$volToggle = document.getElementById('volToggle');
                 this.$volPanel = document.getElementById('volPanel');
                 this.$volAccent = document.getElementById('volAccent');
@@ -1158,7 +1145,6 @@
                     [66,76,'Andante'],[76,108,'Moderato'],[108,120,'Allegro'],
                     [120,168,'Vivace'],[168,200,'Presto'],[200,300,'Prestissimo'],
                 ];
-                this.presetBpms = new Set([30,50,63,72,92,120,144,184,220]);
 
                 this._loadSettings();
                 this.trainingCtrl = new TrainingController(engine, this);
@@ -1170,7 +1156,6 @@
                 this._updateBeatIndicators();
                 this._updateSubBeatIndicators();
                 this._updateSliderFill();
-                this._updateTempoPresetHighlight();
                 this._bindEvents();
                 this._bindKeyboard();
             }
@@ -1218,7 +1203,6 @@
                     self.$subBtns.forEach(b => b.classList.toggle('active', parseInt(b.dataset.sub) === s.subdivision));
                     self.$soundBtns.forEach(b => b.classList.toggle('active', b.dataset.sound === s.soundType));
                     self.$presetBtns.forEach(b => b.classList.toggle('active', parseInt(b.dataset.beats) === s.beatsPerBar));
-                    self._updateTempoPresetHighlight();
                     self._updateSubBeatIndicators();
                     self._updateBeatIndicators();
                 });
@@ -1259,7 +1243,6 @@
                 this.$bpmSlider.value = newBpm;
                 this._updateBpmLabel();
                 this._updateSliderFill();
-                this._updateTempoPresetHighlight();
                 this.$bpmDisplay.classList.remove('bpm-pop');
                 void this.$bpmDisplay.offsetWidth;
                 this.$bpmDisplay.classList.add('bpm-pop');
@@ -1277,12 +1260,6 @@
             _updateSliderFill() {
                 const pct = ((this.bpm - 20) / (300 - 20)) * 100;
                 this.$bpmSlider.style.setProperty('--fill-percent', pct + '%');
-            }
-
-            _updateTempoPresetHighlight() {
-                this.$tempoPresetBtns.forEach(btn => {
-                    btn.classList.toggle('active', parseInt(btn.dataset.bpm) === this.bpm);
-                });
             }
 
             // ======== Beats Per Bar ========
@@ -1493,10 +1470,6 @@
                 this.$bpmDisplay.addEventListener('click', () => this._showBpmInput());
                 this.$bpmDisplay.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') this._showBpmInput();
-                });
-
-                this.$tempoPresetBtns.forEach(btn => {
-                    btn.addEventListener('click', () => this.setBpm(parseInt(btn.dataset.bpm)));
                 });
 
                 this.$subBtns.forEach(btn => {
