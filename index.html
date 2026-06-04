@@ -471,6 +471,7 @@
                 <option value="th">🇹🇭 ไทย</option>
                 <option value="vi">🇻🇳 Tiếng Việt</option>
                 <option value="my">🇲🇲 မြန်မာ</option>
+                <option value="el">🇬🇷 Ελληνικά</option>
             </select>
         </div>
     </footer>
@@ -1221,6 +1222,57 @@
                 'note-10': 'Triplet Sixteenths',
                 'note-11': 'Triplet 32nds',
             },
+            'el': {
+                'title': 'Διαδικτυακός Μετρονόμος — Δωρεάν',
+                'page-heading': 'Δωρεάν Διαδικτυακός Μετρονόμος',
+                'meta-desc': 'Δωρεάν διαδικτυακός μετρονόμος με ακρίβεια Web Audio. Tap Tempo, υποδιαιρέσεις, 3 ήχοι, λειτουργία προπόνησης, πολύγλωσσος.',
+                'bpm-label': 'bpm',
+                'sub-label': 'Ρυθμός',
+                'beats-label1': 'Χτύποι ανά',
+                'beats-label2': 'μέτρο',
+                'sound-label': 'Ήχος',
+                'vol-toggle': '🔊 Ένταση ▾',
+                'vol-accent': 'Τονισμός',
+                'vol-normal': 'Κανονικό',
+                'vol-sub': 'Υποδ.',
+                'train-toggle': '🎯 Προπόνηση ▾',
+                'train-mute-tab': 'Σιωπηλή άσκηση',
+                'train-speed-tab': 'Αύξηση ταχύτητας',
+                'train-mute-play': 'Αναπαραγωγή',
+                'train-mute-bars': 'μέτρα',
+                'train-mute-silence': 'σιωπή',
+                'train-speed-from': 'Από',
+                'train-speed-to': 'έως',
+                'train-speed-step': 'Κάθε',
+                'train-speed-step-bars': 'μέτρα +',
+                'train-start': 'Έναρξη',
+                'keyboard-hint': 'Space Έναρξη · ←→ ±1BPM · Shift+←→ ±10 · T Χτύπημα · 1-4 Υποδ.',
+                'share-btn': 'Κοινοποίηση',
+                'footer-copy': '© 2026 Διαδικτυακός Μετρονόμος',
+                'footer-privacy': 'Απόρρητο',
+                'footer-about': 'Σχετικά',
+                'accent-label': 'Τονισμός 1ου χτύπου',
+                'timer-label': 'Χρονόμετρο',
+                'sound-classic': 'Κλασικό',
+                'sound-wood': 'Ξύλο',
+                'sound-cymbal': 'Κύμβαλο',
+                'beat-label': 'Χτύποι',
+                'rhythm-label': 'Τύπος ρυθμού',
+                'vol-tab': '🔊 Ένταση',
+                'train-tab': '🎯 Προπόνηση',
+                'sound-tab': '🎵 Ήχος',
+                'note-1': 'Τέταρτο',
+                'note-2': 'Όγδοα · 2 ανά χτύπο',
+                'note-3': 'Τρίηχα · 3 ανά χτύπο',
+                'note-4': 'Δέκατα έκτα · 4 ανά χτύπο',
+                'note-5': 'Παρεστιγμένο όγδοο + Δέκατο έκτο',
+                'note-6': 'Δέκατο έκτο + Παρεστιγμένο όγδοο',
+                'note-7': '2 Δέκατα έκτα + Όγδοο',
+                'note-8': 'Όγδοο + 2 Δέκατα έκτα',
+                'note-9': 'Συγκοπή',
+                'note-10': 'Τρίηχα δεκάτων έκτων',
+                'note-11': 'Τρίηχα 32ων',
+            },
         };
 
         let currentLang = 'zh-CN';
@@ -1241,6 +1293,7 @@
             if (navLang.startsWith('th')) return 'th';
             if (navLang.startsWith('vi')) return 'vi';
             if (navLang.startsWith('my')) return 'my';
+            if (navLang.startsWith('el')) return 'el';
             return 'en';
         }
 
