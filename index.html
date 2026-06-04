@@ -789,6 +789,11 @@
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 this.audioCtx = new AudioCtx();
                 this._generateAllBuffers();
+                // Preload speech synthesis voices
+                if (window.speechSynthesis) {
+                    speechSynthesis.getVoices();
+                    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+                }
             }
 
             _generateAllBuffers() {
@@ -889,6 +894,27 @@
                 src.start(time);
             }
 
+            /** Speak beat number using SpeechSynthesis (for voice sound type) */
+            _speakBeat(beatNumber, time) {
+                if (!window.speechSynthesis) return;
+                const now = this.audioCtx.currentTime;
+                const delay = Math.max(0, (time - now) * 1000 - 80); // 80ms ahead for synth latency
+                setTimeout(() => {
+                    if (!this.isPlaying || this.soundType !== 'voice') return;
+                    const num = beatNumber + 1;
+                    const utt = new SpeechSynthesisUtterance(String(num));
+                    utt.rate = 1.4;   // speak fast enough for higher BPM
+                    utt.pitch = 1.0;
+                    utt.volume = this.muted ? 0 : 0.9;
+                    // Use Chinese voice if available, else default
+                    const voices = speechSynthesis.getVoices();
+                    const zhVoice = voices.find(v => v.lang.startsWith('zh'));
+                    if (zhVoice) utt.voice = zhVoice;
+                    speechSynthesis.cancel(); // cancel previous to avoid overlap
+                    speechSynthesis.speak(utt);
+                }, delay);
+            }
+
             _nextNote() {
                 const secondsPerBeat = 60.0 / this.tempo;
                 const secondsPerSub = secondsPerBeat / this.subdivision;
@@ -926,6 +952,11 @@
                 const isAccent = beatNumber === 0 && subIndex === 0;
                 const isSub = subIndex > 0;
                 this._playClick(this._getBuffer(), time, this._getVolume(isAccent, isSub));
+
+                // Voice: speak beat number on main beats
+                if (this.soundType === 'voice' && subIndex === 0) {
+                    this._speakBeat(beatNumber, time);
+                }
 
                 if (this.onBeatCallback) {
                     const delayMs = Math.max(0, (time - this.audioCtx.currentTime) * 1000);
