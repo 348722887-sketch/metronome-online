@@ -145,6 +145,10 @@
         .note-btn.active{background:#4F8CFF;color:#fff}
         .note-btn svg{width:40px;height:40px}
 
+        .nav-pill{padding:6px 16px;border-radius:8px;background:linear-gradient(135deg,#4F8CFF 0%,#6B5CFF 100%);color:#fff;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s ease;white-space:nowrap}
+        .nav-pill:hover{box-shadow:0 4px 16px rgba(79,140,255,.4);transform:translateY(-1px)}
+        .nav-pill.active{background:#4F8CFF;box-shadow:0 2px 8px rgba(79,140,255,.3)}
+
         .ad-placeholder{border:1px dashed #d0ddd0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8a9a8a;font-size:12px}
 
         .btn-play-pill,.btn-tap-pill,.btn-preset,.btn-bpm-adj,.beat-dot,.btn-sm,.btn-sound,.btn-train{touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -220,6 +224,31 @@
     </script>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-between py-6 px-4" style="background:#f2f7f2;">
+
+    <!-- Header Bar -->
+    <div class="w-full max-w-4xl mx-auto flex items-center justify-between px-2 py-2">
+        <div class="flex gap-2">
+            <a href="./index.html" class="nav-pill active">免费在线节拍器</a>
+            <a href="./ear-training.html" class="nav-pill">音程练耳训练</a>
+        </div>
+        <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1 focus:outline-none focus:border-accent cursor-pointer">
+            <option value="en">🇬🇧 EN</option>
+            <option value="fr">🇫🇷 FR</option>
+            <option value="de">🇩🇪 DE</option>
+            <option value="it">🇮🇹 IT</option>
+            <option value="es">🇪🇸 ES</option>
+            <option value="pt">🇧🇷 PT</option>
+            <option value="el">🇬🇷 EL</option>
+            <option value="ru">🇷🇺 RU</option>
+            <option value="pl">🇵🇱 PL</option>
+            <option value="zh-CN">🇨🇳 中文</option>
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="ko">🇰🇷 한국어</option>
+            <option value="th">🇹🇭 ไทย</option>
+            <option value="vi">🇻🇳 TV</option>
+            <option value="my">🇲🇲 MY</option>
+        </select>
+    </div>
 
     <!-- Top Ad -->
     <div class="w-full max-w-4xl mx-auto mb-4">
@@ -392,7 +421,7 @@
                 <div class="training-panel rounded-xl p-4 mt-1.5">
                     <div class="flex gap-1 mb-3" id="trainTabs">
                         <button class="btn-train active flex-1" data-train="mute" data-i18n="train-mute-tab">静音训练</button>
-                        <button class="btn-train flex-1" data-train="speed" data-i18n="train-speed-tab">渐进加速</button>
+                        <button class="btn-train flex-1" data-train="speed" data-i18n="train-speed-tab">渐进加速训练</button>
                     </div>
                     <div id="trainMutePanel" class="flex flex-col gap-3">
                         <div class="flex items-center gap-2 text-xs text-gray-400">
@@ -420,6 +449,13 @@
                             <input type="number" id="speedStepBars" value="2" min="1" max="8" class="w-10 text-center bg-[#e8efe8] border border-[#c8dcc8] rounded text-gray-900 text-xs py-1 focus:outline-none focus:border-train-dim">
                             <span data-i18n="train-speed-step-bars">小节 +</span>
                             <input type="number" id="speedStepBpm" value="5" min="1" max="20" class="w-10 text-center bg-[#e8efe8] border border-[#c8dcc8] rounded text-gray-900 text-xs py-1 focus:outline-none focus:border-train-dim">
+                            <span>BPM</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span data-i18n="train-speed-step">每</span>
+                            <input type="number" id="speedStepMins" value="2" min="1" max="30" class="w-10 text-center bg-[#e8efe8] border border-[#c8dcc8] rounded text-gray-900 text-xs py-1 focus:outline-none focus:border-train-dim">
+                            <span data-i18n="train-speed-mins">分钟 +</span>
+                            <input type="number" id="speedStepBpmTime" value="5" min="1" max="20" class="w-10 text-center bg-[#e8efe8] border border-[#c8dcc8] rounded text-gray-900 text-xs py-1 focus:outline-none focus:border-train-dim">
                             <span>BPM</span>
                         </div>
                         <div id="speedStatus" class="text-center text-xs text-gray-500 hidden"></div>
@@ -511,7 +547,7 @@
                 'vol-sub': '细分',
                 'train-toggle': '🎯 训练模式 ▾',
                 'train-mute-tab': '静音训练',
-                'train-speed-tab': '渐进加速',
+                'train-speed-tab': '渐进加速训练',
                 'train-mute-play': '播放',
                 'train-mute-bars': '小节',
                 'train-mute-silence': '静音',
@@ -519,6 +555,7 @@
                 'train-speed-to': '到',
                 'train-speed-step': '每',
                 'train-speed-step-bars': '小节 +',
+                'train-speed-mins': '分钟 +',
                 'train-start': '开始训练',
                 'keyboard-hint': '空格 开始/停止 · ←→ ±1BPM · Shift+←→ ±10 · T 测速 · 1-4 切换细分',
                 'share-btn': '分享当前设置',
@@ -565,7 +602,7 @@
                 'vol-sub': 'Sub',
                 'train-toggle': '🎯 Training ▾',
                 'train-mute-tab': 'Mute Drill',
-                'train-speed-tab': 'Speed Ramp',
+                'train-speed-tab': 'Speed Ramp Training',
                 'train-mute-play': 'Play',
                 'train-mute-bars': 'bars',
                 'train-mute-silence': 'mute',
@@ -573,6 +610,7 @@
                 'train-speed-to': 'to',
                 'train-speed-step': 'Every',
                 'train-speed-step-bars': 'bars +',
+                'train-speed-mins': 'min +',
                 'train-start': 'Start Training',
                 'keyboard-hint': 'Space Play/Stop · ←→ ±1BPM · Shift+←→ ±10 · T Tap · 1-4 Subdivision',
                 'share-btn': 'Share Settings',
@@ -619,7 +657,7 @@
                 'vol-sub': '分割',
                 'train-toggle': '🎯 トレーニング ▾',
                 'train-mute-tab': 'ミュート練習',
-                'train-speed-tab': '速度上昇',
+                'train-speed-tab': '速度上昇訓練',
                 'train-mute-play': '再生',
                 'train-mute-bars': '小節',
                 'train-mute-silence': '消音',
@@ -627,6 +665,7 @@
                 'train-speed-to': '終了',
                 'train-speed-step': '間隔',
                 'train-speed-step-bars': '小節 +',
+                'train-speed-mins': '分 +',
                 'train-start': '開始',
                 'keyboard-hint': 'Space 再生 · ←→ ±1BPM · Shift+←→ ±10 · T タップ · 1-4 分割',
                 'share-btn': '設定を共有',
@@ -681,6 +720,7 @@
                 'train-speed-to': 'a',
                 'train-speed-step': 'Cada',
                 'train-speed-step-bars': 'comp. +',
+                'train-speed-mins': 'min +',
                 'train-start': 'Comenzar',
                 'keyboard-hint': 'Espacio Iniciar · ←→ ±1BPM · Shift+←→ ±10 · T Tap · 1-4 Subdiv',
                 'share-btn': 'Compartir',
@@ -735,6 +775,7 @@
                 'train-speed-to': 'a',
                 'train-speed-step': 'A cada',
                 'train-speed-step-bars': 'comp. +',
+                'train-speed-mins': 'min +',
                 'train-start': 'Começar',
                 'keyboard-hint': 'Espaço Iniciar · ←→ ±1BPM · Shift+←→ ±10 · T Tap · 1-4 Subdiv',
                 'share-btn': 'Compartilhar',
@@ -786,6 +827,7 @@
                 'train-speed-to': '종료',
                 'train-speed-step': '간격',
                 'train-speed-step-bars': '마디 +',
+                'train-speed-mins': '분 +',
                 'train-start': '시작',
                 'keyboard-hint': 'Space 재생 · ←→ ±1BPM · Shift+←→ ±10 · T 탭 · 1-4 세분',
                 'share-btn': '설정 공유',
@@ -837,6 +879,7 @@
                 'train-speed-to': 'bis',
                 'train-speed-step': 'Alle',
                 'train-speed-step-bars': 'Takte +',
+                'train-speed-mins': 'Min +',
                 'train-start': 'Start',
                 'keyboard-hint': 'Leertaste Start · ←→ ±1BPM · Shift+←→ ±10 · T Tippen · 1-4 Untert.',
                 'share-btn': 'Einstellungen teilen',
@@ -888,6 +931,7 @@
                 'train-speed-to': 'à',
                 'train-speed-step': 'Toutes les',
                 'train-speed-step-bars': 'mes. +',
+                'train-speed-mins': 'min +',
                 'train-start': 'Démarrer',
                 'keyboard-hint': 'Espace Démarrer · ←→ ±1BPM · Shift+←→ ±10 · T Tap · 1-4 Subdiv.',
                 'share-btn': 'Partager',
@@ -939,6 +983,7 @@
                 'train-speed-to': 'a',
                 'train-speed-step': 'Ogni',
                 'train-speed-step-bars': 'batt. +',
+                'train-speed-mins': 'min +',
                 'train-start': 'Inizia',
                 'keyboard-hint': 'Spazio Avvia · ←→ ±1BPM · Shift+←→ ±10 · T Tap · 1-4 Suddiv.',
                 'share-btn': 'Condividi',
@@ -990,6 +1035,7 @@
                 'train-speed-to': 'до',
                 'train-speed-step': 'Каждые',
                 'train-speed-step-bars': 'такт. +',
+                'train-speed-mins': 'мин +',
                 'train-start': 'Старт',
                 'keyboard-hint': 'Пробел Старт · ←→ ±1BPM · Shift+←→ ±10 · T Тап · 1-4 Дел.',
                 'share-btn': 'Поделиться',
@@ -1041,6 +1087,7 @@
                 'train-speed-to': 'do',
                 'train-speed-step': 'Co',
                 'train-speed-step-bars': 'takt. +',
+                'train-speed-mins': 'min +',
                 'train-start': 'Start',
                 'keyboard-hint': 'Spacja Start · ←→ ±1BPM · Shift+←→ ±10 · T Stuknij · 1-4 Podz.',
                 'share-btn': 'Udostępnij',
@@ -1092,6 +1139,7 @@
                 'train-speed-to': 'ถึง',
                 'train-speed-step': 'ทุก',
                 'train-speed-step-bars': 'ห้อง +',
+                'train-speed-mins': 'นาที +',
                 'train-start': 'เริ่ม',
                 'keyboard-hint': 'Space เริ่ม · ←→ ±1BPM · Shift+←→ ±10 · T แตะ · 1-4 แบ่ง',
                 'share-btn': 'แชร์การตั้งค่า',
@@ -1143,6 +1191,7 @@
                 'train-speed-to': 'đến',
                 'train-speed-step': 'Mỗi',
                 'train-speed-step-bars': 'ô nhịp +',
+                'train-speed-mins': 'phút +',
                 'train-start': 'Bắt đầu',
                 'keyboard-hint': 'Space Bắt đầu · ←→ ±1BPM · Shift+←→ ±10 · T Chạm · 1-4 Chia',
                 'share-btn': 'Chia sẻ',
@@ -1194,6 +1243,7 @@
                 'train-speed-to': 'သို့',
                 'train-speed-step': 'တိုင်း',
                 'train-speed-step-bars': 'ဘား +',
+                'train-speed-mins': 'မိနစ် +',
                 'train-start': 'စတင်',
                 'keyboard-hint': 'Space စတင် · ←→ ±1BPM · Shift+←→ ±10 · T ထိ · 1-4 အပိုင်း',
                 'share-btn': 'မျှဝေ',
@@ -1245,6 +1295,7 @@
                 'train-speed-to': 'έως',
                 'train-speed-step': 'Κάθε',
                 'train-speed-step-bars': 'μέτρα +',
+                'train-speed-mins': 'λεπτά +',
                 'train-start': 'Έναρξη',
                 'keyboard-hint': 'Space Έναρξη · ←→ ±1BPM · Shift+←→ ±10 · T Χτύπημα · 1-4 Υποδ.',
                 'share-btn': 'Κοινοποίηση',
@@ -1323,6 +1374,8 @@
 
             document.documentElement.lang = lang;
             document.getElementById('langSelect').value = lang;
+            const top = document.getElementById('langSelectTop');
+            if (top) top.value = lang;
         }
 
         // =============================================
@@ -1656,6 +1709,9 @@
                 this.$speedEndBpm = document.getElementById('speedEndBpm');
                 this.$speedStepBars = document.getElementById('speedStepBars');
                 this.$speedStepBpm = document.getElementById('speedStepBpm');
+                this.$speedStepMins = document.getElementById('speedStepMins');
+                this.$speedStepBpmTime = document.getElementById('speedStepBpmTime');
+                this._timeSpeedInterval = null;
                 this.$speedStartBtn = document.getElementById('speedStartBtn');
                 this.$speedStatus = document.getElementById('speedStatus');
 
@@ -1791,14 +1847,41 @@
                     this.ui.setPlayingState(true);
                 }
 
+                // Start time-based speed training
+                this._startTimeSpeed();
+
                 this.$speedStatus.classList.remove('hidden');
                 this.$speedStatus.textContent = this._speedStatusText();
                 this._setTrainBtnText(this.$speedStartBtn, true);
                 this.ui.$playBtn.classList.add('training');
             }
 
+            _startTimeSpeed() {
+                const mins = parseInt(this.$speedStepMins.value) || 2;
+                const bpmInc = parseInt(this.$speedStepBpmTime.value) || 5;
+                if (mins <= 0 || bpmInc <= 0) return;
+                this._clearTimeSpeed();
+                this._timeSpeedInterval = setInterval(() => {
+                    if (!this.running || this.mode !== 'speed') return;
+                    this.speedCurrentBpm += bpmInc;
+                    if (this.speedCurrentBpm >= this.speedEndBpm) {
+                        this.speedCurrentBpm = this.speedEndBpm;
+                        this.ui.setBpm(this.speedEndBpm);
+                        this._stopSpeedTrainer();
+                        return;
+                    }
+                    this.ui.setBpm(this.speedCurrentBpm);
+                    this.$speedStatus.textContent = this._speedStatusText();
+                }, mins * 60000);
+            }
+
+            _clearTimeSpeed() {
+                if (this._timeSpeedInterval) { clearInterval(this._timeSpeedInterval); this._timeSpeedInterval = null; }
+            }
+
             _stopSpeedTrainer() {
                 this.running = false;
+                this._clearTimeSpeed();
                 this.$speedStatus.classList.add('hidden');
                 this._setTrainBtnText(this.$speedStartBtn, false);
                 this.ui.$playBtn.classList.remove('training');
@@ -2291,12 +2374,16 @@
 
                 this.$shareBtn.addEventListener('click', () => this._share());
 
-                // Language selector
-                this.$langSelect.addEventListener('change', () => {
-                    const lang = this.$langSelect.value;
+                // Language selectors (top + bottom)
+                const setLang = (lang) => {
                     applyLang(lang);
                     try { localStorage.setItem('metronome-lang', lang); } catch(e) {}
-                });
+                };
+                this.$langSelect.addEventListener('change', () => setLang(this.$langSelect.value));
+                const $langSelectTop = document.getElementById('langSelectTop');
+                if ($langSelectTop) {
+                    $langSelectTop.addEventListener('change', () => setLang($langSelectTop.value));
+                }
 
                 // Beat counter +/−
                 document.getElementById('beatMinus').addEventListener('click', () => {
