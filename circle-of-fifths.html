@@ -16,7 +16,7 @@
         .theme-btn{background:none;border:1px solid #d0ddd0;border-radius:6px;font-size:16px;cursor:pointer;padding:2px 5px;line-height:1;transition:all .2s ease;flex-shrink:0;outline:none;color:#1a2a1a}
         .theme-btn:hover{background:#e8efe8;border-color:#4F8CFF}
 
-        .content-card{background:#fff;border:1px solid #d0ddd0;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+        .content-card{background:#fff;border:1px solid #d0ddd0;border-radius:16px;padding:18px 20px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.04)}
         .highlight-box{background:#f0f5ff;border:1px solid #c8d6f0;border-radius:10px;padding:16px 20px;margin:16px 0}
         .use-card{background:#fff;border:1px solid #d0ddd0;border-radius:12px;padding:18px;transition:all .2s ease}
         .use-card:hover{border-color:#4F8CFF;box-shadow:0 4px 16px rgba(79,140,255,.1);transform:translateY(-2px)}
@@ -96,36 +96,36 @@
     <main class="flex-1 w-full max-w-4xl mx-auto px-4 pb-12">
 
         <!-- Title -->
-        <div class="text-center mb-6">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-1">🎵 音乐五度圈</h1>
-            <p class="text-gray-500 text-sm">Circle of Fifths — 点任意键查看它的和弦家族</p>
+        <div class="text-center mb-3">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">🎵 音乐五度圈</h1>
+            <p class="text-gray-500 text-xs">Circle of Fifths — 点任意键查看它的和弦家族</p>
         </div>
 
         <!-- ===== 五度圈主图 ===== -->
-        <div class="content-card" style="padding:12px">
+        <div class="content-card" style="padding:10px">
             <div class="flex justify-center">
-                <svg viewBox="0 0 620 620" id="circleSVG" style="max-width:100%;height:auto">
+                <svg viewBox="0 0 440 440" id="circleSVG" style="max-width:420px;width:100%;height:auto">
                     <defs>
                         <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
                             <stop offset="0%" stop-color="#fafcfd" />
                             <stop offset="85%" stop-color="#f0f4f0" />
                             <stop offset="100%" stop-color="#e0e8e0" />
                         </radialGradient>
-                        <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+                        <filter id="shadow"><feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-opacity="0.1"/></filter>
                     </defs>
 
                     <!-- Large background -->
-                    <circle cx="310" cy="310" r="300" fill="url(#bgGrad)" stroke="#d0ddd0" stroke-width="1.5"/>
+                    <circle cx="220" cy="220" r="212" fill="url(#bgGrad)" stroke="#d0ddd0" stroke-width="1.2"/>
 
                     <!-- Rings -->
-                    <circle cx="310" cy="310" r="260" fill="none" stroke="#d0ddd0" stroke-width="1" stroke-dasharray="5 5"/>
-                    <circle cx="310" cy="310" r="180" fill="none" stroke="#d0ddd0" stroke-width="1" stroke-dasharray="3 6"/>
-                    <circle cx="310" cy="310" r="90" fill="none" stroke="#d0ddd0" stroke-width="0.8"/>
+                    <circle cx="220" cy="220" r="185" fill="none" stroke="#d0ddd0" stroke-width="0.8" stroke-dasharray="5 5"/>
+                    <circle cx="220" cy="220" r="128" fill="none" stroke="#d0ddd0" stroke-width="0.8" stroke-dasharray="3 6"/>
+                    <circle cx="220" cy="220" r="62" fill="none" stroke="#d0ddd0" stroke-width="0.6"/>
 
                     <!-- Center -->
-                    <circle cx="310" cy="310" r="55" fill="#4F8CFF" opacity="0.06" stroke="#4F8CFF" stroke-width="1.5"/>
-                    <text x="310" y="305" text-anchor="middle" font-size="13" font-weight="800" fill="#4F8CFF">五度圈</text>
-                    <text x="310" y="322" text-anchor="middle" font-size="9" fill="#999">Circle of 5ths</text>
+                    <circle cx="220" cy="220" r="38" fill="#4F8CFF" opacity="0.06" stroke="#4F8CFF" stroke-width="1.2"/>
+                    <text x="220" y="216" text-anchor="middle" font-size="11" font-weight="800" fill="#4F8CFF">五度圈</text>
+                    <text x="220" y="232" text-anchor="middle" font-size="8" fill="#999">Circle of 5ths</text>
 
                     <!--
                     Major keys on outer ring (radius 258)
@@ -142,8 +142,8 @@
 
                     <!-- Direction indicators -->
                     <g id="direction-labels">
-                        <text x="460" y="155" text-anchor="middle" font-size="11" fill="#4F8CFF" font-weight="600">顺时针 → 升号 ♯</text>
-                        <text x="160" y="155" text-anchor="middle" font-size="11" fill="#EC4899" font-weight="600">逆时针 → 降号 ♭</text>
+                        <text x="340" y="118" text-anchor="middle" font-size="9" fill="#4F8CFF" font-weight="600">顺时针 → 升号 ♯</text>
+                        <text x="100" y="118" text-anchor="middle" font-size="9" fill="#EC4899" font-weight="600">逆时针 → 降号 ♭</text>
                     </g>
 
                     <!-- No legend needed - design is self-explanatory -->
@@ -152,11 +152,11 @@
         </div>
 
         <!-- ===== 选中调的和弦表 ===== -->
-        <div class="content-card" id="chordFamilyCard" style="display:none">
-            <h2 class="text-lg font-bold text-gray-900 mb-3 text-center">
+        <div class="content-card" id="chordFamilyCard" style="display:block">
+            <h2 class="text-base font-bold text-gray-900 mb-2 text-center">
                 和弦家族：<span id="selectedKeyName" class="text-blue-600">C 大调</span> 的七级和弦
             </h2>
-            <p class="text-gray-500 text-xs text-center mb-4">
+            <p class="text-gray-500 text-xs text-center mb-2">
                 🟢 绿圈 = 大三和弦 (I/IV/V) 🔴 红圈 = 小三和弦 (ii/iii/vi) 🟣 紫圈 = 减三和弦 (vii°)
             </p>
             <div class="overflow-x-auto">
@@ -216,7 +216,7 @@
 
         <!-- ===== 什么是五度圈 ===== -->
         <div class="content-card">
-            <h2 class="text-xl font-bold text-gray-900 mb-3">📖 什么是五度圈？</h2>
+            <h2 class="text-lg font-bold text-gray-900 mb-2">📖 什么是五度圈？</h2>
             <p class="text-gray-600 leading-relaxed mb-3">
                 五度圈把 <strong>12 个调性</strong> 按<strong>纯五度</strong>（7 个半音）间隔排成圆环。
                 相邻的调最亲近（只差 1 个升/降号），对面的调最远。
@@ -232,7 +232,7 @@
 
         <!-- ===== 怎么找各级和弦 ===== -->
         <div class="content-card">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">🛠️ 核心技能：一眼找出任何调的各级和弦</h2>
+            <h2 class="text-lg font-bold text-gray-900 mb-3">🛠️ 核心技能：一眼找出任何调的各级和弦</h2>
             <p class="text-gray-600 leading-relaxed mb-4">
                 这是五度圈<strong>最实用的功能</strong>。给定一个调，它的 7 个顺阶和弦在圈上排成一段连续的弧：
             </p>
@@ -277,7 +277,7 @@
 
         <!-- ===== 怎么读五度圈 ===== -->
         <div class="content-card">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">👀 怎么读五度圈？</h2>
+            <h2 class="text-lg font-bold text-gray-900 mb-3">👀 怎么读五度圈？</h2>
 
             <h3 class="text-lg font-semibold text-gray-800 mb-2">外圈：12 个大调</h3>
             <p class="text-gray-600 leading-relaxed mb-4">顶端 C（0 升/降号），顺时针加升号，逆时针加降号。</p>
@@ -323,8 +323,8 @@
         {name:"F",  min:"Dm",  acc:"♭1", accLabel:"♭",   sharps:0, flats:1 }
     ];
 
-    const cx = 310, cy = 310;
-    const majorR = 258, minorR = 175, majorDotR = 34, minorDotR = 20;
+    const cx = 220, cy = 220;
+    const majorR = 183, minorR = 125, majorDotR = 24, minorDotR = 15;
 
     function getPos(index) {
         const angle = (index * 30 - 90) * Math.PI / 180; // -90° so C starts at top
