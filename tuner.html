@@ -37,23 +37,31 @@
 
         /* Tuner display */
         .tuner-frame {
-            background: linear-gradient(180deg, #1c1c24 0%, #141419 100%);
+            background: linear-gradient(180deg, #f8fafb 0%, #eef2f5 100%);
             border-radius: 24px;
             padding: 28px 24px 20px;
             position: relative;
+            border: 1px solid #dde3e8;
         }
-        body.dark .tuner-frame { background: linear-gradient(180deg, #1e1e28 0%, #18181f 100%); }
+        body.dark .tuner-frame { background: linear-gradient(180deg, #1e1e28 0%, #18181f 100%); border-color: #2a2a35; }
+        body.dark .mode-chip { border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: rgba(255,255,255,.55); }
+        body.dark .mode-chip:hover { border-color: rgba(255,255,255,.35); color: rgba(255,255,255,.85); }
+        body.dark .string-dot { border-color: rgba(255,255,255,.15); background: rgba(255,255,255,.04); color: rgba(255,255,255,.35); }
+        body.dark #noteText { fill: #fff!important; }
+        body.dark #freqText { fill: rgba(255,255,255,.45)!important; }
+        body.dark #devText { fill: rgba(255,255,255,.4)!important; }
+        body.dark #hintText { color: rgba(255,255,255,.25)!important; }
 
         .mode-chip {
             padding: 7px 18px; border-radius: 22px;
-            border: 1px solid rgba(255,255,255,.18);
-            background: rgba(255,255,255,.06);
-            color: rgba(255,255,255,.55);
+            border: 1px solid #d0d8e0;
+            background: #fff;
+            color: #667;
             font-size: 12px; font-weight: 600;
             cursor: pointer; transition: all .2s ease;
             white-space: nowrap; letter-spacing: .3px;
         }
-        .mode-chip:hover { border-color: rgba(255,255,255,.35); color: rgba(255,255,255,.85); }
+        .mode-chip:hover { border-color: #4F8CFF; color: #4F8CFF; }
         .mode-chip.active { background: #4F8CFF; border-color: #4F8CFF; color: #fff; box-shadow: 0 2px 14px rgba(79,140,255,.35); }
 
         .string-dot {
@@ -61,10 +69,10 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 11px; font-weight: 700; letter-spacing: .2px;
             transition: all .3s cubic-bezier(.4,0,.2,1);
-            border: 1.5px solid rgba(255,255,255,.15);
-            background: rgba(255,255,255,.04); color: rgba(255,255,255,.35);
+            border: 1.5px solid #d8dde3;
+            background: #f5f6f8; color: #99a;
         }
-        .string-dot.near { background: rgba(79,140,255,.25); border-color: rgba(79,140,255,.6); color: #4F8CFF; transform: scale(1.1); }
+        .string-dot.near { background: rgba(79,140,255,.15); border-color: rgba(79,140,255,.6); color: #4F8CFF; transform: scale(1.1); }
         .string-dot.locked { background: #2e7d32; border-color: #4ECB71; color: #fff; transform: scale(1.15); box-shadow: 0 0 16px rgba(78,203,113,.35); }
         .string-dot .num { font-size: 9px; margin-right: 1px; opacity: .7; }
 
@@ -151,7 +159,7 @@
 
                     <!-- Background arc -->
                     <path d="M 60 240 A 180 180 0 0 1 380 240"
-                          fill="none" stroke="rgba(255,255,255,.08)" stroke-width="26" stroke-linecap="round"/>
+                          fill="none" stroke="#e4e8ec" stroke-width="26" stroke-linecap="round"/>
 
                     <!-- Colored zone arc -->
                     <path d="M 68 236 A 172 172 0 0 1 372 236"
@@ -160,27 +168,27 @@
                     <!-- Tick lines rendered by JS below -->
                     <g id="tickGroup"></g>
 
-                    <!-- Fine white guide marks at center -->
-                    <line x1="220" y1="62" x2="220" y2="85" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round"/>
-                    <circle cx="220" cy="78" r="3" fill="#fff" opacity="0.5"/>
+                    <!-- Fine guide marks at center -->
+                    <line x1="220" y1="62" x2="220" y2="85" stroke="#999" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="220" cy="78" r="3" fill="#999"/>
 
                     <!-- Needle -->
                     <g id="needle" filter="url(#needleShadow)" style="transform:rotate(0deg);transform-origin:220px 236px;transition:transform .1s cubic-bezier(.25,.1,.25,1)">
-                        <polygon points="217,236 223,236 221,58 219,58" fill="#fff" opacity="0.95"/>
+                        <polygon points="217,236 223,236 221,58 219,58" fill="#333" opacity="0.9"/>
                     </g>
 
                     <!-- Center cap -->
-                    <circle cx="220" cy="236" r="14" fill="#2a2a35" stroke="rgba(255,255,255,.12)" stroke-width="1.5"/>
+                    <circle cx="220" cy="236" r="14" fill="#e8eaed" stroke="#ccd" stroke-width="1.5"/>
                     <circle cx="220" cy="236" r="6" fill="#4F8CFF"/>
 
                     <!-- Big center note name -->
-                    <text id="noteText" x="220" y="210" text-anchor="middle" font-size="56" font-weight="800" fill="#fff" letter-spacing="-1">--</text>
+                    <text id="noteText" x="220" y="210" text-anchor="middle" font-size="56" font-weight="800" fill="#1a2a1a" letter-spacing="-1">--</text>
 
                     <!-- Octave + freq below -->
-                    <text id="freqText" x="220" y="228" text-anchor="middle" font-size="12" fill="rgba(255,255,255,.45)">A4 = 440 Hz</text>
+                    <text id="freqText" x="220" y="228" text-anchor="middle" font-size="12" fill="#999">A4 = 440 Hz</text>
 
                     <!-- Deviation display -->
-                    <text id="devText" x="220" y="186" text-anchor="middle" font-size="15" font-weight="700" fill="rgba(255,255,255,.4)">等待收音</text>
+                    <text id="devText" x="220" y="186" text-anchor="middle" font-size="15" font-weight="700" fill="#888">等待收音</text>
                 </svg>
             </div>
 
@@ -190,7 +198,7 @@
                     <span id="powerIcon">🎤</span>
                 </button>
             </div>
-            <p style="color:rgba(255,255,255,.25);font-size:11px;text-align:center;margin-top:8px" id="hintText">点击麦克风按钮，允许浏览器访问麦克风</p>
+            <p style="color:#999;font-size:11px;text-align:center;margin-top:8px" id="hintText">点击麦克风按钮，允许浏览器访问麦克风</p>
         </div>
 
         <!-- ===== Reference table ===== -->
@@ -250,7 +258,7 @@
             const line = document.createElementNS('http://www.w3.org/2000/svg','line');
             line.setAttribute('x1',x1); line.setAttribute('y1',y1);
             line.setAttribute('x2',x2); line.setAttribute('y2',y2);
-            line.setAttribute('stroke', i===0?'rgba(255,255,255,.8)':(i%10===0?'rgba(255,255,255,.35)':'rgba(255,255,255,.15)'));
+            line.setAttribute('stroke', i===0?'#555':(i%10===0?'#999':'#ccd'));
             line.setAttribute('stroke-width', i===0?'2':(i%10===0?'1.2':'.7'));
             line.setAttribute('stroke-linecap','round');
             g.appendChild(line);
@@ -260,7 +268,7 @@
                 const t = document.createElementNS('http://www.w3.org/2000/svg','text');
                 t.setAttribute('x',lx); t.setAttribute('y',ly);
                 t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','central');
-                t.setAttribute('font-size','10'); t.setAttribute('fill','rgba(255,255,255,.4)'); t.setAttribute('font-weight','500');
+                t.setAttribute('font-size','10'); t.setAttribute('fill','#999'); t.setAttribute('font-weight','500');
                 t.textContent = i>0?'+'+i:i;
                 g.appendChild(t);
             }
@@ -299,7 +307,7 @@
         document.getElementById('noteText').textContent='--';
         document.getElementById('freqText').textContent='A4 = 440 Hz';
         document.getElementById('devText').textContent='等待收音';
-        document.getElementById('devText').setAttribute('fill','rgba(255,255,255,.4)');
+        document.getElementById('devText').setAttribute('fill','#888');
         document.getElementById('needle').style.transform='rotate(0deg)';
         updateStrings(null);
     }
