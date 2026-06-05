@@ -104,28 +104,28 @@
         <!-- ===== 五度圈主图 ===== -->
         <div class="content-card" style="padding:10px">
             <div class="flex justify-center">
-                <svg viewBox="0 0 540 540" id="circleSVG" style="max-width:520px;width:100%;height:auto">
+                <svg viewBox="0 0 810 810" id="circleSVG" style="max-width:780px;width:100%;height:auto">
                     <defs>
                         <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
                             <stop offset="0%" stop-color="#fafcfd" />
                             <stop offset="85%" stop-color="#f0f4f0" />
                             <stop offset="100%" stop-color="#e0e8e0" />
                         </radialGradient>
-                        <filter id="shadow"><feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-opacity="0.1"/></filter>
+                        <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
                     </defs>
 
                     <!-- Large background -->
-                    <circle cx="270" cy="270" r="260" fill="url(#bgGrad)" stroke="#d0ddd0" stroke-width="1.4"/>
+                    <circle cx="405" cy="405" r="390" fill="url(#bgGrad)" stroke="#d0ddd0" stroke-width="2"/>
 
                     <!-- Rings -->
-                    <circle cx="270" cy="270" r="225" fill="none" stroke="#d0ddd0" stroke-width="1" stroke-dasharray="5 5"/>
-                    <circle cx="270" cy="270" r="158" fill="none" stroke="#d0ddd0" stroke-width="1" stroke-dasharray="3 6"/>
-                    <circle cx="270" cy="270" r="78" fill="none" stroke="#d0ddd0" stroke-width="0.8"/>
+                    <circle cx="405" cy="405" r="338" fill="none" stroke="#d0ddd0" stroke-width="1.4" stroke-dasharray="7 7"/>
+                    <circle cx="405" cy="405" r="237" fill="none" stroke="#d0ddd0" stroke-width="1.4" stroke-dasharray="4 8"/>
+                    <circle cx="405" cy="405" r="117" fill="none" stroke="#d0ddd0" stroke-width="1.1"/>
 
                     <!-- Center -->
-                    <circle cx="270" cy="270" r="48" fill="#4F8CFF" opacity="0.06" stroke="#4F8CFF" stroke-width="1.4"/>
-                    <text x="270" y="265" text-anchor="middle" font-size="13" font-weight="800" fill="#4F8CFF">五度圈</text>
-                    <text x="270" y="283" text-anchor="middle" font-size="10" fill="#999">Circle of 5ths</text>
+                    <circle cx="405" cy="405" r="72" fill="#4F8CFF" opacity="0.06" stroke="#4F8CFF" stroke-width="2"/>
+                    <text x="405" y="398" text-anchor="middle" font-size="19" font-weight="800" fill="#4F8CFF">五度圈</text>
+                    <text x="405" y="424" text-anchor="middle" font-size="15" fill="#999">Circle of 5ths</text>
 
                     <!--
                     Major keys on outer ring (radius 258)
@@ -142,8 +142,8 @@
 
                     <!-- Direction indicators -->
                     <g id="direction-labels">
-                        <text x="410" y="145" text-anchor="middle" font-size="11" fill="#4F8CFF" font-weight="600">顺时针 → 升号 ♯</text>
-                        <text x="130" y="145" text-anchor="middle" font-size="11" fill="#EC4899" font-weight="600">逆时针 → 降号 ♭</text>
+                        <text x="615" y="218" text-anchor="middle" font-size="16" fill="#4F8CFF" font-weight="600">顺时针 → 升号 ♯</text>
+                        <text x="195" y="218" text-anchor="middle" font-size="16" fill="#EC4899" font-weight="600">逆时针 → 降号 ♭</text>
                     </g>
 
                     <!-- No legend needed - design is self-explanatory -->
@@ -323,8 +323,8 @@
         {name:"F",  min:"Dm",  acc:"♭1", accLabel:"♭",   sharps:0, flats:1 }
     ];
 
-    const cx = 270, cy = 270;
-    const majorR = 225, minorR = 155, majorDotR = 29, minorDotR = 18;
+    const cx = 405, cy = 405;
+    const majorR = 338, minorR = 233, majorDotR = 44, minorDotR = 27;
 
     function getPos(index) {
         const angle = (index * 30 - 90) * Math.PI / 180; // -90° so C starts at top
@@ -351,10 +351,10 @@
         g.setAttribute('data-name', key.name);
         g.innerHTML = `
             <circle cx="${pos.x}" cy="${pos.y}" r="${majorDotR}" fill="${color}" opacity="${opacity}"
-                    stroke="${color}" stroke-width="1.8" class="key-dot" filter="url(#shadow)"/>
-            <text x="${pos.x}" y="${pos.y - 2}" text-anchor="middle" font-size="19" font-weight="700"
+                    stroke="${color}" stroke-width="2.5" class="key-dot" filter="url(#shadow)"/>
+            <text x="${pos.x}" y="${pos.y - 4}" text-anchor="middle" font-size="28" font-weight="700"
                   fill="#2C313C" class="key-name">${key.name}</text>
-            <text x="${pos.x}" y="${pos.y + 15}" text-anchor="middle" font-size="10" fill="#888">${key.acc}</text>
+            <text x="${pos.x}" y="${pos.y + 22}" text-anchor="middle" font-size="15" fill="#888">${key.acc}</text>
         `;
         g.addEventListener('click', () => selectKey(i));
         majorGroup.appendChild(g);
@@ -366,8 +366,8 @@
         mg.setAttribute('data-index', i);
         mg.innerHTML = `
             <circle cx="${mpos.x}" cy="${mpos.y}" r="${minorDotR}" fill="#f5edf7"
-                    stroke="#c8b0d4" stroke-width="1.2"/>
-            <text x="${mpos.x}" y="${mpos.y + 3}" text-anchor="middle" font-size="11" font-weight="600"
+                    stroke="#c8b0d4" stroke-width="1.8"/>
+            <text x="${mpos.x}" y="${mpos.y + 4}" text-anchor="middle" font-size="16" font-weight="600"
                   fill="#7a6a80">${key.min}</text>
         `;
         mg.addEventListener('click', (e) => { e.stopPropagation(); selectKey(i); });
