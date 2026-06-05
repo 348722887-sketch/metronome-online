@@ -181,8 +181,8 @@
                     <line x1="220" y1="62" x2="220" y2="85" stroke="#999" stroke-width="2" stroke-linecap="round"/>
                     <circle cx="220" cy="78" r="3" fill="#999"/>
 
-                    <!-- Needle -->
-                    <g id="needle" filter="url(#needleShadow)" style="transform:rotate(0deg);transform-origin:220px 236px;transition:transform .1s cubic-bezier(.25,.1,.25,1)">
+                    <!-- Needle — smooth damping: fast response + gentle settle -->
+                    <g id="needle" filter="url(#needleShadow)" style="transform:rotate(0deg);transform-origin:220px 236px;transition:transform .12s cubic-bezier(.22,.05,.15,1)">
                         <polygon points="217,236 223,236 221,58 219,58" fill="#333" opacity="0.9"/>
                     </g>
 
@@ -284,11 +284,27 @@
     })();
 
     // ===== AUDIO ENGINE =====
-    let ctx=null, analyser=null, running=false, mode='guitar';
-    let smoothedHz=null;  // smoothed frequency in Hz (log-space is more accurate)
+    let ctx=null, analyser=null, bandpassLP=null, bandpassHP=null, running=false, mode='guitar';
+    let smoothedHz=null;  // smoothed frequency in Hz
+    let smoothedCents=0;  // smoothed cents for needle (separate from freq smoothing)
     let lastDetectionTime=0;
-    let noiseRejectCount=0; // consecutive non-musical frames — suppress noise
+    let noiseRejectCount=0; // consecutive non-musical frames
+    let musicalFrameCount=0; // consecutive musical frames — must reach threshold before display update
+    let peakToAvg=0; // spectral peak-to-average ratio (tonality measure)
+    let tickFrameCount=0; // frame counter for periodic spectral analysis
     const HOLD_MS=1800;
+    const MUSICAL_FRAMES_NEEDED=3; // need 3 consecutive musical frames before trusting the reading
+
+    // Bandpass filter frequencies by instrument mode
+    function getBandpassRange(m) {
+        switch(m) {
+            case 'bass':    return {low:35, high:600};
+            case 'violin':  return {low:180, high:2500};
+            case 'ukulele': return {low:200, high:1200};
+            case 'guitar':
+            default:        return {low:70, high:1500};
+        }
+    }
 
     async function toggleTuner() {
         if (running) { stopTuner(); return; }
@@ -297,10 +313,30 @@
             const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
             ctx = new (window.AudioContext||window.webkitAudioContext)();
             const src = ctx.createMediaStreamSource(stream);
+
+            // === BANDPASS PRE-FILTER: key noise immunity layer ===
+            // GuitarTuna/Fender use bandpass to reject rumble & hiss before pitch detection
+            const range = getBandpassRange(mode);
+            bandpassHP = ctx.createBiquadFilter();
+            bandpassHP.type = 'highpass';
+            bandpassHP.frequency.value = range.low;
+            bandpassHP.Q.value = 0.7;
+
+            bandpassLP = ctx.createBiquadFilter();
+            bandpassLP.type = 'lowpass';
+            bandpassLP.frequency.value = range.high;
+            bandpassLP.Q.value = 0.7;
+
             analyser = ctx.createAnalyser();
-            analyser.fftSize=2048; // proven sweet spot (sen-ltd/pitch-detector, cwilso/PitchDetect)
+            analyser.fftSize=2048;
             analyser.smoothingTimeConstant=0.3;
-            src.connect(analyser);
+
+            // Chain: mic → highpass → lowpass → analyser
+            src.connect(bandpassHP);
+            bandpassHP.connect(bandpassLP);
+            bandpassLP.connect(analyser);
+            // Don't connect to speakers — we're analysis only
+
             running=true;
             document.getElementById('powerIcon').textContent='⏹';
             document.getElementById('powerBtn').classList.add('on');
@@ -313,8 +349,9 @@
     }
 
     function stopTuner() {
-        running=false;smoothedHz=null;lastDetectionTime=0;noiseRejectCount=0;
-        if(ctx){ctx.close();ctx=null;analyser=null;}
+        running=false;smoothedHz=null;smoothedCents=0;
+        lastDetectionTime=0;noiseRejectCount=0;musicalFrameCount=0;peakToAvg=0;tickFrameCount=0;
+        if(ctx){ctx.close();ctx=null;analyser=null;bandpassLP=null;bandpassHP=null;}
         document.getElementById('powerIcon').textContent='🎤';
         document.getElementById('powerBtn').classList.remove('on');
         document.getElementById('hintText').textContent='已停止';
@@ -326,16 +363,23 @@
         updateStrings(null);
     }
 
-    // Autocorrelation + parabolic interpolation (sen-ltd/pitch-detector, cwilso/PitchDetect)
+    // Autocorrelation + parabolic interpolation
+    // Enhanced with RMS amplitude gate and stricter noise gate
     function detectPitch(buf) {
         const n=buf.length, sr=ctx.sampleRate;
         const minLag=Math.floor(sr/1500); // ~C6
         const maxLag=Math.floor(sr/60);   // ~B1
-        if (maxLag>=n) return -1;
+        if (maxLag>=n) return {freq:-1, rms:0, corrRatio:0};
 
-        // Compute r[0] for noise threshold
-        let r0=0; for(let i=0;i<n;i++)r0+=buf[i]*buf[i];
-        if(r0<1e-12) return -1;
+        // Compute RMS amplitude and r[0] (same underlying sum-of-squares)
+        let r0=0;
+        for(let i=0;i<n;i++){ const v=buf[i]; r0+=v*v; }
+        const rms=Math.sqrt(r0/n);
+
+        // === RMS AMPLITUDE GATE ===
+        // Typical room ambient: -60 to -50 dBFS. Musical tones: -30 to -10 dBFS.
+        // Gate at -48 dBFS (about 0.4% of full scale) — below this is silence or faint noise
+        if (rms < 0.004) return {freq:-2, rms, corrRatio:0}; // special code: too quiet
 
         // Autocorrelation
         let bestLag=-1, bestVal=0;
@@ -345,8 +389,11 @@
             if(r>bestVal){bestVal=r;bestLag=lag;}
         }
 
-        // Noise gate: peak must be >= 65% of zero-lag (phones need higher threshold)
-        if(bestLag<0||bestVal/r0<0.65) return -1;
+        const corrRatio = (r0>1e-12) ? bestVal/r0 : 0;
+
+        // === STRICTER NOISE GATE ===
+        // Phone mics are very sensitive — raised from 0.65 to 0.72
+        if(bestLag<0||corrRatio<0.72) return {freq:-3, rms, corrRatio}; // special code: weak correlation
 
         // Parabolic interpolation for sub-sample precision
         let cm1=0,c1=0;
@@ -354,7 +401,35 @@
         if(bestLag<maxLag-1){for(let i=0;i<n-bestLag-1;i++)c1+=buf[i]*buf[i+bestLag+1];}
         const div=2*(2*bestVal-c1-cm1);
         const refinedLag=(Math.abs(div)<1e-10)?bestLag:bestLag+(c1-cm1)/div;
-        return (refinedLag>0)?sr/refinedLag:sr/bestLag;
+        const freq = (refinedLag>0)?sr/refinedLag:sr/bestLag;
+        return {freq, rms, corrRatio};
+    }
+
+    // Spectral tonality check: musical tones have peaked spectra, noise is flat
+    // Uses peak-to-average ratio of FFT magnitude bins
+    function computeSpectralTonality() {
+        const fftSize = analyser.fftSize;
+        const freqData = new Float32Array(fftSize/2);
+        analyser.getFloatFrequencyData(freqData);
+
+        // Convert dB to linear magnitude and find peak / average
+        let maxMag = -Infinity, sumMag = 0, count = 0;
+        // Only check bins in our instrument range (skip DC and very high bins)
+        const sr = ctx.sampleRate;
+        const lowBin = Math.floor(50 * fftSize / sr);    // ~50Hz
+        const highBin = Math.floor(2500 * fftSize / sr); // ~2500Hz
+
+        for (let i = lowBin; i < Math.min(highBin, freqData.length); i++) {
+            // dBFS to linear: 10^(dB/20)
+            const linear = Math.pow(10, freqData[i] / 20);
+            sumMag += linear;
+            count++;
+            if (linear > maxMag) maxMag = linear;
+        }
+
+        const avgMag = count > 0 ? sumMag / count : 0;
+        // Peak-to-average ratio: >8 = clearly tonal, <4 = likely noise
+        return avgMag > 1e-12 ? maxMag / avgMag : 1;
     }
 
     function tick() {
@@ -362,49 +437,127 @@
         const buf=new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(buf);
         const now=performance.now();
-        const f=detectPitch(buf);
+        const result=detectPitch(buf);
+        const f=result.freq;
 
         if(f>40&&f<1800){
-            // Musical note validation: must be within 40 cents of a real note.
-            // Environmental noise (fans, hum, traffic) won't match musical pitches exactly.
+            // === MUSICAL NOTE VALIDATION ===
             const rawMidi=69+12*Math.log2(f/440);
             const nearestNote=Math.round(rawMidi);
             const centsOff=100*(rawMidi-nearestNote);
 
-            // If too far from any real note → noise, not music
-            if(Math.abs(centsOff)>40){
+            // === SPECTRAL TONALITY CHECK ===
+            // Recompute periodically: every 4 frames during clean signal, or at start of new burst
+            tickFrameCount++;
+            const needsFreshTonality = (musicalFrameCount===0 && noiseRejectCount>0) || (tickFrameCount % 4 === 0);
+            if (needsFreshTonality) {
+                peakToAvg = computeSpectralTonality();
+            }
+
+            // === THREE-LAYER NOISE GATE ===
+            // Layer 1: Cents deviation check (tightened from ±40 to ±30)
+            // Layer 2: Correlation quality (already checked in detectPitch at 0.72)
+            // Layer 3: Spectral tonality (PAR > 5 means clear spectral peaks = musical)
+            const centsOk = Math.abs(centsOff) <= 30;
+            const spectralOk = peakToAvg > 5.0;
+            const isMusical = centsOk && spectralOk;
+
+            if(!isMusical){
                 noiseRejectCount++;
-                // Only clear display after 10 consecutive noise frames (prevent flicker)
-                if(noiseRejectCount>10&&smoothedHz!==null&&(now-lastDetectionTime)>=HOLD_MS){
+                musicalFrameCount=0;
+                // Clear display after 5 consecutive noise frames (down from 10 for faster response)
+                if(noiseRejectCount>=5 && smoothedHz!==null && (now-lastDetectionTime)>=HOLD_MS){
                     document.getElementById('noteText').textContent='--';
                     document.getElementById('freqLine').textContent='等待信号…';
                     document.getElementById('devText').textContent='';
                     document.getElementById('needle').style.transform='rotate(0deg)';
-                    updateStrings(null);smoothedHz=null;
+                    updateStrings(null);smoothedHz=null;smoothedCents=0;
                 }
                 requestAnimationFrame(tick);return;
             }
-            // Valid musical signal
+
+            // === VALID MUSICAL SIGNAL ===
             noiseRejectCount=0;
+            musicalFrameCount++;
             lastDetectionTime=now;
 
-            if(smoothedHz===null) smoothedHz=f;
-            else if(Math.abs(f-smoothedHz)/smoothedHz<0.35){
-                smoothedHz=smoothedHz*0.6+f*0.4;
+            // === MULTI-FRAME CONFIRMATION ===
+            // Require N consecutive musical frames before trusting the reading
+            // This prevents single-frame noise blips from moving the needle
+            if (musicalFrameCount < MUSICAL_FRAMES_NEEDED) {
+                requestAnimationFrame(tick);return;
+            }
+
+            // === ADAPTIVE SMOOTHING ===
+            // If signal is stable (new reading close to current), use heavy smoothing
+            // If signal is changing (new note / bend), use faster response
+            if(smoothedHz===null){
+                smoothedHz=f;
+                smoothedCents=centsOff;
+            } else {
+                const freqChange = Math.abs(f-smoothedHz)/smoothedHz;
+                // Reject wild jumps (>30% frequency change) as likely octave errors or noise
+                if (freqChange > 0.30) {
+                    requestAnimationFrame(tick);return;
+                }
+
+                // Adaptive smoothing weight based on signal stability
+                // Stable signal (<2% change): heavy smoothing → comfortable needle
+                // Moderate change (2-10%): medium smoothing
+                // Large change (>10%): faster tracking (new note / slide)
+                let smooth;
+                if (freqChange < 0.02)      smooth = 0.15; // heavy smoothing: needle stays calm
+                else if (freqChange < 0.10) smooth = 0.30; // medium
+                else                         smooth = 0.50; // fast: track bends & slides
+
+                smoothedHz = smoothedHz*(1-smooth) + f*smooth;
+
+                // Needle cents smoothing: separate, heavier for display comfort
+                const centsSmooth = (Math.abs(centsOff - smoothedCents) < 3) ? 0.12 : 0.35;
+                smoothedCents = smoothedCents*(1-centsSmooth) + centsOff*centsSmooth;
             }
             const midi=69+12*Math.log2(smoothedHz/440);
             const mr=Math.round(midi),cents=100*(midi-mr);
             updateDisplay(midiToNote(mr+cents/100),cents,mr);
             updateStrings(mr);
-        }else if(smoothedHz!==null&&(now-lastDetectionTime)<HOLD_MS){
+        } else if (f===-2) {
+            // Too quiet (RMS gate) — treat as silence
+            noiseRejectCount++;
+            musicalFrameCount=0;
+            if (noiseRejectCount>=3 && smoothedHz!==null && (now-lastDetectionTime)>=HOLD_MS) {
+                document.getElementById('noteText').textContent='--';
+                document.getElementById('freqLine').textContent='等待信号…';
+                document.getElementById('devText').textContent='';
+                document.getElementById('needle').style.transform='rotate(0deg)';
+                updateStrings(null);smoothedHz=null;smoothedCents=0;
+            }
+        } else if (f===-3) {
+            // Weak correlation (not periodic enough) — treat as noise
+            noiseRejectCount++;
+            musicalFrameCount=0;
+            if (noiseRejectCount>=3 && smoothedHz!==null && (now-lastDetectionTime)>=HOLD_MS) {
+                document.getElementById('noteText').textContent='--';
+                document.getElementById('freqLine').textContent='等待信号…';
+                document.getElementById('devText').textContent='';
+                document.getElementById('needle').style.transform='rotate(0deg)';
+                updateStrings(null);smoothedHz=null;smoothedCents=0;
+            }
+        } else if(smoothedHz!==null&&(now-lastDetectionTime)<HOLD_MS){
             // Hold display — keep last reading visible
+            // Gentle decay of needle toward center during hold
+            if (Math.abs(smoothedCents) > 0.5) {
+                smoothedCents *= 0.95; // slow drift back to center
+            }
+            const midi=69+12*Math.log2(smoothedHz/440);
+            const mr=Math.round(midi),cents=100*(midi-mr);
+            updateDisplay(midiToNote(mr+cents/100),smoothedCents,mr);
         }else if(smoothedHz!==null){
             document.getElementById('noteText').textContent='--';
             document.getElementById('freqLine').textContent='等待信号…';
             document.getElementById('devText').textContent='';
             document.getElementById('needle').style.transform='rotate(0deg)';
             updateStrings(null);
-            smoothedHz=null;noiseRejectCount=0;
+            smoothedHz=null;smoothedCents=0;noiseRejectCount=0;musicalFrameCount=0;
         }
         requestAnimationFrame(tick);
     }
@@ -417,14 +570,34 @@
         fEl.textContent=note.freq.toFixed(1)+' Hz · MIDI '+midi;
 
         const abs=Math.abs(cents);
-        let color, dev;
-        if (abs<5) { color='#4ECB71'; dev='✓ 准了'; nEl.style.filter='url(#softGlow)'; }
-        else if (abs<15) { color='#f59e0b'; dev=(cents>0?'偏高 ↑ ':'偏低 ↓ ')+abs.toFixed(0)+'¢'; nEl.style.filter='none'; }
-        else { color='#ef4444'; dev=(cents>0?'偏高 ↑ ':'偏低 ↓ ')+abs.toFixed(0)+'¢'; nEl.style.filter='none'; }
+        let color, dev, displayCents;
+
+        // === DEAD ZONE: ±2 cents = in tune ===
+        // Snaps needle to center for a stable, comfortable reading
+        if (abs<2) {
+            color='#4ECB71'; dev='✓ 准了';
+            displayCents=0;
+            nEl.style.filter='url(#softGlow)';
+        } else if (abs<5) {
+            color='#4ECB71'; dev=(cents>0?'偏高 ↑ ':'偏低 ↓ ')+cents.toFixed(0)+'¢';
+            displayCents=cents;
+            nEl.style.filter='url(#softGlow)';
+        } else if (abs<15) {
+            color='#f59e0b'; dev=(cents>0?'偏高 ↑ ':'偏低 ↓ ')+cents.toFixed(0)+'¢';
+            displayCents=cents;
+            nEl.style.filter='none';
+        } else {
+            color='#ef4444'; dev=(cents>0?'偏高 ↑ ':'偏低 ↓ ')+cents.toFixed(0)+'¢';
+            displayCents=cents;
+            nEl.style.filter='none';
+        }
         nEl.setAttribute('fill',color);
         dEl.textContent=dev; dEl.setAttribute('fill',color);
 
-        const angle=Math.max(-55,Math.min(55,cents*1.0));
+        // Needle angle with dead zone compression
+        // Within ±2 cents → needle at center
+        // Beyond ±2 → linear mapping with slight compression for comfort
+        const angle = Math.max(-55, Math.min(55, displayCents*1.0));
         ndl.style.transform='rotate('+angle+'deg)';
     }
 
@@ -454,6 +627,15 @@
             d.innerHTML='<span class="num">'+(t.labels[i]||(i+1))+'</span>'+s.slice(0,-1);
             row.appendChild(d);
         });
+    }
+
+    // Update bandpass filter range when mode changes
+    function updateBandpassForMode(m) {
+        if (!running || !bandpassHP || !bandpassLP) return;
+        const range = getBandpassRange(m);
+        // Smooth transition of filter cutoff frequencies
+        bandpassHP.frequency.setTargetAtTime(range.low, ctx.currentTime, 0.05);
+        bandpassLP.frequency.setTargetAtTime(range.high, ctx.currentTime, 0.05);
     }
 
     function buildRef(m) {
@@ -492,6 +674,10 @@
         e.target.classList.add('active');
         mode=e.target.dataset.mode;
         smoothedHz=null;
+        smoothedCents=0;
+        musicalFrameCount=0;
+        noiseRejectCount=0;
+        updateBandpassForMode(mode);
         buildStrings(mode);
         buildRef(mode);
         updateStrings(null);
