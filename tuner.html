@@ -131,8 +131,8 @@
         <div class="tuner-frame">
             <!-- Mode chips -->
             <div class="flex flex-wrap justify-center gap-2 mb-5" id="modeBar">
-                <button class="mode-chip active" data-mode="chromatic">半音阶</button>
-                <button class="mode-chip" data-mode="guitar">🎸 吉他</button>
+                <button class="mode-chip" data-mode="chromatic">半音阶</button>
+                <button class="mode-chip active" data-mode="guitar">🎸 吉他</button>
                 <button class="mode-chip" data-mode="ukulele">🪕 尤克里里</button>
                 <button class="mode-chip" data-mode="bass">贝斯</button>
                 <button class="mode-chip" data-mode="violin">🎻 小提琴</button>
@@ -182,18 +182,17 @@
                     <circle cx="220" cy="236" r="6" fill="#4F8CFF"/>
 
                     <!-- Big center note name -->
-                    <text id="noteText" x="220" y="210" text-anchor="middle" font-size="56" font-weight="800" fill="#1a2a1a" letter-spacing="-1">--</text>
-
-                    <!-- Octave + freq below -->
-                    <text id="freqText" x="220" y="228" text-anchor="middle" font-size="12" fill="#999">A4 = 440 Hz</text>
+                    <text id="noteText" x="220" y="218" text-anchor="middle" font-size="64" font-weight="800" fill="#1a2a1a" letter-spacing="-1">--</text>
 
                     <!-- Deviation display -->
-                    <text id="devText" x="220" y="186" text-anchor="middle" font-size="15" font-weight="700" fill="#888">等待收音</text>
+                    <text id="devText" x="220" y="185" text-anchor="middle" font-size="16" font-weight="700" fill="#555"></text>
                 </svg>
             </div>
 
+            <!-- Freq info above power button -->
+            <p style="color:#888;font-size:14px;text-align:center;margin-bottom:4px;font-weight:500" id="freqLine">A4 = 440 Hz</p>
             <!-- Power button -->
-            <div class="flex justify-center mt-1">
+            <div class="flex justify-center">
                 <button class="power-btn" id="powerBtn" onclick="toggleTuner()" title="开始/停止调音">
                     <span id="powerIcon">🎤</span>
                 </button>
@@ -203,10 +202,10 @@
 
         <!-- ===== Reference table ===== -->
         <div class="content-card" id="refCard">
-            <h2 class="text-lg font-bold mb-3" style="color:var(--text)" id="refTitle">📋 半音阶参考频率</h2>
-            <p style="color:var(--mute);font-size:12px;margin-bottom:12px">A4 = 440 Hz · 相邻半音 = <sup>12</sup>√2 ≈ 1.05946</p>
+            <h2 class="text-xl font-bold mb-3" style="color:var(--text)" id="refTitle">📋 吉他标准定弦</h2>
+            <p style="color:var(--mute);font-size:14px;margin-bottom:14px">从粗到细 · A4 = 440 Hz</p>
             <div class="overflow-x-auto">
-                <table style="width:100%;border-collapse:collapse;font-size:13px" id="refTable">
+                <table style="width:100%;border-collapse:collapse;font-size:15px" id="refTable">
                     <thead id="refHead"></thead>
                     <tbody id="refBody"></tbody>
                 </table>
@@ -258,8 +257,8 @@
             const line = document.createElementNS('http://www.w3.org/2000/svg','line');
             line.setAttribute('x1',x1); line.setAttribute('y1',y1);
             line.setAttribute('x2',x2); line.setAttribute('y2',y2);
-            line.setAttribute('stroke', i===0?'#555':(i%10===0?'#999':'#ccd'));
-            line.setAttribute('stroke-width', i===0?'2':(i%10===0?'1.2':'.7'));
+            line.setAttribute('stroke', i===0?'#333':(i%10===0?'#666':'#bbb'));
+            line.setAttribute('stroke-width', i===0?'2.5':(i%10===0?'1.5':'.9'));
             line.setAttribute('stroke-linecap','round');
             g.appendChild(line);
             // Major labels
@@ -268,7 +267,7 @@
                 const t = document.createElementNS('http://www.w3.org/2000/svg','text');
                 t.setAttribute('x',lx); t.setAttribute('y',ly);
                 t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','central');
-                t.setAttribute('font-size','10'); t.setAttribute('fill','#999'); t.setAttribute('font-weight','500');
+                t.setAttribute('font-size','11'); t.setAttribute('fill','#555'); t.setAttribute('font-weight','600');
                 t.textContent = i>0?'+'+i:i;
                 g.appendChild(t);
             }
@@ -276,7 +275,7 @@
     })();
 
     // ===== AUDIO ENGINE =====
-    let ctx=null, analyser=null, running=false, mode='chromatic';
+    let ctx=null, analyser=null, running=false, mode='guitar';
     let smoothedCents=0, smoothedMidi=null;
 
     async function toggleTuner() {
@@ -305,9 +304,9 @@
         document.getElementById('powerBtn').classList.remove('on');
         document.getElementById('hintText').textContent='已停止';
         document.getElementById('noteText').textContent='--';
-        document.getElementById('freqText').textContent='A4 = 440 Hz';
-        document.getElementById('devText').textContent='等待收音';
-        document.getElementById('devText').setAttribute('fill','#888');
+        document.getElementById('freqLine').textContent='A4 = 440 Hz';
+        document.getElementById('devText').textContent='';
+        document.getElementById('devText').setAttribute('fill','#555');
         document.getElementById('needle').style.transform='rotate(0deg)';
         updateStrings(null);
     }
@@ -338,7 +337,7 @@
 
         if (rms<0.004) {
             document.getElementById('noteText').textContent='--';
-            document.getElementById('freqText').textContent='等待信号…';
+            document.getElementById('freqLine').textContent='等待信号…';
             document.getElementById('devText').textContent='';
             document.getElementById('needle').style.transform='rotate(0deg)';
             updateStrings(null);
@@ -358,11 +357,11 @@
     }
 
     function updateDisplay(note,cents,midi) {
-        const nEl=document.getElementById('noteText'), fEl=document.getElementById('freqText');
+        const nEl=document.getElementById('noteText'), fEl=document.getElementById('freqLine');
         const dEl=document.getElementById('devText'), ndl=document.getElementById('needle');
 
         nEl.textContent=note.name+note.oct;
-        fEl.textContent=note.freq.toFixed(1)+' Hz (MIDI '+midi+')';
+        fEl.textContent=note.freq.toFixed(1)+' Hz · MIDI '+midi;
 
         const abs=Math.abs(cents);
         let color, dev;
@@ -410,24 +409,24 @@
         h.innerHTML=''; b.innerHTML='';
         if (m==='chromatic') {
             ttl.textContent='📋 半音阶参考频率';
-            ['音名','频率','MIDI'].forEach(v=>{const th=document.createElement('th');th.textContent=v;th.style.cssText='padding:8px 12px;text-align:center;border-bottom:1px solid var(--card-border);color:var(--text-secondary);font-size:12px;font-weight:600';h.appendChild(th);});
+            ['音名','频率','MIDI'].forEach(v=>{const th=document.createElement('th');th.textContent=v;th.style.cssText='padding:12px 16px;text-align:center;border-bottom:2px solid var(--card-border);color:var(--text-secondary);font-size:14px;font-weight:700';h.appendChild(th);});
             for (let mi=60;mi<=71;mi++) {
                 const n=midiToNote(mi);
                 const tr=document.createElement('tr');
-                ['<b>'+n.name+'</b> '+n.oct, n.freq.toFixed(2)+' Hz', mi].forEach((v,i)=>{
-                    const td=document.createElement('td');td.innerHTML=v;td.style.cssText='padding:8px 12px;text-align:center;border-bottom:1px solid var(--card-border);color:var(--text);font-size:13px';tr.appendChild(td);
+                ['<b style="font-size:16px">'+n.name+'</b> '+n.oct, n.freq.toFixed(2)+' Hz', mi].forEach((v,i)=>{
+                    const td=document.createElement('td');td.innerHTML=v;td.style.cssText='padding:12px 16px;text-align:center;border-bottom:1px solid var(--card-border);color:var(--text);font-size:15px';tr.appendChild(td);
                 });
                 b.appendChild(tr);
             }
         } else {
             const t=TUNINGS[m];
             ttl.textContent='📋 '+t.name+' 标准定弦';
-            ['弦序','音名','频率 (Hz)','MIDI'].forEach(v=>{const th=document.createElement('th');th.textContent=v;th.style.cssText='padding:8px 12px;text-align:center;border-bottom:1px solid var(--card-border);color:var(--text-secondary);font-size:12px;font-weight:600';h.appendChild(th);});
+            ['弦序','音名','频率 (Hz)','MIDI'].forEach(v=>{const th=document.createElement('th');th.textContent=v;th.style.cssText='padding:12px 16px;text-align:center;border-bottom:2px solid var(--card-border);color:var(--text-secondary);font-size:14px;font-weight:700';h.appendChild(th);});
             t.strings.forEach((s,i)=>{
                 const p=parseNote(s);
                 const tr=document.createElement('tr');
-                [i+1,s,p?p.freq.toFixed(2)+' Hz':'--',p?p.midi:'--'].forEach(v=>{
-                    const td=document.createElement('td');td.textContent=v;td.style.cssText='padding:8px 12px;text-align:center;border-bottom:1px solid var(--card-border);color:var(--text);font-size:13px';tr.appendChild(td);
+                [i+1,'<b style="font-size:16px">'+s.slice(0,-1)+'</b>'+s.slice(-1),p?p.freq.toFixed(2)+' Hz':'--',p?p.midi:'--'].forEach(v=>{
+                    const td=document.createElement('td');td.innerHTML=v;td.style.cssText='padding:12px 16px;text-align:center;border-bottom:1px solid var(--card-border);color:var(--text);font-size:15px';tr.appendChild(td);
                 });
                 b.appendChild(tr);
             });
@@ -445,7 +444,8 @@
         updateStrings(null);
     });
 
-    buildRef('chromatic');
+    buildStrings('guitar');
+    buildRef('guitar');
 
     // ===== THEME + LANG =====
     (function(){
