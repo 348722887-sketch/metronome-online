@@ -287,6 +287,7 @@
     let ctx=null, analyser=null, running=false, mode='guitar';
     let smoothedHz=null;  // smoothed frequency in Hz (log-space is more accurate)
     let lastDetectionTime=0;
+    let noiseRejectCount=0; // consecutive non-musical frames — suppress noise
     const HOLD_MS=1800;
 
     async function toggleTuner() {
@@ -312,7 +313,7 @@
     }
 
     function stopTuner() {
-        running=false;smoothedHz=null;lastDetectionTime=0;
+        running=false;smoothedHz=null;lastDetectionTime=0;noiseRejectCount=0;
         if(ctx){ctx.close();ctx=null;analyser=null;}
         document.getElementById('powerIcon').textContent='🎤';
         document.getElementById('powerBtn').classList.remove('on');
@@ -344,8 +345,8 @@
             if(r>bestVal){bestVal=r;bestLag=lag;}
         }
 
-        // Noise gate: peak must be >= 50% of zero-lag (professional standard)
-        if(bestLag<0||bestVal/r0<0.5) return -1;
+        // Noise gate: peak must be >= 65% of zero-lag (phones need higher threshold)
+        if(bestLag<0||bestVal/r0<0.65) return -1;
 
         // Parabolic interpolation for sub-sample precision
         let cm1=0,c1=0;
@@ -364,15 +365,32 @@
         const f=detectPitch(buf);
 
         if(f>40&&f<1800){
-            lastDetectionTime=now;
-            // Smooth in log-frequency (Hz) — professional approach:
-            // cents deviation stays consistent regardless of octave
-            if(smoothedHz===null) smoothedHz=f;
-            else{
-                // Anti-octave-jump: reject if >35% frequency change
-                if(Math.abs(f-smoothedHz)/smoothedHz<0.35){
-                    smoothedHz=smoothedHz*0.6+f*0.4;
+            // Musical note validation: must be within 40 cents of a real note.
+            // Environmental noise (fans, hum, traffic) won't match musical pitches exactly.
+            const rawMidi=69+12*Math.log2(f/440);
+            const nearestNote=Math.round(rawMidi);
+            const centsOff=100*(rawMidi-nearestNote);
+
+            // If too far from any real note → noise, not music
+            if(Math.abs(centsOff)>40){
+                noiseRejectCount++;
+                // Only clear display after 10 consecutive noise frames (prevent flicker)
+                if(noiseRejectCount>10&&smoothedHz!==null&&(now-lastDetectionTime)>=HOLD_MS){
+                    document.getElementById('noteText').textContent='--';
+                    document.getElementById('freqLine').textContent='等待信号…';
+                    document.getElementById('devText').textContent='';
+                    document.getElementById('needle').style.transform='rotate(0deg)';
+                    updateStrings(null);smoothedHz=null;
                 }
+                requestAnimationFrame(tick);return;
+            }
+            // Valid musical signal
+            noiseRejectCount=0;
+            lastDetectionTime=now;
+
+            if(smoothedHz===null) smoothedHz=f;
+            else if(Math.abs(f-smoothedHz)/smoothedHz<0.35){
+                smoothedHz=smoothedHz*0.6+f*0.4;
             }
             const midi=69+12*Math.log2(smoothedHz/440);
             const mr=Math.round(midi),cents=100*(midi-mr);
@@ -386,7 +404,7 @@
             document.getElementById('devText').textContent='';
             document.getElementById('needle').style.transform='rotate(0deg)';
             updateStrings(null);
-            smoothedHz=null;
+            smoothedHz=null;noiseRejectCount=0;
         }
         requestAnimationFrame(tick);
     }
