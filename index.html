@@ -13,7 +13,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://metronome-online-mvp.vercel.app/">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="theme-color" content="#f2f7f2">
+    <meta name="theme-colwsor" content="#f2f7f2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="节拍器">
@@ -258,19 +258,16 @@
 
     <main class="flex-1 flex flex-col items-center justify-center w-full max-w-2xl mx-auto gap-5 bg-white rounded-2xl border border-[#d0ddd0] shadow-md py-10 px-6 sm:px-8">
 
-        <!-- ===== Nav ===== -->
-        <div class="w-full max-w-xl mx-auto flex flex-wrap justify-center gap-2 mb-2">
-            <a href="./circle-of-fifths.html" class="nav-pill">音乐五度圈</a>
-            <a href="./tuner.html" class="nav-pill">乐器调音器</a>
-            <a href="./staff.html" class="nav-pill">认识五线谱</a>
-            <a href="./index.html" class="nav-pill active">免费在线节拍器</a>
-            <a href="./ear-training.html" class="nav-pill">视唱练耳训练</a>
-        </div>
-
-        <!-- ===== Theme + Lang ===== -->
-        <div class="w-full flex items-center justify-center gap-3 mb-1">
+        <!-- ===== Nav + Lang ===== -->
+        <div class="w-full max-w-md mx-auto flex items-center justify-between mb-1">
+            <div class="flex gap-2">
+                <a href="./tuner.html" class="nav-pill">乐器调音器</a>
+                <a href="./staff.html" class="nav-pill">认识五线谱</a>
+                <a href="./index.html" class="nav-pill active">免费在线节拍器</a>
+                <a href="./ear-training.html" class="nav-pill">视唱练耳训练</a>
+            </div>
             <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
-            <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer">
+            <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer" style="max-width:120px;">
                 <option value="en">🇬🇧 English</option>
                 <option value="fr">🇫🇷 Français</option>
                 <option value="de">🇩🇪 Deutsch</option>
