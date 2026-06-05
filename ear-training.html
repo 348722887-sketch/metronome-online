@@ -175,13 +175,12 @@
     // ===== STATE =====
     let audioCtx = null;
     let currentInterval = null;
-    let currentDirection = 'asc'; // asc, desc
+    let currentDirection = 'asc';
     let directionMode = 'both';
     let answered = false;
     let correctTotal = 0, wrongTotal = 0;
+    let currentRoot = 60; // random per question
     let enabledIntervals = new Set(INTERVALS.filter(i=>['m3','M3','P4','P5','P8'].includes(i.id)).map(i=>i.id));
-
-    const ROOT_MIDI = 60; // C4
 
     // ===== BUILD FILTER CHIPS =====
     function buildFilter() {
@@ -237,14 +236,17 @@
 
     function playInterval() {
         ensureCtx();
-        if (!currentInterval) pickNewInterval();
+        // Always pick a fresh interval + root for each play
+        pickNewInterval();
+        // Pick a random root: C3 to B4 (MIDI 48-71), but avoid extremes for clarity
+        currentRoot = 48 + Math.floor(Math.random() * 24); // C3 ~ B4
 
         const btn = document.getElementById('playBtn');
         const icon = document.getElementById('playIcon');
         btn.classList.add('playing'); icon.textContent = '⏸';
 
         const now = audioCtx.currentTime + 0.05;
-        const note1 = ROOT_MIDI;
+        const note1 = currentRoot;
         const semi = currentInterval.semi;
         let note2;
         if (directionMode === 'both') {
@@ -252,8 +254,8 @@
         } else {
             currentDirection = directionMode;
         }
-        if (currentDirection === 'asc') note2 = ROOT_MIDI + semi;
-        else note2 = ROOT_MIDI - semi;
+        if (currentDirection === 'asc') note2 = currentRoot + semi;
+        else note2 = currentRoot - semi;
 
         playTone(note1, now, 0.8, 0.35);
         playTone(note2, now + 0.85, 0.8, 0.35);
