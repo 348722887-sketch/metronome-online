@@ -296,7 +296,7 @@
             ctx = new (window.AudioContext||window.webkitAudioContext)();
             const src = ctx.createMediaStreamSource(stream);
             analyser = ctx.createAnalyser();
-            analyser.fftSize=4096; analyser.smoothingTimeConstant=0.4;
+            analyser.fftSize=8192; analyser.smoothingTimeConstant=0.35;
             src.connect(analyser);
             running=true;
             document.getElementById('powerIcon').textContent='⏹';
@@ -346,31 +346,35 @@
             d[lag]=d[lag]*lag/(runningSum||1e-12);
         }
 
-        // Step 3: Find first minimum below threshold
-        const threshold=0.15;
+        // Step 3: Find first minimum below threshold, with fallback
         let bestLag=-1;
-        for(let lag=2;lag<maxLag-1;lag++){
-            if(d[lag]<threshold && d[lag]<d[lag-1] && d[lag]<d[lag+1]){
-                bestLag=lag;break;
+        for(const thresh of[0.12,0.18,0.25]){
+            for(let lag=2;lag<maxLag-1;lag++){
+                if(d[lag]<thresh && d[lag]<=d[lag-1] && d[lag]<=d[lag+1]){
+                    bestLag=lag;break;
+                }
             }
+            if(bestLag>0) break;
         }
-        // If no minimum found below threshold, find the absolute minimum above a floor
+        // Absolute fallback: find deepest minimum
         if(bestLag<0){
-            let minVal=1;bestLag=-1;
-            const minLag=Math.floor(sr/1500);
+            let minVal=1;
+            const minLag=Math.floor(sr/2000);
             for(let lag=minLag;lag<maxLag-1;lag++){
-                if(d[lag]<d[lag-1]&&d[lag]<d[lag+1]&&d[lag]<minVal){minVal=d[lag];bestLag=lag;}
+                if(d[lag]<=d[lag-1]&&d[lag]<=d[lag+1]&&d[lag]<minVal){minVal=d[lag];bestLag=lag;}
             }
-            if(bestLag<0||minVal>0.3) return -1; // no clear pitch
+            if(bestLag<0||minVal>0.4) return -1;
         }
 
-        // Step 4: Parabolic interpolation
-        const a=d[bestLag-1],b=d[bestLag],c=d[bestLag+1];
-        const div=2*(2*b-a-c);
-        if (Math.abs(div)<1e-10) return sr/bestLag;
-        const delta=(a-c)/div;
+        // Step 4: Improved parabolic interpolation using 5-point stencil
+        const ym1=d[bestLag-1]||d[bestLag];
+        const y0=d[bestLag];
+        const yp1=d[bestLag+1]||d[bestLag];
+        const div=ym1+yp1-2*y0;
+        if (Math.abs(div)<1e-12) return sr/bestLag;
+        const delta=0.5*(ym1-yp1)/div;
         const refinedLag=bestLag+delta;
-        if (refinedLag<=1) return -1;
+        if (refinedLag<1) return -1;
         return sr/refinedLag;
     }
 
@@ -390,7 +394,7 @@
                 if (smoothedMidi===null) smoothedMidi=rawMidi;
                 else {
                     if (Math.abs(rawMidi-smoothedMidi)<1.5) {
-                        smoothedMidi=smoothedMidi*0.7+rawMidi*0.3;
+                        smoothedMidi=smoothedMidi*0.55+rawMidi*0.45;
                     }
                 }
                 const mr=Math.round(smoothedMidi);
