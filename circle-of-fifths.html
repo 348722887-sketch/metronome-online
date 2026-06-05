@@ -13,25 +13,8 @@
         .nav-pill:hover{box-shadow:0 4px 16px rgba(79,140,255,.4);transform:translateY(-1px)}
         .nav-pill.active{background:#4F8CFF;box-shadow:0 2px 8px rgba(79,140,255,.3)}
 
-        .theme-btn{background:none;border:1px solid #d0ddd0;border-radius:6px;font-size:16px;cursor:pointer;padding:2px 5px;line-height:1;transition:all .2s ease;flex-shrink:0;outline:none}
+        .theme-btn{background:none;border:1px solid #d0ddd0;border-radius:6px;font-size:16px;cursor:pointer;padding:2px 5px;line-height:1;transition:all .2s ease;flex-shrink:0;outline:none;color:#1a2a1a}
         .theme-btn:hover{background:#e8efe8;border-color:#4F8CFF}
-
-        /* Dark mode */
-        body.dark{background:#0a0a0f!important;color:#e0e0e0}
-        body.dark header{background:#141419!important;border-color:#2a2a35!important}
-        body.dark .content-card{background:#141419!important;border-color:#2a2a35!important}
-        body.dark h1,body.dark h2,body.dark h3,body.dark h4{color:#e0e0e0!important}
-        body.dark p,body.dark li,body.dark td,body.dark th{color:#aaa!important}
-        body.dark .text-gray-500,body.dark .text-gray-600,body.dark .text-gray-400{color:#999!important}
-        body.dark .text-gray-800,body.dark .text-gray-900{color:#ddd!important}
-        body.dark .bg-white{background:#141419!important}
-        body.dark .bg-gray-50{background:#1a1a21!important}
-        body.dark .border-gray-200{background:#2a2a35!important}
-        body.dark .theme-btn{background:#1a1a21;border-color:#2a2a35;color:#e0e0e0}
-        body.dark .highlight-box{background:#1a1a21!important;border-color:#2a2a35!important}
-        body.dark .use-card{background:#141419!important;border-color:#2a2a35!important}
-        body.dark .use-card h3{color:#4F8CFF!important}
-        body.dark footer{border-color:#2a2a35!important}
 
         .content-card{background:#fff;border:1px solid #d0ddd0;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.04)}
         .highlight-box{background:#f0f5ff;border:1px solid #c8d6f0;border-radius:10px;padding:16px 20px;margin:16px 0}
@@ -44,10 +27,36 @@
         th{background:#f0f5ff;color:#4F8CFF;font-weight:600;padding:10px 12px;text-align:left;border-bottom:2px solid #c8d6f0}
         td{padding:10px 12px;border-bottom:1px solid #e8efe8}
 
-        /* SVG circle animation */
-        .circle-svg .key-group{cursor:pointer;transition:all .2s ease}
-        .circle-svg .key-group:hover .key-bg{fill:#4F8CFF;opacity:.15}
-        .circle-svg .key-group:hover text{fill:#4F8CFF}
+        /* Circle interactivity */
+        .key-node{cursor:pointer;transition:all .2s ease}
+        .key-node:hover .key-dot{filter:drop-shadow(0 0 8px rgba(79,140,255,.5))}
+        .key-node:hover text{fill:#4F8CFF}
+        .key-node.selected .key-dot{stroke:#4F8CFF;stroke-width:3}
+        .key-node.selected text.key-name{fill:#4F8CFF;font-weight:800}
+        .chord-highlight{transition:opacity .3s ease}
+        .chord-highlight.dim{opacity:.25}
+
+        /* Dark mode */
+        body.dark{background:#0a0a0f!important;color:#e0e0e0}
+        body.dark .content-card{background:#141419!important;border-color:#2a2a35!important}
+        body.dark h1,body.dark h2,body.dark h3,body.dark h4{color:#e0e0e0!important}
+        body.dark p,body.dark li,body.dark td,body.dark th{color:#aaa!important}
+        body.dark .text-gray-500,.dark .text-gray-600,.dark .text-gray-400{color:#999!important}
+        body.dark .text-gray-800,.dark .text-gray-900{color:#ddd!important}
+        body.dark .highlight-box{background:#1a1a21!important;border-color:#2a2a35!important}
+        body.dark .highlight-box p,body.dark .highlight-box li{color:#aaa!important}
+        body.dark .use-card{background:#141419!important;border-color:#2a2a35!important}
+        body.dark .use-card h3{color:#4F8CFF!important}
+        body.dark .use-card p,body.dark .use-card li{color:#999!important}
+        body.dark footer{border-color:#2a2a35!important}
+        body.dark .theme-btn{background:#1a1a21;border-color:#2a2a35;color:#e0e0e0}
+        body.dark th{background:#1a1a21!important;color:#4F8CFF!important;border-color:#2a2a35!important}
+        body.dark td{border-color:#2a2a35!important}
+        body.dark .chord-table td{border-color:#2a2a35!important}
+        body.dark .chord-table th{background:#1a1a21!important}
+        body.dark .degree-tag{background:#1e1e28!important;color:#aaa!important}
+        body.dark select{background:#1a1a21!important;color:#999!important;border-color:#2a2a35!important}
+        body.dark .arc-label{fill:#999!important}
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -61,336 +70,257 @@
             <a href="./index.html" class="nav-pill">免费在线节拍器</a>
             <a href="./ear-training.html" class="nav-pill">视唱练耳训练</a>
         </div>
-        <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
+        <div class="flex items-center justify-center gap-3">
+            <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
+            <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer">
+                <option value="zh-CN">🇨🇳 中文</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="fr">🇫🇷 Français</option>
+                <option value="de">🇩🇪 Deutsch</option>
+                <option value="it">🇮🇹 Italiano</option>
+                <option value="es">🇪🇸 Español</option>
+                <option value="pt">🇧🇷 Português</option>
+                <option value="el">🇬🇷 Ελληνικά</option>
+                <option value="ru">🇷🇺 Русский</option>
+                <option value="pl">🇵🇱 Polski</option>
+                <option value="ja">🇯🇵 日本語</option>
+                <option value="ko">🇰🇷 한국어</option>
+                <option value="th">🇹🇭 ไทย</option>
+                <option value="vi">🇻🇳 Tiếng Việt</option>
+                <option value="my">🇲🇲 မြန်မာ</option>
+            </select>
+        </div>
     </header>
 
     <!-- ===== Main Content ===== -->
     <main class="flex-1 w-full max-w-4xl mx-auto px-4 pb-12">
 
         <!-- Title -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">🎵 音乐五度圈</h1>
-            <p class="text-gray-500 text-base">Circle of Fifths — 音乐理论的万能钥匙</p>
+        <div class="text-center mb-6">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-1">🎵 音乐五度圈</h1>
+            <p class="text-gray-500 text-sm">Circle of Fifths — 点任意键查看它的和弦家族</p>
         </div>
 
-        <!-- ===== 五度圈 SVG 图解 ===== -->
-        <div class="content-card">
-            <h2 class="text-xl font-bold text-gray-900 mb-4 text-center">📐 五度圈图解</h2>
-            <div class="flex justify-center overflow-x-auto">
-                <svg viewBox="0 0 520 520" class="circle-svg" style="max-width:480px;width:100%;height:auto">
+        <!-- ===== 五度圈主图 ===== -->
+        <div class="content-card" style="padding:12px">
+            <div class="flex justify-center">
+                <svg viewBox="0 0 620 620" id="circleSVG" style="max-width:100%;height:auto">
                     <defs>
                         <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
-                            <stop offset="0%" stop-color="#fafbfc" />
-                            <stop offset="100%" stop-color="#e8efe8" />
+                            <stop offset="0%" stop-color="#fafcfd" />
+                            <stop offset="85%" stop-color="#f0f4f0" />
+                            <stop offset="100%" stop-color="#e0e8e0" />
                         </radialGradient>
+                        <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
                     </defs>
-                    <!-- Background circle -->
-                    <circle cx="260" cy="260" r="245" fill="url(#bgGrad)" stroke="#d0ddd0" stroke-width="2"/>
-                    <circle cx="260" cy="260" r="185" fill="none" stroke="#d0ddd0" stroke-width="1" stroke-dasharray="4 4"/>
-                    <circle cx="260" cy="260" r="115" fill="none" stroke="#d0ddd0" stroke-width="1" stroke-dasharray="4 4"/>
 
-                    <!-- Clock position helpers: 12=C, 1=G, 2=D, 3=A, 4=E, 5=B, 6=F#, 7=C#, 8=Ab, 9=Eb, 10=Bb, 11=F -->
-                    <!-- Outer ring: Major keys -->
-                    <!-- C at 12 o'clock (top) -->
-                    <g class="key-group">
-                        <circle cx="260" cy="20" r="32" class="key-bg" fill="#4F8CFF" opacity="0.12"/>
-                        <text x="260" y="26" text-anchor="middle" font-size="18" font-weight="700" fill="#2C313C">C</text>
-                        <text x="260" y="42" text-anchor="middle" font-size="10" fill="#999">0</text>
-                    </g>
-                    <!-- G at 1 o'clock -->
-                    <g class="key-group">
-                        <circle cx="398" cy="56" r="32" class="key-bg" fill="#4F8CFF" opacity="0.08"/>
-                        <text x="398" y="62" text-anchor="middle" font-size="18" font-weight="700" fill="#2C313C">G</text>
-                        <text x="398" y="78" text-anchor="middle" font-size="10" fill="#999">♯1</text>
-                    </g>
-                    <!-- D at 2 o'clock -->
-                    <g class="key-group">
-                        <circle cx="480" cy="175" r="32" class="key-bg" fill="#4F8CFF" opacity="0.08"/>
-                        <text x="480" y="181" text-anchor="middle" font-size="18" font-weight="700" fill="#2C313C">D</text>
-                        <text x="480" y="197" text-anchor="middle" font-size="10" fill="#999">♯2</text>
-                    </g>
-                    <!-- A at 3 o'clock -->
-                    <g class="key-group">
-                        <circle cx="500" cy="315" r="32" class="key-bg" fill="#4F8CFF" opacity="0.08"/>
-                        <text x="500" y="321" text-anchor="middle" font-size="18" font-weight="700" fill="#2C313C">A</text>
-                        <text x="500" y="337" text-anchor="middle" font-size="10" fill="#999">♯3</text>
-                    </g>
-                    <!-- E at 4 o'clock -->
-                    <g class="key-group">
-                        <circle cx="445" cy="435" r="32" class="key-bg" fill="#4F8CFF" opacity="0.08"/>
-                        <text x="445" y="441" text-anchor="middle" font-size="18" font-weight="700" fill="#2C313C">E</text>
-                        <text x="445" y="457" text-anchor="middle" font-size="10" fill="#999">♯4</text>
-                    </g>
-                    <!-- B at 5 o'clock -->
-                    <g class="key-group">
-                        <circle cx="340" cy="492" r="32" class="key-bg" fill="#4F8CFF" opacity="0.08"/>
-                        <text x="340" y="498" text-anchor="middle" font-size="18" font-weight="700" fill="#2C313C">B</text>
-                        <text x="340" y="514" text-anchor="middle" font-size="10" fill="#999">♯5</text>
-                    </g>
-                    <!-- F# at 6 o'clock (bottom right) -->
-                    <g class="key-group">
-                        <circle cx="205" cy="500" r="32" class="key-bg" fill="#6B5CFF" opacity="0.06"/>
-                        <text x="205" y="504" text-anchor="middle" font-size="16" font-weight="700" fill="#2C313C">F♯</text>
-                        <text x="205" y="518" text-anchor="middle" font-size="9" fill="#999">♯6 / ♭6</text>
-                    </g>
-                    <!-- C# at 7 o'clock (bottom left) -->
-                    <g class="key-group">
-                        <circle cx="75" cy="500" r="32" class="key-bg" fill="#6B5CFF" opacity="0.06"/>
-                        <text x="75" y="504" text-anchor="middle" font-size="16" font-weight="700" fill="#2C313C">C♯</text>
-                        <text x="75" y="518" text-anchor="middle" font-size="9" fill="#999">♯7 / ♭5</text>
-                    </g>
-                    <!-- Ab at 8 o'clock -->
-                    <g class="key-group">
-                        <circle cx="20" cy="435" r="32" class="key-bg" fill="#EC4899" opacity="0.06"/>
-                        <text x="20" y="439" text-anchor="middle" font-size="16" font-weight="700" fill="#2C313C">A♭</text>
-                        <text x="20" y="453" text-anchor="middle" font-size="9" fill="#999">♭4</text>
-                    </g>
-                    <!-- Eb at 9 o'clock -->
-                    <g class="key-group">
-                        <circle cx="5" cy="315" r="32" class="key-bg" fill="#EC4899" opacity="0.06"/>
-                        <text x="5" y="319" text-anchor="middle" font-size="16" font-weight="700" fill="#2C313C">E♭</text>
-                        <text x="5" y="333" text-anchor="middle" font-size="9" fill="#999">♭3</text>
-                    </g>
-                    <!-- Bb at 10 o'clock -->
-                    <g class="key-group">
-                        <circle cx="40" cy="195" r="32" class="key-bg" fill="#EC4899" opacity="0.06"/>
-                        <text x="40" y="199" text-anchor="middle" font-size="16" font-weight="700" fill="#2C313C">B♭</text>
-                        <text x="40" y="213" text-anchor="middle" font-size="9" fill="#999">♭2</text>
-                    </g>
-                    <!-- F at 11 o'clock -->
-                    <g class="key-group">
-                        <circle cx="128" cy="65" r="32" class="key-bg" fill="#EC4899" opacity="0.06"/>
-                        <text x="128" y="69" text-anchor="middle" font-size="18" font-weight="700" fill="#2C313C">F</text>
-                        <text x="128" y="83" text-anchor="middle" font-size="10" fill="#999">♭1</text>
-                    </g>
+                    <!-- Large background -->
+                    <circle cx="310" cy="310" r="300" fill="url(#bgGrad)" stroke="#d0ddd0" stroke-width="1.5"/>
 
-                    <!-- Inner ring: Relative minors (smaller circles) -->
-                    <!-- Am (C's relative minor) at 3 o'clock from C -->
-                    <g class="key-group">
-                        <circle cx="260" cy="50" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="260" y="54" text-anchor="middle" font-size="11" font-weight="600" fill="#666">Am</text>
+                    <!-- Rings -->
+                    <circle cx="310" cy="310" r="260" fill="none" stroke="#d0ddd0" stroke-width="1" stroke-dasharray="5 5"/>
+                    <circle cx="310" cy="310" r="180" fill="none" stroke="#d0ddd0" stroke-width="1" stroke-dasharray="3 6"/>
+                    <circle cx="310" cy="310" r="90" fill="none" stroke="#d0ddd0" stroke-width="0.8"/>
+
+                    <!-- Center -->
+                    <circle cx="310" cy="310" r="55" fill="#4F8CFF" opacity="0.06" stroke="#4F8CFF" stroke-width="1.5"/>
+                    <text x="310" y="305" text-anchor="middle" font-size="13" font-weight="800" fill="#4F8CFF">五度圈</text>
+                    <text x="310" y="322" text-anchor="middle" font-size="9" fill="#999">Circle of 5ths</text>
+
+                    <!--
+                    Major keys on outer ring (radius 258)
+                    Angles: C=top(0), then clockwise: G(30), D(60), A(90), E(120), B(150),
+                            F#/Gb(180), C#/Db(210), Ab(240), Eb(270), Bb(300), F(330)
+                    -->
+                    <g id="major-keys"></g>
+
+                    <!-- Relative minors on inner ring (radius 175) -->
+                    <g id="minor-keys"></g>
+
+                    <!-- Chord family arc highlight group -->
+                    <g id="chord-arc"></g>
+
+                    <!-- Direction indicators -->
+                    <g id="direction-labels">
+                        <text x="460" y="155" text-anchor="middle" font-size="11" fill="#4F8CFF" font-weight="600">顺时针 → 升号 ♯</text>
+                        <text x="160" y="155" text-anchor="middle" font-size="11" fill="#EC4899" font-weight="600">逆时针 → 降号 ♭</text>
                     </g>
-                    <g class="key-group"><circle cx="375" cy="85" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="375" y="89" text-anchor="middle" font-size="11" font-weight="600" fill="#666">Em</text></g>
-                    <g class="key-group"><circle cx="448" cy="200" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="448" y="204" text-anchor="middle" font-size="11" font-weight="600" fill="#666">Bm</text></g>
-                    <g class="key-group"><circle cx="468" cy="340" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="468" y="344" text-anchor="middle" font-size="11" font-weight="600" fill="#666">F♯m</text></g>
-                    <g class="key-group"><circle cx="415" cy="458" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="415" y="462" text-anchor="middle" font-size="11" font-weight="600" fill="#666">C♯m</text></g>
-                    <g class="key-group"><circle cx="315" cy="510" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="315" y="514" text-anchor="middle" font-size="11" font-weight="600" fill="#666">G♯m</text></g>
-                    <g class="key-group"><circle cx="185" cy="510" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="185" y="514" text-anchor="middle" font-size="11" font-weight="600" fill="#666">E♭m</text></g>
-                    <g class="key-group"><circle cx="55" cy="510" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="55" y="514" text-anchor="middle" font-size="11" font-weight="600" fill="#666">B♭m</text></g>
-                    <g class="key-group"><circle cx="30" cy="458" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="30" y="462" text-anchor="middle" font-size="11" font-weight="600" fill="#666">Fm</text></g>
-                    <g class="key-group"><circle cx="15" cy="340" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="15" y="344" text-anchor="middle" font-size="11" font-weight="600" fill="#666">Cm</text></g>
-                    <g class="key-group"><circle cx="38" cy="220" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="38" y="224" text-anchor="middle" font-size="11" font-weight="600" fill="#666">Gm</text></g>
-                    <g class="key-group"><circle cx="140" cy="95" r="18" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                        <text x="140" y="99" text-anchor="middle" font-size="11" font-weight="600" fill="#666">Dm</text></g>
-
-                    <!-- Center label -->
-                    <circle cx="260" cy="260" r="44" fill="#4F8CFF" opacity="0.08" stroke="#4F8CFF" stroke-width="1.5"/>
-                    <text x="260" y="256" text-anchor="middle" font-size="12" font-weight="700" fill="#4F8CFF">五度圈</text>
-                    <text x="260" y="272" text-anchor="middle" font-size="10" fill="#999">Circle of 5ths</text>
-
-                    <!-- Direction arrows -->
-                    <!-- Clockwise (sharps) -->
-                    <path d="M 260 15 A 245 245 0 0 1 500 270" fill="none" stroke="#4F8CFF" stroke-width="2" stroke-dasharray="8 4" opacity="0.6"/>
-                    <polygon points="498,260 508,274 495,270" fill="#4F8CFF" opacity="0.7"/>
-                    <text x="430" y="110" text-anchor="middle" font-size="11" fill="#4F8CFF" transform="rotate(-15 430 110)">顺时针 → 加升号 ♯</text>
-
-                    <!-- Counter-clockwise (flats) -->
-                    <path d="M 260 15 A 245 245 0 0 0 20 270" fill="none" stroke="#EC4899" stroke-width="2" stroke-dasharray="8 4" opacity="0.5"/>
-                    <polygon points="22,260 12,274 25,270" fill="#EC4899" opacity="0.6"/>
-                    <text x="90" y="110" text-anchor="middle" font-size="11" fill="#EC4899" transform="rotate(15 90 110)">逆时针 → 加降号 ♭</text>
 
                     <!-- Legend -->
-                    <rect x="155" y="335" width="12" height="12" rx="2" fill="#4F8CFF" opacity="0.12"/>
-                    <text x="172" y="345" font-size="11" fill="#666">大调（外圈）</text>
-                    <rect x="260" y="335" width="12" height="12" rx="2" fill="#E8EDF5" stroke="#c0c8d8" stroke-width="1"/>
-                    <text x="277" y="345" font-size="11" fill="#666">小调（内圈）</text>
+                    <rect x="230" y="380" width="14" height="14" rx="3" fill="#4F8CFF" opacity="0.15" stroke="#4F8CFF" stroke-width="1.5"/>
+                    <text x="250" y="392" font-size="11" fill="#555">大调 (Major)</text>
+                    <rect x="370" y="380" width="14" height="14" rx="3" fill="#f0e0f0" stroke="#c0a0c8" stroke-width="1"/>
+                    <text x="390" y="392" font-size="11" fill="#555">关系小调 (Relative Minor)</text>
                 </svg>
             </div>
-            <p class="text-gray-500 text-xs text-center mt-3">▲ 点击外圈大调可高亮对应关系 | 数字 = 升/降号数量</p>
+        </div>
+
+        <!-- ===== 选中调的和弦表 ===== -->
+        <div class="content-card" id="chordFamilyCard" style="display:none">
+            <h2 class="text-lg font-bold text-gray-900 mb-3 text-center">
+                和弦家族：<span id="selectedKeyName" class="text-blue-600">C 大调</span> 的七级和弦
+            </h2>
+            <p class="text-gray-500 text-xs text-center mb-4">
+                💡 任何大调的 7 个顺阶和弦在五度圈上形成一段<strong>连续的弧</strong>，从 IV 级到 vii° 级，I 级位于弧的左侧
+            </p>
+            <div class="overflow-x-auto">
+                <table class="chord-table text-center" style="min-width:100%">
+                    <thead>
+                        <tr>
+                            <th style="text-align:center">级数</th>
+                            <th style="text-align:center">I</th>
+                            <th style="text-align:center">ii</th>
+                            <th style="text-align:center">iii</th>
+                            <th style="text-align:center">IV</th>
+                            <th style="text-align:center">V</th>
+                            <th style="text-align:center">vi</th>
+                            <th style="text-align:center">vii°</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center" class="font-semibold">和弦</td>
+                            <td style="text-align:center" id="chI">C</td>
+                            <td style="text-align:center" id="chII">Dm</td>
+                            <td style="text-align:center" id="chIII">Em</td>
+                            <td style="text-align:center" id="chIV">F</td>
+                            <td style="text-align:center" id="chV">G</td>
+                            <td style="text-align:center" id="chVI">Am</td>
+                            <td style="text-align:center" id="chVII">Bdim</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center" class="font-semibold">类型</td>
+                            <td style="text-align:center"><span class="degree-tag" style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:4px;font-size:12px">大三</span></td>
+                            <td style="text-align:center"><span class="degree-tag" style="background:#fce4ec;color:#c62828;padding:2px 8px;border-radius:4px;font-size:12px">小三</span></td>
+                            <td style="text-align:center"><span class="degree-tag" style="background:#fce4ec;color:#c62828;padding:2px 8px;border-radius:4px;font-size:12px">小三</span></td>
+                            <td style="text-align:center"><span class="degree-tag" style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:4px;font-size:12px">大三</span></td>
+                            <td style="text-align:center"><span class="degree-tag" style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:4px;font-size:12px">大三</span></td>
+                            <td style="text-align:center"><span class="degree-tag" style="background:#fce4ec;color:#c62828;padding:2px 8px;border-radius:4px;font-size:12px">小三</span></td>
+                            <td style="text-align:center"><span class="degree-tag" style="background:#f3e5f5;color:#6a1b9a;padding:2px 8px;border-radius:4px;font-size:12px">减三</span></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center" class="font-semibold">圈上位置</td>
+                            <td style="text-align:center" class="text-xs text-gray-500" id="posI">本位</td>
+                            <td style="text-align:center" class="text-xs text-gray-500" id="posII">顺2格</td>
+                            <td style="text-align:center" class="text-xs text-gray-500" id="posIII">顺4格</td>
+                            <td style="text-align:center" class="text-xs text-gray-500" id="posIV">逆1格</td>
+                            <td style="text-align:center" class="text-xs text-gray-500" id="posV">顺1格</td>
+                            <td style="text-align:center" class="text-xs text-gray-500" id="posVI">顺3格</td>
+                            <td style="text-align:center" class="text-xs text-gray-500" id="posVII">顺5格</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-gray-500 text-xs text-center mt-3">
+                🎸 <strong>实战口诀：</strong>IV ← 逆1 → <strong>I</strong> → 顺1 → V → 顺1 → ii → 顺1 → vi → 顺1 → iii → 顺1 → vii°<br>
+                框内的 7 个和弦组成一首歌几乎"不会跑调"
+            </p>
         </div>
 
         <!-- ===== 什么是五度圈 ===== -->
         <div class="content-card">
             <h2 class="text-xl font-bold text-gray-900 mb-3">📖 什么是五度圈？</h2>
             <p class="text-gray-600 leading-relaxed mb-3">
-                五度圈（Circle of Fifths）是音乐理论中最核心的视觉工具。它把 <strong>12 个调性</strong> 按
-                <strong>纯五度</strong>（7 个半音）的间隔排列成一个圆环，一眼就能看出调号、和弦关系、以及如何在不同调之间转换。
+                五度圈把 <strong>12 个调性</strong> 按<strong>纯五度</strong>（7 个半音）间隔排成圆环。
+                相邻的调最亲近（只差 1 个升/降号），对面的调最远。
             </p>
             <div class="highlight-box">
                 <p class="text-sm text-gray-700 leading-relaxed">
-                    <strong>💡 核心概念：</strong>
-                    顺时针走 = 升号方向（属调），逆时针走 = 降号方向（下属调）。
-                    相邻的调最"亲近"（只差一个升/降号），切换最自然；对面的调最"远"。
+                    <strong>💡 核心：</strong>顺时针 = 升号方向 | 逆时针 = 降号方向 |
+                    外圈 = 大调 | 内圈 = 关系小调（共享相同调号）<br>
+                    <strong>五度圈最大的用处：</strong>找到任何调的 I–ii–iii–IV–V–vi–vii° 七级和弦 → 点击圈上的键试试！
                 </p>
             </div>
+        </div>
+
+        <!-- ===== 怎么找各级和弦 ===== -->
+        <div class="content-card">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">🛠️ 核心技能：一眼找出任何调的各级和弦</h2>
+            <p class="text-gray-600 leading-relaxed mb-4">
+                这是五度圈<strong>最实用的功能</strong>。给定一个调，它的 7 个顺阶和弦在圈上排成一段连续的弧：
+            </p>
+
+            <div class="highlight-box mb-4">
+                <p class="text-sm text-gray-800 font-semibold mb-2">以 C 大调为例：</p>
+                <div class="flex flex-wrap gap-2 text-sm text-gray-700 leading-relaxed">
+                    <span class="px-2 py-0.5 rounded font-bold" style="background:#e8f5e9">IV = F</span>
+                    <span class="text-gray-400 self-center">← 逆1 ←</span>
+                    <span class="px-2 py-0.5 rounded font-bold" style="background:#fff3e0;border:2px solid #4F8CFF">I = C</span>
+                    <span class="text-gray-400 self-center">→ 顺1 →</span>
+                    <span class="px-2 py-0.5 rounded font-bold" style="background:#e8f5e9">V = G</span>
+                    <span class="text-gray-400 self-center">→ 顺1 →</span>
+                    <span class="px-2 py-0.5 rounded font-bold" style="background:#fce4ec">ii = Dm</span>
+                    <span class="text-gray-400 self-center">→ 顺1 →</span>
+                    <span class="px-2 py-0.5 rounded font-bold" style="background:#fce4ec">vi = Am</span>
+                    <span class="text-gray-400 self-center">→ 顺1 →</span>
+                    <span class="px-2 py-0.5 rounded font-bold" style="background:#fce4ec">iii = Em</span>
+                    <span class="text-gray-400 self-center">→ 顺1 →</span>
+                    <span class="px-2 py-0.5 rounded font-bold" style="background:#f3e5f5">vii° = Bdim</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">🟢 大三和弦 | 🔴 小三和弦 | 🟣 减三和弦 | 🔵 主和弦(I)</p>
+            </div>
+
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">记忆规律</h3>
+            <table>
+                <tr><th>级数</th><th>圈上位置（从 I 出发）</th><th>和弦性质</th><th>举例（C大调）</th></tr>
+                <tr><td><strong>I</strong>（主）</td><td>本位</td><td>大三</td><td>C</td></tr>
+                <tr><td><strong>IV</strong>（下属）</td><td>逆时针 1 格</td><td>大三</td><td>F</td></tr>
+                <tr><td><strong>V</strong>（属）</td><td>顺时针 1 格</td><td>大三</td><td>G</td></tr>
+                <tr><td><strong>ii</strong></td><td>顺时针 2 格</td><td>小三</td><td>Dm</td></tr>
+                <tr><td><strong>vi</strong></td><td>顺时针 3 格</td><td>小三</td><td>Am</td></tr>
+                <tr><td><strong>iii</strong></td><td>顺时针 4 格</td><td>小三</td><td>Em</td></tr>
+                <tr><td><strong>vii°</strong></td><td>顺时针 5 格</td><td>减三</td><td>Bdim</td></tr>
+            </table>
+
+            <p class="text-gray-500 text-xs mt-3">
+                💡 <strong>规律：</strong>I、IV、V 是大三和弦（紧挨在一起的 3 个）；ii、iii、vi 是小三和弦（顺时针方向 2/3/4 格）；vii° 是减三和弦。
+                这个规律对<strong>任何大调都适用</strong>！选 C 调记熟，换到其他调就依葫芦画瓢。
+            </p>
         </div>
 
         <!-- ===== 怎么读五度圈 ===== -->
         <div class="content-card">
             <h2 class="text-xl font-bold text-gray-900 mb-4">👀 怎么读五度圈？</h2>
 
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">一、外圈 = 大调（Major Keys）</h3>
-            <p class="text-gray-600 leading-relaxed mb-4">
-                顶端是 <strong>C 大调</strong>（0 个升/降号），顺时针每走一格加一个升号，逆时针每走一格加一个降号。
-            </p>
-
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">外圈：12 个大调</h3>
+            <p class="text-gray-600 leading-relaxed mb-4">顶端 C（0 升/降号），顺时针加升号，逆时针加降号。</p>
             <table class="mb-4">
-                <tr><th>方向</th><th>顺序</th><th>调号变化</th></tr>
-                <tr><td>🔄 顺时针</td><td>C → G → D → A → E → B → F♯ → C♯</td><td>升号 0 → 1 → 2 → … → 7</td></tr>
-                <tr><td>🔄 逆时针</td><td>C → F → B♭ → E♭ → A♭ → D♭ → G♭ → C♭</td><td>降号 0 → 1 → 2 → … → 7</td></tr>
+                <tr><th>顺时针（升号）</th><td>C</td><td>G</td><td>D</td><td>A</td><td>E</td><td>B</td><td>F♯</td><td>C♯</td></tr>
+                <tr><th>逆时针（降号）</th><td>C</td><td>F</td><td>B♭</td><td>E♭</td><td>A♭</td><td>D♭</td><td>G♭</td><td>C♭</td></tr>
             </table>
-
             <div class="highlight-box">
-                <p class="text-sm text-gray-700 leading-relaxed">
-                    <strong>🔑 巧记升号顺序：</strong> F-C-G-D-A-E-B（父吃瓜的爱饼）<br>
-                    <strong>🔑 巧记降号顺序：</strong> B-E-A-D-G-C-F（升号倒过来念）
-                </p>
+                <p class="text-sm text-gray-700"><strong>🔑 升号顺序口诀：</strong>F-C-G-D-A-E-B（父吃瓜的爱饼）<br>
+                <strong>🔑 降号顺序口诀：</strong>B-E-A-D-G-C-F（升号倒过来）</p>
             </div>
 
-            <h3 class="text-lg font-semibold text-gray-800 mb-2 mt-6">二、内圈 = 关系小调（Relative Minor Keys）</h3>
-            <p class="text-gray-600 leading-relaxed mb-3">
-                每个大调都有一个 <strong>关系小调</strong>，它们共享完全相同的调号（升降号数量一样）。
-                从大调往顺时针方向数 <strong>3 格</strong>，就是它的关系小调。
-            </p>
-            <table>
-                <tr><th>大调</th><th>C</th><th>G</th><th>D</th><th>A</th><th>E</th><th>B</th></tr>
-                <tr><td>关系小调</td><td>Am</td><td>Em</td><td>Bm</td><td>F♯m</td><td>C♯m</td><td>G♯m</td></tr>
-            </table>
-            <p class="text-gray-500 text-xs mt-2">* 简单记法：大调往下数 3 个半音 = 关系小调。比如 C 往下 3 个半音 → A → Am</p>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2 mt-5">内圈：12 个关系小调</h3>
+            <p class="text-gray-600 leading-relaxed">每个大调顺时针走 3 格 = 关系小调。如 C → 顺3 → A → Am。大调往下数 3 个半音也一样。</p>
 
-            <h3 class="text-lg font-semibold text-gray-800 mb-2 mt-6">三、底部 = 等音调（Enharmonic Keys）</h3>
-            <p class="text-gray-600 leading-relaxed">
-                圈底部的 F♯ = G♭、C♯ = D♭、B = C♭，它们是 <strong>等音调</strong>——键盘上弹的键完全一样，
-                只是写法不同。你可以选择升号少的那个来读谱更方便。
-            </p>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2 mt-5">底部：等音调</h3>
+            <p class="text-gray-600 leading-relaxed">F♯=G♭、C♯=D♭，键盘上一样但写法不同，选升/降号少的读谱更轻松。</p>
         </div>
 
-        <!-- ===== 如何使用五度圈 ===== -->
+        <!-- ===== 其他用法 ===== -->
         <div class="content-card">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">🛠️ 如何使用五度圈？</h2>
-
+            <h2 class="text-xl font-bold text-gray-900 mb-4">🎯 更多用法</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Use 1 -->
                 <div class="use-card">
-                    <h3>🎯 用法一：快速查调号</h3>
-                    <p>看到一首曲子，想知道它有几个升号/降号？看五度圈外圈的数字就行。</p>
-                    <ul class="list-disc pl-5 mt-2 text-gray-600">
-                        <li>D 大调 → 看 D 的位置 → ♯2（两个升号：F♯、C♯）</li>
-                        <li>E♭ 大调 → 看 E♭ 的位置 → ♭3（三个降号：B♭、E♭、A♭）</li>
-                    </ul>
+                    <h3>🎯 查调号</h3>
+                    <p>看一眼圈上的数字就知道几个升降号。D大调 = ♯2（F♯, C♯），E♭大调 = ♭3（B♭, E♭, A♭）。</p>
                 </div>
-
-                <!-- Use 2 -->
                 <div class="use-card">
-                    <h3>🎸 用法二：和弦进行</h3>
-                    <p>最常见的 <strong>I–IV–V</strong> 和弦进行就在五度圈上紧挨着。</p>
-                    <ul class="list-disc pl-5 mt-2 text-gray-600">
-                        <li>以 C 为例：I = C，IV = F（逆时针 1 格），V = G（顺时针 1 格）</li>
-                        <li>C → F → G （无数歌曲的基础！）</li>
-                    </ul>
+                    <h3>🔄 转调</h3>
+                    <p>相邻调切换最自然（差1个升降号）：C→G 很顺畅。<br>对面调切换最大胆（差6个）：C→F♯ 很刺激。</p>
                 </div>
-
-                <!-- Use 3 -->
                 <div class="use-card">
-                    <h3>🔄 用法三：转调（Modulation）</h3>
-                    <p>要在曲子中间换调？往相邻的调转最自然。</p>
-                    <ul class="list-disc pl-5 mt-2 text-gray-600">
-                        <li>C → G（顺时针 1 格）：很流畅</li>
-                        <li>C → D（顺时针 2 格）：有点张力</li>
-                        <li>C → F♯（对面 6 格）：大胆的跳跃</li>
-                    </ul>
+                    <h3>🎹 移调</h3>
+                    <p>唱不上去？统一把整首歌的所有和弦沿圈移动相同格数。C 降两格 → B♭ 调。</p>
                 </div>
-
-                <!-- Use 4 -->
                 <div class="use-card">
-                    <h3>🎼 用法四：找关系大小调</h3>
-                    <p>想给大调曲子加一段小调的色彩？直接用它的关系小调！</p>
-                    <ul class="list-disc pl-5 mt-2 text-gray-600">
-                        <li>C 大调 → Am（共享 0 个升降号）</li>
-                        <li>G 大调 → Em（共享 1 个升号）</li>
-                        <li>即兴 solo 时在这两个调间切换超好用</li>
-                    </ul>
-                </div>
-
-                <!-- Use 5 -->
-                <div class="use-card">
-                    <h3>🎹 用法五：移调（Transposition）</h3>
-                    <p>曲子原调太高唱不上去？用五度圈快速找到新调。</p>
-                    <ul class="list-disc pl-5 mt-2 text-gray-600">
-                        <li>C 调想降两个调 → 逆时针走 2 格 → B♭ 调</li>
-                        <li>所有和弦统一沿圈移动相同格数即可</li>
-                    </ul>
-                </div>
-
-                <!-- Use 6 -->
-                <div class="use-card">
-                    <h3>🎵 用法六：借调和弦（Borrowed Chords）</h3>
-                    <p>想丰富和弦色彩？从相邻调"借"和弦。</p>
-                    <ul class="list-disc pl-5 mt-2 text-gray-600">
-                        <li>C 大调里突然用 B♭ 和弦（来自 F 调）→ 流行/摇滚常用</li>
-                        <li>关系小调的和弦也可以借 → 同理</li>
-                    </ul>
+                    <h3>🎵 借调和弦</h3>
+                    <p>从相邻调借和弦增加色彩。C大调里突然用 B♭（来自F调）→ 摇滚/流行标配。</p>
                 </div>
             </div>
-        </div>
-
-        <!-- ===== 实战示例 ===== -->
-        <div class="content-card">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">🎹 实战示例</h2>
-
-            <div class="highlight-box">
-                <p class="text-sm font-semibold text-gray-800 mb-2">示例：用五度圈分析 C 大调的常用和弦</p>
-                <div class="text-sm text-gray-700 leading-relaxed space-y-1">
-                    <p>• <strong>I 级（主和弦）</strong> = <strong>C</strong>（圈中 C 的位置）</p>
-                    <p>• <strong>V 级（属和弦）</strong> = <strong>G</strong>（顺时针 1 格 → 紧张，渴望回到主和弦）</p>
-                    <p>• <strong>IV 级（下属和弦）</strong> = <strong>F</strong>（逆时针 1 格 → 温暖，稳定的过渡）</p>
-                    <p>• <strong>vi 级（关系小调）</strong> = <strong>Am</strong>（C 的关系小调 → 抒情的色彩）</p>
-                    <p class="mt-2"><strong>→ 经典 I–V–vi–IV 进行：C → G → Am → F</strong>（无数流行歌的基础！）</p>
-                </div>
-            </div>
-
-            <div class="highlight-box mt-3">
-                <p class="text-sm font-semibold text-gray-800 mb-2">🎸 吉他手/钢琴手实用技巧</p>
-                <p class="text-sm text-gray-700 leading-relaxed">
-                    把五度圈画在琴房墙上。即兴 jam 时，用五度圈上相邻 3~4 个调的和弦随意组合，几乎不会"跑调"。
-                    试试这组：<strong>C → Am → F → G</strong>（四个和弦都在五度圈 C 的邻近位置）。
-                </p>
-            </div>
-        </div>
-
-        <!-- ===== 总结 ===== -->
-        <div class="content-card">
-            <h2 class="text-xl font-bold text-gray-900 mb-3">📝 总结</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-                <div class="use-card">
-                    <div class="text-3xl mb-2">🔍</div>
-                    <h3>查</h3>
-                    <p class="text-sm text-gray-600">快速查调号、升降号数量</p>
-                </div>
-                <div class="use-card">
-                    <div class="text-3xl mb-2">🎸</div>
-                    <h3>写</h3>
-                    <p class="text-sm text-gray-600">写歌编曲、设计和弦进行</p>
-                </div>
-                <div class="use-card">
-                    <div class="text-3xl mb-2">🎤</div>
-                    <h3>用</h3>
-                    <p class="text-sm text-gray-600">即兴演奏、移调、转调</p>
-                </div>
-            </div>
-            <p class="text-gray-500 text-sm text-center mt-4">
-                五度圈不是用来死记硬背的公式，而是帮助你 <strong>理解音乐内在规律</strong> 的地图。多画、多用，慢慢就会刻在脑子里。
-            </p>
         </div>
 
     </main>
@@ -400,24 +330,205 @@
         <a href="./index.html" class="text-blue-500 hover:underline">← 返回节拍器</a>
     </footer>
 
-    <!-- ===== Dark Mode Script ===== -->
+    <!-- ===== Scripts ===== -->
     <script>
-        (function() {
-            const themeBtn = document.getElementById('themeToggle');
-            const saved = localStorage.getItem('metronome-theme');
-            if (saved === 'dark') {
-                document.body.classList.add('dark');
-                themeBtn.textContent = '🌙';
+    // ===== DATA =====
+    // Major keys in clockwise order from top (C = index 0 at 12 o'clock)
+    const majorKeys = [
+        {name:"C",  min:"Am",  acc:"0",  accLabel:"",    sharps:0, flats:0 },
+        {name:"G",  min:"Em",  acc:"♯1", accLabel:"♯",   sharps:1, flats:0 },
+        {name:"D",  min:"Bm",  acc:"♯2", accLabel:"♯♯",  sharps:2, flats:0 },
+        {name:"A",  min:"F♯m", acc:"♯3", accLabel:"♯♯♯", sharps:3, flats:0 },
+        {name:"E",  min:"C♯m", acc:"♯4", accLabel:"♯♯♯♯",sharps:4, flats:0 },
+        {name:"B",  min:"G♯m", acc:"♯5", accLabel:"♯♯♯♯♯",sharps:5, flats:0 },
+        {name:"F♯", min:"E♭m", acc:"♯6/♭6", accLabel:"♯♯♯♯♯♯",sharps:6, flats:6 },
+        {name:"C♯", min:"B♭m", acc:"♯7/♭5", accLabel:"♯♯♯♯♯♯♯",sharps:7, flats:5 },
+        {name:"A♭", min:"Fm",  acc:"♭4", accLabel:"♭♭♭♭",sharps:0, flats:4 },
+        {name:"E♭", min:"Cm",  acc:"♭3", accLabel:"♭♭♭", sharps:0, flats:3 },
+        {name:"B♭", min:"Gm",  acc:"♭2", accLabel:"♭♭",  sharps:0, flats:2 },
+        {name:"F",  min:"Dm",  acc:"♭1", accLabel:"♭",   sharps:0, flats:1 }
+    ];
+
+    const cx = 310, cy = 310;
+    const majorR = 258, minorR = 175, majorDotR = 34, minorDotR = 20;
+
+    function getPos(index) {
+        const angle = (index * 30 - 90) * Math.PI / 180; // -90° so C starts at top
+        return { x: cx + majorR * Math.cos(angle), y: cy + majorR * Math.sin(angle) };
+    }
+
+    function getMinorPos(index) {
+        const angle = (index * 30 - 90) * Math.PI / 180;
+        return { x: cx + minorR * Math.cos(angle), y: cy + minorR * Math.sin(angle) };
+    }
+
+    // ===== DRAW SVG =====
+    const majorGroup = document.getElementById('major-keys');
+    const minorGroup = document.getElementById('minor-keys');
+
+    majorKeys.forEach((key, i) => {
+        const pos = getPos(i);
+        const color = key.sharps > 0 ? '#4F8CFF' : (key.flats > 0 ? '#EC4899' : '#4F8CFF');
+        const opacity = i === 0 ? 0.18 : (key.sharps >= 5 || key.flats >= 4 ? 0.05 : 0.09);
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'key-node');
+        g.setAttribute('data-index', i);
+        g.setAttribute('data-name', key.name);
+        g.innerHTML = `
+            <circle cx="${pos.x}" cy="${pos.y}" r="${majorDotR}" fill="${color}" opacity="${opacity}"
+                    stroke="${color}" stroke-width="1.8" class="key-dot" filter="url(#shadow)"/>
+            <text x="${pos.x}" y="${pos.y - 2}" text-anchor="middle" font-size="19" font-weight="700"
+                  fill="#2C313C" class="key-name">${key.name}</text>
+            <text x="${pos.x}" y="${pos.y + 15}" text-anchor="middle" font-size="10" fill="#888">${key.acc}</text>
+        `;
+        g.addEventListener('click', () => selectKey(i));
+        majorGroup.appendChild(g);
+
+        // Minor key (inside)
+        const mpos = getMinorPos(i);
+        const mg = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        mg.setAttribute('class', 'key-node minor-node');
+        mg.setAttribute('data-index', i);
+        mg.innerHTML = `
+            <circle cx="${mpos.x}" cy="${mpos.y}" r="${minorDotR}" fill="#f5edf7"
+                    stroke="#c8b0d4" stroke-width="1.2"/>
+            <text x="${mpos.x}" y="${mpos.y + 3}" text-anchor="middle" font-size="11" font-weight="600"
+                  fill="#7a6a80">${key.min}</text>
+        `;
+        mg.addEventListener('click', (e) => { e.stopPropagation(); selectKey(i); });
+        minorGroup.appendChild(mg);
+    });
+
+    // Chord family highlighting
+    function selectKey(index) {
+        // Reset all
+        document.querySelectorAll('.key-node').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.chord-highlight').forEach(el => el.remove());
+
+        // Highlight selected
+        const nodes = document.querySelectorAll(`.key-node[data-index="${index}"]`);
+        nodes.forEach(n => n.classList.add('selected'));
+
+        // Calculate chord family arc
+        // I = index, IV = (index - 1 + 12) % 12, V = (index + 1) % 12,
+        // ii = (index + 2) % 12, vi = (index + 3) % 12, iii = (index + 4) % 12, vii = (index + 5) % 12
+        const chordIndices = [
+            (index - 1 + 12) % 12, // IV
+            index,                  // I
+            (index + 1) % 12,      // V
+            (index + 2) % 12,      // ii
+            (index + 3) % 12,      // vi
+            (index + 4) % 12,      // iii
+            (index + 5) % 12       // vii°
+        ];
+
+        // Draw highlighted arc ring markers
+        const arcGroup = document.getElementById('chord-arc');
+        chordIndices.forEach((ci, order) => {
+            const pos = getPos(ci);
+            let ringColor;
+            if (order === 1) ringColor = '#4F8CFF'; // I
+            else if (order <= 2) ringColor = '#2e7d32'; // IV, V = major
+            else if (order <= 5) ringColor = '#c62828'; // ii, vi, iii = minor
+            else ringColor = '#6a1b9a'; // vii° = dim
+
+            const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            ring.setAttribute('cx', pos.x);
+            ring.setAttribute('cy', pos.y);
+            ring.setAttribute('r', majorDotR + 6);
+            ring.setAttribute('fill', 'none');
+            ring.setAttribute('stroke', ringColor);
+            ring.setAttribute('stroke-width', '3');
+            ring.setAttribute('stroke-dasharray', order === 1 ? 'none' : '6 3');
+            ring.setAttribute('class', 'chord-highlight');
+            ring.setAttribute('opacity', '0.7');
+            arcGroup.appendChild(ring);
+        });
+
+        // Dim other keys
+        document.querySelectorAll('.key-node:not(.selected)').forEach(el => {
+            const idx = parseInt(el.getAttribute('data-index'));
+            if (!chordIndices.includes(idx)) {
+                el.style.opacity = '0.35';
             } else {
-                themeBtn.textContent = '☀️';
+                el.style.opacity = '1';
             }
-            themeBtn.addEventListener('click', function() {
-                document.body.classList.toggle('dark');
-                const isDark = document.body.classList.contains('dark');
-                themeBtn.textContent = isDark ? '🌙' : '☀️';
-                localStorage.setItem('metronome-theme', isDark ? 'dark' : 'light');
+        });
+        // Always keep selected + chord family at full opacity after a beat
+        setTimeout(() => {
+            document.querySelectorAll('.key-node').forEach(el => {
+                const idx = parseInt(el.getAttribute('data-index'));
+                if (!chordIndices.includes(idx) && idx !== index) {
+                    el.style.opacity = '0.35';
+                }
             });
-        })();
+        }, 50);
+
+        // Update chord family card
+        updateChordCard(index);
+    }
+
+    function updateChordCard(index) {
+        const key = majorKeys[index];
+        const card = document.getElementById('chordFamilyCard');
+        card.style.display = 'block';
+
+        document.getElementById('selectedKeyName').textContent = key.name + ' 大调';
+
+        const I = key.name;
+        const ii = majorKeys[(index + 2) % 12].min;
+        const iii = majorKeys[(index + 4) % 12].min;
+        const IV = majorKeys[(index - 1 + 12) % 12].name;
+        const V = majorKeys[(index + 1) % 12].name;
+        const vi = majorKeys[(index + 3) % 12].min;
+        const vii = majorKeys[(index + 5) % 12].min.replace('m', 'dim');
+
+        document.getElementById('chI').textContent = I;
+        document.getElementById('chII').textContent = ii;
+        document.getElementById('chIII').textContent = iii;
+        document.getElementById('chIV').textContent = IV;
+        document.getElementById('chV').textContent = V;
+        document.getElementById('chVI').textContent = vi;
+        document.getElementById('chVII').textContent = vii;
+
+        document.getElementById('posIV').textContent = IV + ' (逆1)';
+        document.getElementById('posI').textContent = I + ' (本位)';
+        document.getElementById('posV').textContent = V + ' (顺1)';
+        document.getElementById('posII').textContent = ii + ' (顺2)';
+        document.getElementById('posVI').textContent = vi + ' (顺3)';
+        document.getElementById('posIII').textContent = iii + ' (顺4)';
+        document.getElementById('posVII').textContent = vii + ' (顺5)';
+
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Default: select C (index 0)
+    selectKey(0);
+
+    // ===== Theme =====
+    (function() {
+        const themeBtn = document.getElementById('themeToggle');
+        const saved = localStorage.getItem('metronome-theme');
+        if (saved === 'dark') { document.body.classList.add('dark'); themeBtn.textContent = '🌙'; }
+        else { themeBtn.textContent = '☀️'; }
+        themeBtn.addEventListener('click', function() {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            themeBtn.textContent = isDark ? '🌙' : '☀️';
+            localStorage.setItem('metronome-theme', isDark ? 'dark' : 'light');
+        });
+    })();
+
+    // ===== Language (sync with main site) =====
+    (function() {
+        const langSelect = document.getElementById('langSelectTop');
+        const savedLang = localStorage.getItem('metronome-lang');
+        if (savedLang) langSelect.value = savedLang;
+        langSelect.addEventListener('change', function() {
+            localStorage.setItem('metronome-lang', this.value);
+        });
+    })();
     </script>
 </body>
 </html>
