@@ -157,8 +157,7 @@
                 和弦家族：<span id="selectedKeyName" class="text-blue-600">C 大调</span> 的七级和弦
             </h2>
             <p class="text-gray-500 text-xs text-center mb-4">
-                💡 圈上亮起的 3 个大调（IV ← <strong>I</strong> → V），每个大调的内圈小调就是它的关系小调。<br>
-                外圈 = 大三和弦（I、IV、V），内圈 = 小三和弦（vi跟I、ii跟IV、iii跟V）
+                🟢 绿圈 = 大三和弦 (I/IV/V) 🔴 红圈 = 小三和弦 (ii/iii/vi) 🟣 紫圈 = 减三和弦 (vii°)
             </p>
             <div class="overflow-x-auto">
                 <table class="chord-table text-center" style="min-width:100%">
@@ -375,52 +374,72 @@
         minorGroup.appendChild(mg);
     });
 
+    // Helpers for drawing rings + labels
+    function addRing(group, pos, r, stroke, width, opacity) {
+        const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        ring.setAttribute('cx', pos.x); ring.setAttribute('cy', pos.y);
+        ring.setAttribute('r', r); ring.setAttribute('fill', 'none');
+        ring.setAttribute('stroke', stroke); ring.setAttribute('stroke-width', width);
+        ring.setAttribute('class', 'chord-highlight'); ring.setAttribute('opacity', opacity);
+        group.appendChild(ring);
+    }
+    function addLabel(group, pos, r, text, color) {
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', pos.x); label.setAttribute('y', pos.y - r - 3);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('font-size', '11');
+        label.setAttribute('font-weight', '700');
+        label.setAttribute('fill', color);
+        label.setAttribute('class', 'chord-highlight');
+        label.textContent = text;
+        group.appendChild(label);
+    }
+
     // Chord family highlighting
     function selectKey(index) {
         // Reset all
         document.querySelectorAll('.key-node').forEach(el => el.classList.remove('selected'));
         document.querySelectorAll('.chord-highlight').forEach(el => el.remove());
 
-        // Highlight selected
-        const nodes = document.querySelectorAll(`.key-node[data-index="${index}"]`);
-        nodes.forEach(n => n.classList.add('selected'));
+        // Highlight selected key
+        document.querySelectorAll(`.key-node[data-index="${index}"]`).forEach(n => n.classList.add('selected'));
 
-        // Chord family: only 3 positions matter on the circle
-        // IV(ccw1): IV大 + ii小(内圈) | I(本位): I大 + vi小(内圈) | V(cw1): V大 + iii小(内圈)
-        const triadPositions = [
-            { idx: (index - 1 + 12) % 12, role: 'IV' },
-            { idx: index, role: 'I' },
-            { idx: (index + 1) % 12, role: 'V' }
+        const arcGroup = document.getElementById('chord-arc');
+
+        // Three triad positions: each has a major(outer) + minor(inner) chord
+        // IV/ii at ccw1, I/vi at center, V/iii at cw1
+        const triads = [
+            { idx: (index - 1 + 12) % 12, mj: 'IV', mn: 'ii' },
+            { idx: index,                   mj: 'I',  mn: 'vi' },
+            { idx: (index + 1) % 12,       mj: 'V',  mn: 'iii' }
         ];
 
-        // Draw ring markers ONLY on the 3 triad positions
-        const arcGroup = document.getElementById('chord-arc');
-        triadPositions.forEach(({ idx, role }) => {
-            const pos = getPos(idx);
-            const color = role === 'I' ? '#4F8CFF' : '#2e7d32';
-            const width = role === 'I' ? '3.5' : '2.5';
+        triads.forEach(({ idx, mj, mn }) => {
+            const mp = getPos(idx);       // outer ring (major)
+            const ip = getMinorPos(idx);  // inner ring (minor)
 
-            const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            ring.setAttribute('cx', pos.x);
-            ring.setAttribute('cy', pos.y);
-            ring.setAttribute('r', majorDotR + 6);
-            ring.setAttribute('fill', 'none');
-            ring.setAttribute('stroke', color);
-            ring.setAttribute('stroke-width', width);
-            ring.setAttribute('class', 'chord-highlight');
-            ring.setAttribute('opacity', '0.8');
-            arcGroup.appendChild(ring);
+            // Green ring + label on outer circle
+            const mjW = mj === 'I' ? '3.5' : '2.8';
+            addRing(arcGroup, mp, majorDotR + 7, '#2e7d32', mjW, '0.9');
+            addLabel(arcGroup, mp, majorDotR + 8, mj, '#2e7d32');
+
+            // Red ring + label on inner circle
+            addRing(arcGroup, ip, minorDotR + 5, '#c62828', '2.5', '0.85');
+            addLabel(arcGroup, ip, minorDotR + 6, mn, '#c62828');
         });
 
-        const triadIdxSet = triadPositions.map(p => p.idx);
-        // Dim keys not in the 3-position chord family
+        // vii° = diminished chord — root at inner ring of position (index+2)
+        const viiIdx = (index + 2) % 12;
+        const viiPos = getMinorPos(viiIdx);
+        addRing(arcGroup, viiPos, minorDotR + 5, '#6a1b9a', '2.5', '0.85');
+        addLabel(arcGroup, viiPos, minorDotR + 6, 'vii°', '#6a1b9a');
+
+        // Dim everything outside the chord family
+        const familySet = new Set(triads.map(t => t.idx));
+        familySet.add(viiIdx);
         document.querySelectorAll('.key-node').forEach(el => {
             const idx = parseInt(el.getAttribute('data-index'));
-            if (!triadIdxSet.includes(idx)) {
-                el.style.opacity = '0.35';
-            } else {
-                el.style.opacity = '1';
-            }
+            el.style.opacity = familySet.has(idx) ? '1' : '0.35';
         });
 
         // Update chord family card
