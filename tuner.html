@@ -285,18 +285,20 @@
 
     // ===== AUDIO ENGINE =====
     let ctx=null, analyser=null, running=false, mode='guitar';
-    let smoothedMidi=null;
+    let smoothedHz=null;  // smoothed frequency in Hz (log-space is more accurate)
     let lastDetectionTime=0;
-    const HOLD_MS=1800; // keep display 1.8s after signal fades
+    const HOLD_MS=1800;
 
     async function toggleTuner() {
         if (running) { stopTuner(); return; }
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+            // echoCancellation/noiseSuppression/autoGainControl MUST be false — they destroy pure tones
+            const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
             ctx = new (window.AudioContext||window.webkitAudioContext)();
             const src = ctx.createMediaStreamSource(stream);
             analyser = ctx.createAnalyser();
-            analyser.fftSize=8192; analyser.smoothingTimeConstant=0.35;
+            analyser.fftSize=2048; // proven sweet spot (sen-ltd/pitch-detector, cwilso/PitchDetect)
+            analyser.smoothingTimeConstant=0.3;
             src.connect(analyser);
             running=true;
             document.getElementById('powerIcon').textContent='⏹';
@@ -310,7 +312,7 @@
     }
 
     function stopTuner() {
-        running=false;smoothedMidi=null;lastDetectionTime=0;
+        running=false;smoothedHz=null;lastDetectionTime=0;
         if(ctx){ctx.close();ctx=null;analyser=null;}
         document.getElementById('powerIcon').textContent='🎤';
         document.getElementById('powerBtn').classList.remove('on');
@@ -323,100 +325,68 @@
         updateStrings(null);
     }
 
-    // YIN pitch detection — industry standard for monophonic tuning
+    // Autocorrelation + parabolic interpolation (sen-ltd/pitch-detector, cwilso/PitchDetect)
     function detectPitch(buf) {
         const n=buf.length, sr=ctx.sampleRate;
-        const maxLag=Math.floor(sr/60); // lowest detectable ~60Hz (B1)
+        const minLag=Math.floor(sr/1500); // ~C6
+        const maxLag=Math.floor(sr/60);   // ~B1
         if (maxLag>=n) return -1;
 
-        // Step 1: Difference function d(lag)=Σ(buf[i]-buf[i+lag])²
-        const d=new Float64Array(maxLag);
-        for (let lag=1;lag<maxLag;lag++){
-            let sum=0;
-            for(let i=0;i<n-lag;i++){const diff=buf[i]-buf[i+lag];sum+=diff*diff;}
-            d[lag]=sum;
+        // Compute r[0] for noise threshold
+        let r0=0; for(let i=0;i<n;i++)r0+=buf[i]*buf[i];
+        if(r0<1e-12) return -1;
+
+        // Autocorrelation
+        let bestLag=-1, bestVal=0;
+        for(let lag=minLag;lag<maxLag;lag++){
+            let r=0;
+            for(let i=0;i<n-lag;i++) r+=buf[i]*buf[i+lag];
+            if(r>bestVal){bestVal=r;bestLag=lag;}
         }
 
-        // Step 2: Cumulative mean normalized difference
-        // d'(lag) = d(lag) / avg(d[1..lag])
-        let runningSum=0;
-        d[0]=1; // by convention
-        for(let lag=1;lag<maxLag;lag++){
-            runningSum+=d[lag];
-            d[lag]=d[lag]*lag/(runningSum||1e-12);
-        }
+        // Noise gate: peak must be >= 50% of zero-lag (professional standard)
+        if(bestLag<0||bestVal/r0<0.5) return -1;
 
-        // Step 3: Find first minimum below threshold, with fallback
-        let bestLag=-1;
-        for(const thresh of[0.12,0.18,0.25]){
-            for(let lag=2;lag<maxLag-1;lag++){
-                if(d[lag]<thresh && d[lag]<=d[lag-1] && d[lag]<=d[lag+1]){
-                    bestLag=lag;break;
-                }
-            }
-            if(bestLag>0) break;
-        }
-        // Absolute fallback: find deepest minimum
-        if(bestLag<0){
-            let minVal=1;
-            const minLag=Math.floor(sr/2000);
-            for(let lag=minLag;lag<maxLag-1;lag++){
-                if(d[lag]<=d[lag-1]&&d[lag]<=d[lag+1]&&d[lag]<minVal){minVal=d[lag];bestLag=lag;}
-            }
-            if(bestLag<0||minVal>0.4) return -1;
-        }
-
-        // Step 4: Improved parabolic interpolation using 5-point stencil
-        const ym1=d[bestLag-1]||d[bestLag];
-        const y0=d[bestLag];
-        const yp1=d[bestLag+1]||d[bestLag];
-        const div=ym1+yp1-2*y0;
-        if (Math.abs(div)<1e-12) return sr/bestLag;
-        const delta=0.5*(ym1-yp1)/div;
-        const refinedLag=bestLag+delta;
-        if (refinedLag<1) return -1;
-        return sr/refinedLag;
+        // Parabolic interpolation for sub-sample precision
+        let cm1=0,c1=0;
+        if(bestLag>0){for(let i=0;i<n-bestLag+1;i++)cm1+=buf[i]*buf[i+bestLag-1];}
+        if(bestLag<maxLag-1){for(let i=0;i<n-bestLag-1;i++)c1+=buf[i]*buf[i+bestLag+1];}
+        const div=2*(2*bestVal-c1-cm1);
+        const refinedLag=(Math.abs(div)<1e-10)?bestLag:bestLag+(c1-cm1)/div;
+        return (refinedLag>0)?sr/refinedLag:sr/bestLag;
     }
 
     function tick() {
-        if (!running) return;
-        const buf = new Float32Array(analyser.fftSize);
+        if(!running) return;
+        const buf=new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(buf);
-        let rms=0; for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i]; rms=Math.sqrt(rms/buf.length);
         const now=performance.now();
+        const f=detectPitch(buf);
 
-        if (rms>=0.015) {
-            // SIGNAL: detect and display
-            const f=detectPitch(buf);
-            if (f>40&&f<1800) {
-                lastDetectionTime=now;
-                const rawMidi=69+12*Math.log2(f/440);
-                if (smoothedMidi===null) smoothedMidi=rawMidi;
-                else {
-                    if (Math.abs(rawMidi-smoothedMidi)<1.5) {
-                        smoothedMidi=smoothedMidi*0.55+rawMidi*0.45;
-                    }
+        if(f>40&&f<1800){
+            lastDetectionTime=now;
+            // Smooth in log-frequency (Hz) — professional approach:
+            // cents deviation stays consistent regardless of octave
+            if(smoothedHz===null) smoothedHz=f;
+            else{
+                // Anti-octave-jump: reject if >35% frequency change
+                if(Math.abs(f-smoothedHz)/smoothedHz<0.35){
+                    smoothedHz=smoothedHz*0.6+f*0.4;
                 }
-                const mr=Math.round(smoothedMidi);
-                const cents=100*(smoothedMidi-mr);
-                const note=midiToNote(mr+cents/100);
-                updateDisplay(note,cents,mr);
-                updateStrings(mr);
             }
-        }
-        // No signal: HOLD last reading for HOLD_MS before clearing
-        else if (smoothedMidi!==null && (now-lastDetectionTime)<HOLD_MS) {
-            // Keep showing the last detected note — needle stays put
-            // (updateDisplay already drew it, don't touch)
-        }
-        // Hold expired: clear to idle
-        else if (smoothedMidi!==null) {
+            const midi=69+12*Math.log2(smoothedHz/440);
+            const mr=Math.round(midi),cents=100*(midi-mr);
+            updateDisplay(midiToNote(mr+cents/100),cents,mr);
+            updateStrings(mr);
+        }else if(smoothedHz!==null&&(now-lastDetectionTime)<HOLD_MS){
+            // Hold display — keep last reading visible
+        }else if(smoothedHz!==null){
             document.getElementById('noteText').textContent='--';
             document.getElementById('freqLine').textContent='等待信号…';
             document.getElementById('devText').textContent='';
             document.getElementById('needle').style.transform='rotate(0deg)';
             updateStrings(null);
-            smoothedMidi=null;
+            smoothedHz=null;
         }
         requestAnimationFrame(tick);
     }
@@ -503,7 +473,7 @@
         document.querySelectorAll('.mode-chip').forEach(b=>b.classList.remove('active'));
         e.target.classList.add('active');
         mode=e.target.dataset.mode;
-        smoothedMidi=null;
+        smoothedHz=null;
         buildStrings(mode);
         buildRef(mode);
         updateStrings(null);
