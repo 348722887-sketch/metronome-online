@@ -385,10 +385,10 @@
     }
     function addLabel(group, pos, r, text, color) {
         const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        label.setAttribute('x', pos.x); label.setAttribute('y', pos.y - r - 3);
+        label.setAttribute('x', pos.x); label.setAttribute('y', pos.y - r - 6);
         label.setAttribute('text-anchor', 'middle');
-        label.setAttribute('font-size', '11');
-        label.setAttribute('font-weight', '700');
+        label.setAttribute('font-size', '16');
+        label.setAttribute('font-weight', '800');
         label.setAttribute('fill', color);
         label.setAttribute('class', 'chord-highlight');
         label.textContent = text;
