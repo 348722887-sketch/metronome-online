@@ -431,14 +431,21 @@
         // vii° = diminished chord — root at inner ring of position (index+2)
         const viiIdx = (index + 2) % 12;
         const viiPos = getMinorPos(viiIdx);
-        addRing(arcGroup, viiPos, minorDotR + 5, '#6a1b9a', '2.5', '0.85');
+        addRing(arcGroup, viiPos, minorDotR + 5, '#6a1b9a', '3', '0.95');
         addLabel(arcGroup, viiPos, minorDotR + 6, 'vii°', '#6a1b9a');
 
-        // Only IV/I/V triad positions stay bright; vii° gets its own ring but the position dims
+        // IV/I/V positions + vii° inner circle stay bright; rest dim
         const familySet = new Set(triads.map(t => t.idx));
         document.querySelectorAll('.key-node').forEach(el => {
             const idx = parseInt(el.getAttribute('data-index'));
-            el.style.opacity = familySet.has(idx) ? '1' : '0.35';
+            const isMinor = el.classList.contains('minor-node');
+            if (familySet.has(idx)) {
+                el.style.opacity = '1';
+            } else if (idx === viiIdx && isMinor) {
+                el.style.opacity = '1'; // vii° inner circle stays visible
+            } else {
+                el.style.opacity = '0.35';
+            }
         });
 
         // Update chord family card
