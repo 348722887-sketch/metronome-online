@@ -294,7 +294,7 @@
             ctx = new (window.AudioContext||window.webkitAudioContext)();
             const src = ctx.createMediaStreamSource(stream);
             analyser = ctx.createAnalyser();
-            analyser.fftSize=4096; analyser.smoothingTimeConstant=0.25;
+            analyser.fftSize=2048; analyser.smoothingTimeConstant=0.3;
             src.connect(analyser);
             running=true;
             document.getElementById('powerIcon').textContent='⏹';
@@ -321,22 +321,51 @@
         updateStrings(null);
     }
 
+    // NSDF (Normalized Square Difference Function) pitch detection
+    // Unbiased — correctly detects fundamental, not harmonics
     function detectPitch(buf) {
         const n=buf.length, sr=ctx.sampleRate;
-        const minLag=Math.floor(sr/2000), maxLag=Math.floor(sr/60);
+        const minLag=Math.floor(sr/1500); // ~C5
+        const maxLag=Math.floor(sr/50);   // ~G1
         if (maxLag>=n) return -1;
-        let bestLag=-1, bestC=0;
+
+        // Pre-compute squares cumulative sum for fast NSDF denominator
+        const sqSum = new Float64Array(n);
+        sqSum[0]=buf[0]*buf[0];
+        for (let i=1;i<n;i++) sqSum[i]=sqSum[i-1]+buf[i]*buf[i];
+
+        let bestNSDF=-2, bestLag=-1;
+        const nsdfVals=[];
+
         for (let lag=minLag; lag<maxLag; lag++) {
-            let s=0; for (let i=0;i<n-lag;i++) s+=buf[i]*buf[i+lag];
-            if (s>bestC){bestC=s;bestLag=lag;}
+            // Auto-correlation r
+            let r=0;
+            for (let i=0;i<n-lag;i++) r+=buf[i]*buf[i+lag];
+            // Energy m = sum of squares in the two windows
+            const m=sqSum[n-lag-1]+(sqSum[n-1]-sqSum[lag-1]);
+            if (m<1e-12) continue;
+            const nsdf=2*r/m;
+            nsdfVals.push({lag,nsdf});
+            if (nsdf>bestNSDF){bestNSDF=nsdf;bestLag=lag;}
         }
-        if (bestLag<=0) return -1;
-        let cm1=0,c1=0;
-        if (bestLag>0){let s=0;for(let i=0;i<n-bestLag+1;i++)s+=buf[i]*buf[i+bestLag-1];cm1=s;}
-        if (bestLag<maxLag-1){let s=0;for(let i=0;i<n-bestLag-1;i++)s+=buf[i]*buf[i+bestLag+1];c1=s;}
-        const div=2*(2*bestC-c1-cm1);
+
+        // Only accept if correlation is strong enough
+        if (bestNSDF<0.7) return -1;
+        if (bestLag<=minLag||bestLag>=maxLag-1) return -1;
+
+        // Parabolic interpolation on NSDF peak
+        let cm1=0,c0=bestNSDF,c1=0;
+        let lm1=0,l1=0;
+        for (const v of nsdfVals) {
+            if (v.lag===bestLag-1){cm1=v.nsdf;lm1=bestLag-1;}
+            if (v.lag===bestLag+1){c1=v.nsdf;l1=bestLag+1;}
+        }
+        const div=2*(2*c0-c1-cm1);
         if (Math.abs(div)<1e-10) return sr/bestLag;
-        return sr/(bestLag+(c1-cm1)/div);
+        const delta=(c1-cm1)/div;
+        const refinedLag=bestLag+delta;
+        if (refinedLag<=0) return sr/bestLag;
+        return sr/refinedLag;
     }
 
     function tick() {
@@ -345,8 +374,8 @@
         analyser.getFloatTimeDomainData(buf);
         let rms=0; for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i]; rms=Math.sqrt(rms/buf.length);
 
-        // Higher threshold for phone mics (was 0.004, too sensitive)
-        if (rms<0.015) {
+        // NSDF already rejects noise, so lower threshold is safe
+        if (rms<0.006) {
             document.getElementById('noteText').textContent='--';
             document.getElementById('freqLine').textContent='等待信号…';
             document.getElementById('devText').textContent='';
@@ -356,29 +385,27 @@
         } else {
             const f=detectPitch(buf);
             if (f>30&&f<2000) {
-                const midi=69+12*Math.log2(f/440);
-                const mr=Math.round(midi), cents=100*(midi-mr);
-
-                // Reject harmonic jumps: if new MIDI differs >3 semitones from smoothed, skip
-                if (smoothedMidi!==null && Math.abs(mr-smoothedMidi)>3) {
-                    stableFrames=0;
-                    requestAnimationFrame(tick);
-                    return;
-                }
-
-                // Heavy smoothing: keep 85% old value, 15% new (was 35%/65% — too jumpy)
-                if (smoothedMidi===null){smoothedMidi=mr;smoothedCents=cents;stableFrames=1;}
+                // Smooth raw MIDI (not rounded) for better stability
+                const rawMidi=69+12*Math.log2(f/440);
+                if (smoothedMidi===null){smoothedMidi=rawMidi;stableFrames=1;}
                 else {
-                    smoothedMidi=smoothedMidi*.85+mr*.15;
-                    smoothedCents=smoothedCents*.85+cents*.15;
+                    // Reject jumps > 2 semitones (harmonic/octave error)
+                    if (Math.abs(rawMidi-smoothedMidi)>2) {
+                        stableFrames=0;
+                        requestAnimationFrame(tick);
+                        return;
+                    }
+                    smoothedMidi=smoothedMidi*.8+rawMidi*.2;
                     stableFrames++;
                 }
+                const mr=Math.round(smoothedMidi);
+                const cents=100*(smoothedMidi-mr);
 
-                // Only update display after 3+ stable frames (avoids initial jump)
-                if (stableFrames>=3) {
-                    const note=midiToNote(Math.round(smoothedMidi)+smoothedCents/100);
-                    updateDisplay(note,smoothedCents,Math.round(smoothedMidi));
-                    updateStrings(Math.round(smoothedMidi));
+                // Only display after 2 stable frames
+                if (stableFrames>=2) {
+                    const note=midiToNote(mr+cents/100);
+                    updateDisplay(note,cents,mr);
+                    updateStrings(mr);
                 }
             } else {
                 stableFrames=0;
