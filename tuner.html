@@ -6,51 +6,87 @@
     <title>乐器调音器 — 在线节拍器</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f2f7f2;color:#1a2a1a;-webkit-font-smoothing:antialiased}
-        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#f2f7f2}::-webkit-scrollbar-thumb{background:#d0ddd0;border-radius:3px}
+        :root {
+            --bg: #f2f7f2;
+            --card-bg: #fff;
+            --card-border: #d0ddd0;
+            --text: #1a2a1a;
+            --text-secondary: #666;
+            --mute: #999;
+        }
+        body.dark {
+            --bg: #0a0a0f;
+            --card-bg: #141419;
+            --card-border: #2a2a35;
+            --text: #e0e0e0;
+            --text-secondary: #999;
+            --mute: #666;
+        }
+
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#d0ddd0;border-radius:3px}
 
         .nav-pill{padding:6px 16px;border-radius:8px;background:linear-gradient(135deg,#4F8CFF 0%,#6B5CFF 100%);color:#fff;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s ease;white-space:nowrap}
         .nav-pill:hover{box-shadow:0 4px 16px rgba(79,140,255,.4);transform:translateY(-1px)}
         .nav-pill.active{background:#4F8CFF;box-shadow:0 2px 8px rgba(79,140,255,.3)}
 
-        .theme-btn{background:none;border:1px solid #d0ddd0;border-radius:6px;font-size:16px;cursor:pointer;padding:2px 5px;line-height:1;transition:all .2s ease;flex-shrink:0;outline:none;color:#1a2a1a}
-        .theme-btn:hover{background:#e8efe8;border-color:#4F8CFF}
+        .theme-btn{background:none;border:1px solid var(--card-border);border-radius:6px;font-size:16px;cursor:pointer;padding:2px 5px;line-height:1;transition:all .2s ease;outline:none;color:var(--text)}
+        .theme-btn:hover{background:var(--bg);border-color:#4F8CFF}
 
-        .content-card{background:#fff;border:1px solid #d0ddd0;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+        .content-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:20px 24px;margin-bottom:16px;box-shadow:0 1px 8px rgba(0,0,0,.03)}
 
-        /* Mode buttons */
-        .mode-btn{padding:6px 14px;border:1.5px solid #d0ddd0;border-radius:20px;background:#fff;color:#555;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s ease;white-space:nowrap}
-        .mode-btn:hover{border-color:#4F8CFF;color:#4F8CFF}
-        .mode-btn.active{background:#4F8CFF;border-color:#4F8CFF;color:#fff}
+        /* Tuner display */
+        .tuner-frame {
+            background: linear-gradient(180deg, #1c1c24 0%, #141419 100%);
+            border-radius: 24px;
+            padding: 28px 24px 20px;
+            position: relative;
+        }
+        body.dark .tuner-frame { background: linear-gradient(180deg, #1e1e28 0%, #18181f 100%); }
 
-        /* Start button */
-        .start-btn{padding:14px 48px;border:none;border-radius:24px;background:linear-gradient(135deg,#4F8CFF,#6B5CFF);color:#fff;font-size:17px;font-weight:700;cursor:pointer;transition:all .2s ease;box-shadow:0 4px 20px rgba(79,140,255,.3)}
-        .start-btn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(79,140,255,.45)}
-        .start-btn.running{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 4px 20px rgba(239,68,68,.3)}
+        .mode-chip {
+            padding: 7px 18px; border-radius: 22px;
+            border: 1px solid rgba(255,255,255,.18);
+            background: rgba(255,255,255,.06);
+            color: rgba(255,255,255,.55);
+            font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all .2s ease;
+            white-space: nowrap; letter-spacing: .3px;
+        }
+        .mode-chip:hover { border-color: rgba(255,255,255,.35); color: rgba(255,255,255,.85); }
+        .mode-chip.active { background: #4F8CFF; border-color: #4F8CFF; color: #fff; box-shadow: 0 2px 14px rgba(79,140,255,.35); }
 
-        /* Meter needle transition */
-        .needle{transition:transform .12s ease-out;transform-origin:300px 300px}
+        .string-dot {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; letter-spacing: .2px;
+            transition: all .3s cubic-bezier(.4,0,.2,1);
+            border: 1.5px solid rgba(255,255,255,.15);
+            background: rgba(255,255,255,.04); color: rgba(255,255,255,.35);
+        }
+        .string-dot.near { background: rgba(79,140,255,.25); border-color: rgba(79,140,255,.6); color: #4F8CFF; transform: scale(1.1); }
+        .string-dot.locked { background: #2e7d32; border-color: #4ECB71; color: #fff; transform: scale(1.15); box-shadow: 0 0 16px rgba(78,203,113,.35); }
+        .string-dot .num { font-size: 9px; margin-right: 1px; opacity: .7; }
 
-        /* Tuning status */
-        @keyframes pulseGreen{0%,100%{opacity:1}50%{opacity:.6}}
-        .in-tune{animation:pulseGreen .8s ease-in-out infinite}
+        @keyframes lockPulse { 0%,100% { box-shadow: 0 0 12px rgba(78,203,113,.3); } 50% { box-shadow: 0 0 28px rgba(78,203,113,.55); } }
+        .string-dot.locked { animation: lockPulse 1.2s ease-in-out infinite; }
 
-        /* String pegs */
-        .string-peg{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:default;transition:all .3s ease;border:2px solid #e0e0e0;background:#fafafa;color:#aaa}
-        .string-peg.active{background:#4F8CFF;border-color:#4F8CFF;color:#fff;transform:scale(1.15);box-shadow:0 0 18px rgba(79,140,255,.5)}
-        .string-peg.tuned{background:#2e7d32;border-color:#2e7d32;color:#fff;box-shadow:0 0 12px rgba(46,125,50,.4)}
+        /* Button */
+        .power-btn {
+            width: 56px; height: 56px; border-radius: 50%;
+            border: none; cursor: pointer; transition: all .25s ease;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+            background: #4F8CFF; color: #fff;
+            box-shadow: 0 4px 20px rgba(79,140,255,.35);
+        }
+        .power-btn:hover { transform: scale(1.06); box-shadow: 0 6px 28px rgba(79,140,255,.5); }
+        .power-btn.on { background: #ef4444; box-shadow: 0 4px 20px rgba(239,68,68,.35); }
+        .power-btn.on:hover { box-shadow: 0 6px 28px rgba(239,68,68,.5); }
 
-        /* Dark mode */
-        body.dark{background:#0a0a0f!important;color:#e0e0e0}
-        body.dark .content-card{background:#141419!important;border-color:#2a2a35!important}
-        body.dark h1,body.dark h2{color:#e0e0e0!important}
-        body.dark p,body.dark .text-gray-500,body.dark .text-gray-600{color:#999!important}
-        body.dark .text-gray-900{color:#ddd!important}
-        body.dark .mode-btn{background:#1a1a21;border-color:#2a2a35;color:#888}
-        body.dark .string-peg{background:#1a1a21;border-color:#2a2a35;color:#666}
-        body.dark .theme-btn{background:#1a1a21;border-color:#2a2a35;color:#e0e0e0}
-        body.dark footer{border-color:#2a2a35!important}
-        body.dark select{background:#1a1a21!important;color:#999!important;border-color:#2a2a35!important}
+        footer { border-color: var(--card-border)!important; }
+        body.dark footer { border-color: #2a2a35!important; }
+        select { background: var(--card-bg); color: var(--mute); border-color: var(--card-border); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -67,457 +103,357 @@
         <div class="flex items-center justify-center gap-3">
             <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
             <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer">
-                <option value="zh-CN">🇨🇳 中文</option>
-                <option value="en">🇬🇧 English</option>
-                <option value="fr">🇫🇷 Français</option>
-                <option value="de">🇩🇪 Deutsch</option>
-                <option value="it">🇮🇹 Italiano</option>
-                <option value="es">🇪🇸 Español</option>
-                <option value="pt">🇧🇷 Português</option>
-                <option value="el">🇬🇷 Ελληνικά</option>
-                <option value="ru">🇷🇺 Русский</option>
-                <option value="pl">🇵🇱 Polski</option>
-                <option value="ja">🇯🇵 日本語</option>
-                <option value="ko">🇰🇷 한국어</option>
-                <option value="th">🇹🇭 ไทย</option>
-                <option value="vi">🇻🇳 Tiếng Việt</option>
-                <option value="my">🇲🇲 မြန်မာ</option>
+                <option value="zh-CN">🇨🇳 中文</option><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option>
+                <option value="de">🇩🇪 Deutsch</option><option value="it">🇮🇹 Italiano</option><option value="es">🇪🇸 Español</option>
+                <option value="pt">🇧🇷 Português</option><option value="el">🇬🇷 Ελληνικά</option><option value="ru">🇷🇺 Русский</option>
+                <option value="pl">🇵🇱 Polski</option><option value="ja">🇯🇵 日本語</option><option value="ko">🇰🇷 한국어</option>
+                <option value="th">🇹🇭 ไทย</option><option value="vi">🇻🇳 Tiếng Việt</option><option value="my">🇲🇲 မြန်မာ</option>
             </select>
         </div>
     </header>
 
-    <main class="flex-1 w-full max-w-2xl mx-auto px-4 pb-12">
+    <main class="flex-1 w-full max-w-lg mx-auto px-4 pb-12">
 
-        <!-- Title -->
-        <div class="text-center mb-5">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-1">🎸 乐器调音器</h1>
-            <p class="text-gray-500 text-sm">允许使用麦克风 — 对着它弹一个音</p>
+        <div class="text-center mb-4">
+            <h1 class="text-3xl font-bold" style="color:var(--text)">🎸 乐器调音器</h1>
+            <p style="color:var(--mute);font-size:13px">Chromatic Tuner — 点击麦克风按钮开始</p>
         </div>
 
-        <!-- ===== Meter Display ===== -->
-        <div class="content-card flex flex-col items-center" style="padding:16px 16px 8px">
-
-            <!-- Instrument mode selector -->
-            <div class="flex flex-wrap justify-center gap-2 mb-3" id="modeSelector">
-                <button class="mode-btn active" data-mode="chromatic">🎵 半音阶</button>
-                <button class="mode-btn" data-mode="guitar">🎸 吉他</button>
-                <button class="mode-btn" data-mode="ukulele">🪕 尤克里里</button>
-                <button class="mode-btn" data-mode="bass">🎸 贝斯</button>
-                <button class="mode-btn" data-mode="violin">🎻 小提琴</button>
+        <!-- ===== TUNER DISPLAY ===== -->
+        <div class="tuner-frame">
+            <!-- Mode chips -->
+            <div class="flex flex-wrap justify-center gap-2 mb-5" id="modeBar">
+                <button class="mode-chip active" data-mode="chromatic">半音阶</button>
+                <button class="mode-chip" data-mode="guitar">🎸 吉他</button>
+                <button class="mode-chip" data-mode="ukulele">🪕 尤克里里</button>
+                <button class="mode-chip" data-mode="bass">贝斯</button>
+                <button class="mode-chip" data-mode="violin">🎻 小提琴</button>
             </div>
 
-            <!-- String pegs (visible in instrument modes) -->
-            <div class="flex flex-wrap justify-center gap-3 mb-4" id="stringPegs" style="display:none"></div>
+            <!-- String indicators (non-chromatic modes) -->
+            <div class="flex justify-center gap-3 mb-4" id="stringRow" style="display:none"></div>
 
-            <!-- Meter SVG -->
-            <svg viewBox="0 0 600 330" style="max-width:500px;width:100%;height:auto" id="meterSVG">
-                <defs>
-                    <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#ef4444"/>
-                        <stop offset="25%" stop-color="#f59e0b"/>
-                        <stop offset="45%" stop-color="#4ECB71"/>
-                        <stop offset="55%" stop-color="#4ECB71"/>
-                        <stop offset="75%" stop-color="#f59e0b"/>
-                        <stop offset="100%" stop-color="#ef4444"/>
-                    </linearGradient>
-                    <filter id="glow">
-                        <feGaussianBlur stdDeviation="3" result="blur"/>
-                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                    </filter>
-                </defs>
+            <!-- Gauge SVG -->
+            <div class="flex justify-center mb-2">
+                <svg viewBox="0 0 440 280" style="width:100%;max-width:420px;height:auto" id="gaugeSVG">
+                    <defs>
+                        <linearGradient id="zoneGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#ef4444"/>
+                            <stop offset="23%" stop-color="#f59e0b"/>
+                            <stop offset="42%" stop-color="#4ECB71"/>
+                            <stop offset="58%" stop-color="#4ECB71"/>
+                            <stop offset="77%" stop-color="#f59e0b"/>
+                            <stop offset="100%" stop-color="#ef4444"/>
+                        </linearGradient>
+                        <filter id="softGlow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                        <filter id="needleShadow"><feDropShadow dx="0" dy="1" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/></filter>
+                    </defs>
 
-                <!-- Arc track -->
-                <path d="M 80 290 A 250 250 0 0 1 520 290"
-                      fill="none" stroke="#e8efe8" stroke-width="20" stroke-linecap="round"/>
+                    <!-- Background arc -->
+                    <path d="M 60 240 A 180 180 0 0 1 380 240"
+                          fill="none" stroke="rgba(255,255,255,.08)" stroke-width="26" stroke-linecap="round"/>
 
-                <!-- Colored arc segments -->
-                <path d="M 90 282 A 242 242 0 0 1 300 46"
-                      fill="none" stroke="#ef4444" stroke-width="16" stroke-linecap="butt" opacity="0.7"/>
-                <path d="M 300 46 A 242 242 0 0 1 330 46"
-                      fill="none" stroke="#f59e0b" stroke-width="16" stroke-linecap="butt" opacity="0.7"/>
-                <path d="M 330 46 A 242 242 0 0 1 360 48"
-                      fill="none" stroke="#4ECB71" stroke-width="16" stroke-linecap="butt" opacity="0.8"/>
-                <path d="M 360 48 A 242 242 0 0 1 510 282"
-                      fill="none" stroke="#4ECB71" stroke-width="16" stroke-linecap="butt" opacity="0.7"/>
-                <path d="M 510 282 A 242 242 0 0 1 520 290"
-                      fill="none" stroke="#f59e0b" stroke-width="16" stroke-linecap="butt" opacity="0.7"/>
-                <path d="M 80 290 A 242 242 0 0 1 90 282"
-                      fill="none" stroke="#ef4444" stroke-width="16" stroke-linecap="butt" opacity="0.7"/>
+                    <!-- Colored zone arc -->
+                    <path d="M 68 236 A 172 172 0 0 1 372 236"
+                          fill="none" stroke="url(#zoneGrad)" stroke-width="10" stroke-linecap="butt" opacity="0.7"/>
 
-                <!-- Tick marks -->
-                <g id="tickMarks"></g>
+                    <!-- Tick lines rendered by JS below -->
+                    <g id="tickGroup"></g>
 
-                <!-- Needle -->
-                <g id="needleGroup" class="needle" style="transform:rotate(0deg)">
-                    <line x1="300" y1="300" x2="300" y2="55" stroke="#333" stroke-width="3" stroke-linecap="round"/>
-                    <circle cx="300" cy="300" r="12" fill="#333"/>
-                    <circle cx="300" cy="300" r="6" fill="#fff"/>
-                </g>
+                    <!-- Fine white guide marks at center -->
+                    <line x1="220" y1="62" x2="220" y2="85" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="220" cy="78" r="3" fill="#fff" opacity="0.5"/>
 
-                <!-- Center display -->
-                <g id="centerDisplay">
-                    <text x="300" y="250" text-anchor="middle" font-size="48" font-weight="800" fill="#333" id="noteName">--</text>
-                    <text x="300" y="275" text-anchor="middle" font-size="14" fill="#888" id="noteFreq">等待收音…</text>
-                </g>
+                    <!-- Needle -->
+                    <g id="needle" filter="url(#needleShadow)" style="transform:rotate(0deg);transform-origin:220px 236px;transition:transform .1s cubic-bezier(.25,.1,.25,1)">
+                        <polygon points="217,236 223,236 221,58 219,58" fill="#fff" opacity="0.95"/>
+                    </g>
 
-                <!-- Deviation text -->
-                <text x="300" y="210" text-anchor="middle" font-size="16" font-weight="600" fill="#888" id="deviation">点击下方按钮开始</text>
+                    <!-- Center cap -->
+                    <circle cx="220" cy="236" r="14" fill="#2a2a35" stroke="rgba(255,255,255,.12)" stroke-width="1.5"/>
+                    <circle cx="220" cy="236" r="6" fill="#4F8CFF"/>
 
-                <!-- Min/Max labels -->
-                <text x="72" y="305" text-anchor="middle" font-size="11" fill="#999">-50¢</text>
-                <text x="528" y="305" text-anchor="middle" font-size="11" fill="#999">+50¢</text>
-            </svg>
+                    <!-- Big center note name -->
+                    <text id="noteText" x="220" y="210" text-anchor="middle" font-size="56" font-weight="800" fill="#fff" letter-spacing="-1">--</text>
 
-            <!-- Start/Stop button -->
-            <button class="start-btn mt-3 mb-1" id="startBtn" onclick="toggleTuner()">🎤 开始调音</button>
-            <p class="text-gray-400 text-xs mb-2" id="statusMsg">点击按钮后允许浏览器使用麦克风</p>
+                    <!-- Octave + freq below -->
+                    <text id="freqText" x="220" y="228" text-anchor="middle" font-size="12" fill="rgba(255,255,255,.45)">A4 = 440 Hz</text>
 
+                    <!-- Deviation display -->
+                    <text id="devText" x="220" y="186" text-anchor="middle" font-size="15" font-weight="700" fill="rgba(255,255,255,.4)">等待收音</text>
+                </svg>
+            </div>
+
+            <!-- Power button -->
+            <div class="flex justify-center mt-1">
+                <button class="power-btn" id="powerBtn" onclick="toggleTuner()" title="开始/停止调音">
+                    <span id="powerIcon">🎤</span>
+                </button>
+            </div>
+            <p style="color:rgba(255,255,255,.25);font-size:11px;text-align:center;margin-top:8px" id="hintText">点击麦克风按钮，允许浏览器访问麦克风</p>
         </div>
 
-        <!-- ===== Reference Table ===== -->
-        <div class="content-card" id="refTable">
-            <h2 class="text-xl font-bold text-gray-900 mb-3" id="refTitle">📋 标准音高参考（半音阶）</h2>
-            <p class="text-gray-500 text-xs mb-3" id="refDesc">A4 = 440Hz，相邻半音频率比值 = ¹²√2 ≈ 1.05946</p>
+        <!-- ===== Reference table ===== -->
+        <div class="content-card" id="refCard">
+            <h2 class="text-lg font-bold mb-3" style="color:var(--text)" id="refTitle">📋 半音阶参考频率</h2>
+            <p style="color:var(--mute);font-size:12px;margin-bottom:12px">A4 = 440 Hz · 相邻半音 = <sup>12</sup>√2 ≈ 1.05946</p>
             <div class="overflow-x-auto">
-                <table id="noteTable">
-                    <thead><tr id="tableHeader"></tr></thead>
-                    <tbody id="tableBody"></tbody>
+                <table style="width:100%;border-collapse:collapse;font-size:13px" id="refTable">
+                    <thead id="refHead"></thead>
+                    <tbody id="refBody"></tbody>
                 </table>
             </div>
         </div>
 
     </main>
 
-    <footer class="text-center text-xs text-gray-400 py-6 border-t border-[#d0ddd0]">
+    <footer class="text-center text-xs py-6 border-t" style="color:var(--mute);border-color:var(--card-border)">
         <a href="./index.html" class="text-blue-500 hover:underline">← 返回节拍器</a>
     </footer>
 
     <script>
-    // ===== NOTE DATA =====
-    const NOTE_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
-    const NOTE_ALTS  = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
-
+    // ===== DATA =====
+    const NOTES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
     const TUNINGS = {
-        chromatic: { name: '半音阶', notes: NOTE_NAMES.map((n,i) => ({ name: n, octave: null, midiBase: i })) },
-        guitar:    { name: '吉他',   strings: ['E2','A2','D3','G3','B3','E4'] },
-        ukulele:   { name: '尤克里里', strings: ['G4','C4','E4','A4'] },
-        bass:      { name: '贝斯',   strings: ['E1','A1','D2','G2'] },
-        violin:    { name: '小提琴',  strings: ['G3','D4','A4','E5'] }
+        chromatic: { name:'半音阶', strings:null },
+        guitar:    { name:'吉他',     strings:['E2','A2','D3','G3','B3','E4'], labels:['⑥','⑤','④','③','②','①'] },
+        ukulele:   { name:'尤克里里', strings:['G4','C4','E4','A4'], labels:['④','③','②','①'] },
+        bass:      { name:'贝斯',     strings:['E1','A1','D2','G2'], labels:['④','③','②','①'] },
+        violin:    { name:'小提琴',   strings:['G3','D4','A4','E5'], labels:['④','③','②','①'] }
     };
 
     function parseNote(s) {
         const m = s.match(/^([A-G][♯#♭b]?)(\d)$/);
         if (!m) return null;
-        let name = m[1].replace('#','♯').replace('b','♭');
+        let n = m[1].replace('#','♯').replace('b','♭');
         const oct = parseInt(m[2]);
-        const semi = NOTE_NAMES.indexOf(name);
+        const semi = NOTES.indexOf(n);
         if (semi === -1) return null;
-        return { name, oct, midi: semi + (oct + 1) * 12, freq: 440 * Math.pow(2, (semi + (oct + 1) * 12 - 69) / 12) };
+        const midi = semi + (oct+1)*12;
+        return { name:n, oct, midi, freq: 440*Math.pow(2,(midi-69)/12) };
     }
 
-    function midiToNote(midi) {
-        const semi = Math.round(midi) % 12;
-        const oct = Math.floor(Math.round(midi) / 12) - 1;
-        return { name: NOTE_NAMES[semi], alt: NOTE_ALTS[semi], oct, freq: 440 * Math.pow(2, (midi - 69) / 12) };
+    function midiToNote(m) {
+        const s = Math.round(m) % 12, o = Math.floor(Math.round(m)/12)-1;
+        return { name:NOTES[s], oct:o, freq:440*Math.pow(2,(m-69)/12) };
     }
 
-    // ===== DRAW TICK MARKS =====
-    (function drawTicks() {
-        const g = document.getElementById('tickMarks');
-        const cx = 300, cy = 300, r = 250;
-        for (let i = -50; i <= 50; i += 5) {
-            const angle = (i / 50) * 150 - 90; // -90 to -240 degrees... hmm
-            // Actually: left = -50¢ = -150° from center. Center = 0¢ = -180° (bottom). Right = +50¢ = -210°
-            // Let me rethink: The arc goes from left (x=80) to right (x=520) at y=290
-            // That's a 180° arc with center at (300, 300), radius 250
-            // Leftmost: angle ≈ 150° (from positive x-axis)... this is getting complicated.
-            // Let me just use: angle = -60 - (i/50)*120 degrees (SVG: -90 is up)
-            // For SVG rotation: 0° = right, -90° = up, -180° = left
-            // Arc from x=80,y=290 to x=520,y=290 is from about -152° to -28°
-            const angleDeg = -90 - (i / 50) * 120; // -90=bottom, span ±60°
-            const rad = angleDeg * Math.PI / 180;
-            const x1 = cx + (r - 8) * Math.cos(rad);
-            const y1 = cy + (r - 8) * Math.sin(rad);
-            const x2 = cx + (r + (i % 10 === 0 ? 12 : 6)) * Math.cos(rad);
-            const y2 = cy + (r + (i % 10 === 0 ? 12 : 6)) * Math.sin(rad);
-            const tick = document.createElementNS('http://www.w3.org/2000/svg','line');
-            tick.setAttribute('x1',x1); tick.setAttribute('y1',y1);
-            tick.setAttribute('x2',x2); tick.setAttribute('y2',y2);
-            tick.setAttribute('stroke', i % 10 === 0 ? '#888' : '#ccc');
-            tick.setAttribute('stroke-width', i % 10 === 0 ? '1.5' : '0.8');
-            g.appendChild(tick);
-            if (i % 10 === 0) {
-                const tx = cx + (r + 20) * Math.cos(rad);
-                const ty = cy + (r + 20) * Math.sin(rad);
+    // ===== DRAW TICKS =====
+    const CX=220, CY=236, R=172;
+    (function(){
+        const g = document.getElementById('tickGroup');
+        for (let i=-50; i<=50; i+=5) {
+            const angle = (-90 + i*1.6) * Math.PI/180; // spread 80° each side
+            const inner = 162, outer = i%10===0 ? 178 : 170;
+            const x1 = CX+inner*Math.cos(angle), y1 = CY+inner*Math.sin(angle);
+            const x2 = CX+outer*Math.cos(angle), y2 = CY+outer*Math.sin(angle);
+            const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+            line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+            line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+            line.setAttribute('stroke', i===0?'rgba(255,255,255,.8)':(i%10===0?'rgba(255,255,255,.35)':'rgba(255,255,255,.15)'));
+            line.setAttribute('stroke-width', i===0?'2':(i%10===0?'1.2':'.7'));
+            line.setAttribute('stroke-linecap','round');
+            g.appendChild(line);
+            // Major labels
+            if (i%10===0 && i!==0) {
+                const lx = CX+(outer+16)*Math.cos(angle), ly = CY+(outer+16)*Math.sin(angle);
                 const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-                t.setAttribute('x',tx); t.setAttribute('y',ty);
-                t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','10');
-                t.setAttribute('fill','#999'); t.setAttribute('dominant-baseline','central');
-                t.textContent = Math.abs(i) === 50 ? '±50' : (i === 0 ? '0' : (i > 0 ? '+'+i : i));
+                t.setAttribute('x',lx); t.setAttribute('y',ly);
+                t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','central');
+                t.setAttribute('font-size','10'); t.setAttribute('fill','rgba(255,255,255,.4)'); t.setAttribute('font-weight','500');
+                t.textContent = i>0?'+'+i:i;
                 g.appendChild(t);
             }
         }
     })();
 
     // ===== AUDIO ENGINE =====
-    let audioCtx = null, analyser = null, running = false, animId = null;
-    let currentMode = 'chromatic';
-    let smoothedNote = null, smoothCents = 0;
+    let ctx=null, analyser=null, running=false, mode='chromatic';
+    let smoothedCents=0, smoothedMidi=null;
 
     async function toggleTuner() {
         if (running) { stopTuner(); return; }
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false } });
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const source = audioCtx.createMediaStreamSource(stream);
-            analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 4096;
-            analyser.smoothingTimeConstant = 0.3;
-            source.connect(analyser);
-            running = true;
-            document.getElementById('startBtn').textContent = '⏹ 停止调音';
-            document.getElementById('startBtn').classList.add('running');
-            document.getElementById('statusMsg').textContent = '正在监听…请弹奏一个音';
-            document.getElementById('deviation').textContent = '';
+            const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+            ctx = new (window.AudioContext||window.webkitAudioContext)();
+            const src = ctx.createMediaStreamSource(stream);
+            analyser = ctx.createAnalyser();
+            analyser.fftSize=4096; analyser.smoothingTimeConstant=0.25;
+            src.connect(analyser);
+            running=true;
+            document.getElementById('powerIcon').textContent='⏹';
+            document.getElementById('powerBtn').classList.add('on');
+            document.getElementById('hintText').textContent='正在监听…请弹奏一个音';
             tick();
         } catch(e) {
-            document.getElementById('statusMsg').textContent = '⚠️ 无法访问麦克风，请检查浏览器权限设置';
+            document.getElementById('hintText').textContent='⚠ 无法访问麦克风，请检查权限';
             console.error(e);
         }
     }
 
     function stopTuner() {
-        running = false;
-        if (animId) cancelAnimationFrame(animId);
-        if (audioCtx) { audioCtx.close(); audioCtx = null; analyser = null; }
-        document.getElementById('startBtn').textContent = '🎤 开始调音';
-        document.getElementById('startBtn').classList.remove('running');
-        document.getElementById('statusMsg').textContent = '已停止';
-        document.getElementById('noteName').textContent = '--';
-        document.getElementById('noteFreq').textContent = '等待收音…';
-        document.getElementById('deviation').textContent = '点击下方按钮开始';
-        document.getElementById('needleGroup').style.transform = 'rotate(0deg)';
-        document.querySelectorAll('.string-peg').forEach(e => { e.classList.remove('active','tuned'); });
+        running=false; if(ctx){ctx.close();ctx=null;analyser=null;}
+        document.getElementById('powerIcon').textContent='🎤';
+        document.getElementById('powerBtn').classList.remove('on');
+        document.getElementById('hintText').textContent='已停止';
+        document.getElementById('noteText').textContent='--';
+        document.getElementById('freqText').textContent='A4 = 440 Hz';
+        document.getElementById('devText').textContent='等待收音';
+        document.getElementById('devText').setAttribute('fill','rgba(255,255,255,.4)');
+        document.getElementById('needle').style.transform='rotate(0deg)';
+        updateStrings(null);
     }
 
-    // Autocorrelation pitch detection
-    function detectPitch(buffer) {
-        const n = buffer.length;
-        // Find a reasonable minimum and maximum lag
-        const minLag = Math.floor(audioCtx.sampleRate / 2000); // ~A6
-        const maxLag = Math.floor(audioCtx.sampleRate / 60);   // ~B1
-        if (maxLag >= n) return -1;
-
-        let bestLag = -1, bestCorr = 0;
-        for (let lag = minLag; lag < maxLag; lag++) {
-            let sum = 0;
-            for (let i = 0; i < n - lag; i++) {
-                sum += buffer[i] * buffer[i + lag];
-            }
-            if (sum > bestCorr) { bestCorr = sum; bestLag = lag; }
+    function detectPitch(buf) {
+        const n=buf.length, sr=ctx.sampleRate;
+        const minLag=Math.floor(sr/2000), maxLag=Math.floor(sr/60);
+        if (maxLag>=n) return -1;
+        let bestLag=-1, bestC=0;
+        for (let lag=minLag; lag<maxLag; lag++) {
+            let s=0; for (let i=0;i<n-lag;i++) s+=buf[i]*buf[i+lag];
+            if (s>bestC){bestC=s;bestLag=lag;}
         }
-
-        if (bestLag <= 0) return -1;
-        // Refine with parabolic interpolation around the best lag
-        const c0 = bestCorr;
-        let c1 = 0, cm1 = 0;
-        if (bestLag > 0) {
-            let s = 0; for (let i = 0; i < n - bestLag + 1; i++) s += buffer[i] * buffer[i + bestLag - 1]; cm1 = s;
-        }
-        if (bestLag < maxLag - 1) {
-            let s = 0; for (let i = 0; i < n - bestLag - 1; i++) s += buffer[i] * buffer[i + bestLag + 1]; c1 = s;
-        }
-        const div = 2 * (2 * c0 - c1 - cm1);
-        if (Math.abs(div) < 1e-10) return audioCtx.sampleRate / bestLag;
-        const delta = (c1 - cm1) / div;
-        const refinedLag = bestLag + delta;
-        if (refinedLag <= 0) return audioCtx.sampleRate / bestLag;
-        return audioCtx.sampleRate / refinedLag;
+        if (bestLag<=0) return -1;
+        let cm1=0,c1=0;
+        if (bestLag>0){let s=0;for(let i=0;i<n-bestLag+1;i++)s+=buf[i]*buf[i+bestLag-1];cm1=s;}
+        if (bestLag<maxLag-1){let s=0;for(let i=0;i<n-bestLag-1;i++)s+=buf[i]*buf[i+bestLag+1];c1=s;}
+        const div=2*(2*bestC-c1-cm1);
+        if (Math.abs(div)<1e-10) return sr/bestLag;
+        return sr/(bestLag+(c1-cm1)/div);
     }
 
     function tick() {
         if (!running) return;
         const buf = new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(buf);
+        let rms=0; for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i]; rms=Math.sqrt(rms/buf.length);
 
-        // Check signal level
-        let rms = 0;
-        for (let i = 0; i < buf.length; i++) rms += buf[i] * buf[i];
-        rms = Math.sqrt(rms / buf.length);
-
-        if (rms < 0.005) {
-            // Too quiet — show idle
-            document.getElementById('noteName').textContent = '--';
-            document.getElementById('noteFreq').textContent = '等待信号…';
-            document.getElementById('deviation').textContent = '';
-            document.getElementById('needleGroup').style.transform = 'rotate(0deg)';
-            highlightString(null);
+        if (rms<0.004) {
+            document.getElementById('noteText').textContent='--';
+            document.getElementById('freqText').textContent='等待信号…';
+            document.getElementById('devText').textContent='';
+            document.getElementById('needle').style.transform='rotate(0deg)';
+            updateStrings(null);
         } else {
-            const freq = detectPitch(buf);
-            if (freq > 20 && freq < 4000) {
-                const midi = 69 + 12 * Math.log2(freq / 440);
-                const midiRounded = Math.round(midi);
-                const cents = 100 * (midi - midiRounded);
-
-                // Smoothing
-                if (smoothedNote === null) {
-                    smoothedNote = midiRounded;
-                    smoothCents = cents;
-                } else {
-                    smoothedNote = smoothedNote * 0.5 + midiRounded * 0.5;
-                    smoothCents = smoothCents * 0.4 + cents * 0.6;
-                }
-
-                const note = midiToNote(smoothedNote + smoothCents / 100);
-                updateDisplay(note, smoothCents, midiRounded);
-                highlightString(midiRounded);
+            const f=detectPitch(buf);
+            if (f>20&&f<4000) {
+                const midi=69+12*Math.log2(f/440);
+                const mr=Math.round(midi), cents=100*(midi-mr);
+                if (smoothedMidi===null){smoothedMidi=mr;smoothedCents=cents;}
+                else {smoothedMidi=smoothedMidi*.45+mr*.55;smoothedCents=smoothedCents*.35+cents*.65;}
+                const note=midiToNote(smoothedMidi+smoothedCents/100);
+                updateDisplay(note,smoothedCents,mr);
+                updateStrings(mr);
             }
         }
-        animId = requestAnimationFrame(tick);
+        requestAnimationFrame(tick);
     }
 
-    function updateDisplay(note, cents, midi) {
-        const nameEl = document.getElementById('noteName');
-        const freqEl = document.getElementById('noteFreq');
-        const devEl = document.getElementById('deviation');
-        const needle = document.getElementById('needleGroup');
+    function updateDisplay(note,cents,midi) {
+        const nEl=document.getElementById('noteText'), fEl=document.getElementById('freqText');
+        const dEl=document.getElementById('devText'), ndl=document.getElementById('needle');
 
-        nameEl.textContent = note.name + (note.oct !== null ? note.oct : '');
-        freqEl.textContent = note.freq.toFixed(1) + ' Hz';
+        nEl.textContent=note.name+note.oct;
+        fEl.textContent=note.freq.toFixed(1)+' Hz (MIDI '+midi+')';
 
-        // Color based on how close
-        const absCents = Math.abs(cents);
-        let color, devText;
-        if (absCents < 5) {
-            color = '#2e7d32';
-            devText = '✓ 准了！';
-            nameEl.classList.add('in-tune');
-        } else if (absCents < 15) {
-            color = '#f59e0b';
-            devText = (cents > 0 ? '偏高 ↑ ' : '偏低 ↓ ') + absCents.toFixed(0) + ' ¢';
-            nameEl.classList.remove('in-tune');
-        } else {
-            color = '#ef4444';
-            devText = (cents > 0 ? '偏高 ↑ ' : '偏低 ↓ ') + absCents.toFixed(0) + ' ¢';
-            nameEl.classList.remove('in-tune');
-        }
-        nameEl.setAttribute('fill', color);
-        devEl.textContent = devText;
-        devEl.setAttribute('fill', color);
+        const abs=Math.abs(cents);
+        let color, dev;
+        if (abs<5) { color='#4ECB71'; dev='✓ 准了'; nEl.style.filter='url(#softGlow)'; }
+        else if (abs<15) { color='#f59e0b'; dev=(cents>0?'偏高 ↑ ':'偏低 ↓ ')+abs.toFixed(0)+'¢'; nEl.style.filter='none'; }
+        else { color='#ef4444'; dev=(cents>0?'偏高 ↑ ':'偏低 ↓ ')+abs.toFixed(0)+'¢'; nEl.style.filter='none'; }
+        nEl.setAttribute('fill',color);
+        dEl.textContent=dev; dEl.setAttribute('fill',color);
 
-        // Needle rotation: -60° (flat) to +60° (sharp), center at 0
-        const needleAngle = Math.max(-60, Math.min(60, cents * 1.2));
-        needle.style.transform = 'rotate(' + needleAngle + 'deg)';
+        const angle=Math.max(-70,Math.min(70,cents*1.4));
+        ndl.style.transform='rotate('+angle+'deg)';
     }
 
-    function highlightString(midi) {
-        if (currentMode === 'chromatic') return;
-        const tuning = TUNINGS[currentMode];
-        if (!tuning.strings) return;
-        const pegs = document.querySelectorAll('.string-peg');
-        pegs.forEach((peg, i) => {
-            const target = parseNote(tuning.strings[i]);
-            if (!target) return;
-            peg.classList.remove('active','tuned');
-            if (midi !== null && Math.abs(midi - target.midi) <= 1) {
-                peg.classList.add(midi === target.midi ? 'tuned' : 'active');
+    function updateStrings(midi) {
+        if (mode==='chromatic') return;
+        const dots=document.querySelectorAll('.string-dot');
+        dots.forEach((d,i)=>{
+            const t=parseNote(TUNINGS[mode].strings[i]);
+            d.classList.remove('near','locked');
+            if (midi!==null && t && Math.abs(midi-t.midi)<=1) {
+                d.classList.add(midi===t.midi?'locked':'near');
             }
         });
     }
 
-    // ===== MODE SWITCHING =====
-    function buildStringPegs(mode) {
-        const container = document.getElementById('stringPegs');
-        container.innerHTML = '';
-        const tuning = TUNINGS[mode];
-        if (!tuning.strings) { container.style.display = 'none'; return; }
-        container.style.display = 'flex';
-        const labels = mode === 'guitar' ? ['⑥','⑤','④','③','②','①'] :
-                       mode === 'ukulele' ? ['④','③','②','①'] :
-                       mode === 'bass' ? ['④','③','②','①'] :
-                       mode === 'violin' ? ['④','③','②','①'] :
-                       tuning.strings.map((_,i) => i + 1);
-        tuning.strings.forEach((s, i) => {
-            const div = document.createElement('div');
-            div.className = 'string-peg';
-            div.title = s + ' (' + parseNote(s).freq.toFixed(1) + ' Hz)';
-            div.innerHTML = '<span style="font-size:10px;margin-right:1px">'+labels[i]+'</span>' + s.replace(/[♯#♭b\d]/g,'');
-            container.appendChild(div);
+    // ===== MODE + STRING PEGS =====
+    function buildStrings(m) {
+        const row=document.getElementById('stringRow');
+        const t=TUNINGS[m];
+        row.innerHTML='';
+        if (!t.strings){row.style.display='none';return;}
+        row.style.display='flex';
+        t.strings.forEach((s,i)=>{
+            const d=document.createElement('div');
+            d.className='string-dot';
+            d.title=s+' ('+parseNote(s).freq.toFixed(1)+'Hz)';
+            d.innerHTML='<span class="num">'+(t.labels[i]||(i+1))+'</span>'+s.slice(0,-1);
+            row.appendChild(d);
         });
     }
 
-    function buildRefTable(mode) {
-        const tuning = TUNINGS[mode];
-        const header = document.getElementById('tableHeader');
-        const body = document.getElementById('tableBody');
-        const title = document.getElementById('refTitle');
-        const desc = document.getElementById('refDesc');
-        header.innerHTML = ''; body.innerHTML = '';
-
-        if (mode === 'chromatic') {
-            title.textContent = '📋 标准音高参考（半音阶）';
-            desc.textContent = 'A4 = 440Hz，相邻半音 = ¹²√2 ≈ 1.05946';
-            // Show one octave: C4 to B4
-            const th1 = document.createElement('th'); th1.textContent = '音名'; header.appendChild(th1);
-            const thF = document.createElement('th'); thF.textContent = '频率 (Hz)'; header.appendChild(thF);
-            const thM = document.createElement('th'); thM.textContent = 'MIDI'; header.appendChild(thM);
-            for (let midi = 60; midi <= 71; midi++) {
-                const n = midiToNote(midi);
-                const tr = document.createElement('tr');
-                ['<strong>'+n.name+'</strong>'+(n.name!==n.alt?' / '+n.alt:''), n.freq.toFixed(2)+' Hz', midi].forEach(v => {
-                    const td = document.createElement('td'); td.innerHTML = v; tr.appendChild(td);
+    function buildRef(m) {
+        const h=document.getElementById('refHead'), b=document.getElementById('refBody');
+        const ttl=document.getElementById('refTitle');
+        h.innerHTML=''; b.innerHTML='';
+        if (m==='chromatic') {
+            ttl.textContent='📋 半音阶参考频率';
+            ['音名','频率','MIDI'].forEach(v=>{const th=document.createElement('th');th.textContent=v;th.style.cssText='padding:8px 12px;text-align:center;border-bottom:1px solid var(--card-border);color:var(--text-secondary);font-size:12px;font-weight:600';h.appendChild(th);});
+            for (let mi=60;mi<=71;mi++) {
+                const n=midiToNote(mi);
+                const tr=document.createElement('tr');
+                ['<b>'+n.name+'</b> '+n.oct, n.freq.toFixed(2)+' Hz', mi].forEach((v,i)=>{
+                    const td=document.createElement('td');td.innerHTML=v;td.style.cssText='padding:8px 12px;text-align:center;border-bottom:1px solid var(--card-border);color:var(--text);font-size:13px';tr.appendChild(td);
                 });
-                body.appendChild(tr);
+                b.appendChild(tr);
             }
-        } else if (tuning.strings) {
-            title.textContent = '📋 ' + tuning.name + '标准定弦';
-            desc.textContent = '从粗到细（左→右），A4 = 440Hz';
-            ['弦序','音名','频率 (Hz)','MIDI'].forEach(h => {
-                const th = document.createElement('th'); th.textContent = h; header.appendChild(th);
-            });
-            tuning.strings.forEach((s, i) => {
-                const p = parseNote(s);
-                const tr = document.createElement('tr');
-                [i+1, s, p ? p.freq.toFixed(2)+' Hz' : '--', p ? p.midi : '--'].forEach(v => {
-                    const td = document.createElement('td'); td.textContent = v; tr.appendChild(td);
+        } else {
+            const t=TUNINGS[m];
+            ttl.textContent='📋 '+t.name+' 标准定弦';
+            ['弦序','音名','频率 (Hz)','MIDI'].forEach(v=>{const th=document.createElement('th');th.textContent=v;th.style.cssText='padding:8px 12px;text-align:center;border-bottom:1px solid var(--card-border);color:var(--text-secondary);font-size:12px;font-weight:600';h.appendChild(th);});
+            t.strings.forEach((s,i)=>{
+                const p=parseNote(s);
+                const tr=document.createElement('tr');
+                [i+1,s,p?p.freq.toFixed(2)+' Hz':'--',p?p.midi:'--'].forEach(v=>{
+                    const td=document.createElement('td');td.textContent=v;td.style.cssText='padding:8px 12px;text-align:center;border-bottom:1px solid var(--card-border);color:var(--text);font-size:13px';tr.appendChild(td);
                 });
-                body.appendChild(tr);
+                b.appendChild(tr);
             });
         }
     }
 
-    document.getElementById('modeSelector').addEventListener('click', function(e) {
-        if (!e.target.classList.contains('mode-btn')) return;
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('modeBar').addEventListener('click',e=>{
+        if (!e.target.classList.contains('mode-chip')) return;
+        document.querySelectorAll('.mode-chip').forEach(b=>b.classList.remove('active'));
         e.target.classList.add('active');
-        currentMode = e.target.dataset.mode;
-        smoothedNote = null;
-        buildStringPegs(currentMode);
-        buildRefTable(currentMode);
-        document.querySelectorAll('.string-peg').forEach(el => { el.classList.remove('active','tuned'); });
+        mode=e.target.dataset.mode;
+        smoothedMidi=null;
+        buildStrings(mode);
+        buildRef(mode);
+        updateStrings(null);
     });
 
-    // ===== INIT =====
-    buildRefTable('chromatic');
+    buildRef('chromatic');
 
-    // ===== DARK MODE + LANG =====
-    (function() {
-        const themeBtn = document.getElementById('themeToggle');
-        const saved = localStorage.getItem('metronome-theme');
-        if (saved === 'dark') { document.body.classList.add('dark'); themeBtn.textContent = '🌙'; }
-        else { themeBtn.textContent = '☀️'; }
-        themeBtn.addEventListener('click', function() {
+    // ===== THEME + LANG =====
+    (function(){
+        const btn=document.getElementById('themeToggle');
+        const saved=localStorage.getItem('metronome-theme');
+        if (saved==='dark'){document.body.classList.add('dark');btn.textContent='🌙';}else{btn.textContent='☀️';}
+        btn.addEventListener('click',()=>{
             document.body.classList.toggle('dark');
-            const isDark = document.body.classList.contains('dark');
-            themeBtn.textContent = isDark ? '🌙' : '☀️';
-            localStorage.setItem('metronome-theme', isDark ? 'dark' : 'light');
+            const d=document.body.classList.contains('dark');
+            btn.textContent=d?'🌙':'☀️';
+            localStorage.setItem('metronome-theme',d?'dark':'light');
         });
-        const langSelect = document.getElementById('langSelectTop');
-        const savedLang = localStorage.getItem('metronome-lang');
-        if (savedLang) langSelect.value = savedLang;
-        langSelect.addEventListener('change', function() {
-            localStorage.setItem('metronome-lang', this.value);
-        });
+        const sel=document.getElementById('langSelectTop');
+        const sl=localStorage.getItem('metronome-lang');
+        if (sl) sel.value=sl;
+        sel.addEventListener('change',()=>localStorage.setItem('metronome-lang',sel.value));
     })();
     </script>
 </body>
