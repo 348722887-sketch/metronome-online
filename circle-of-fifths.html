@@ -157,7 +157,8 @@
                 和弦家族：<span id="selectedKeyName" class="text-blue-600">C 大调</span> 的七级和弦
             </h2>
             <p class="text-gray-500 text-xs text-center mb-4">
-                💡 任何大调的 7 个顺阶和弦在五度圈上形成一段<strong>连续的弧</strong>，从 IV 级到 vii° 级，I 级位于弧的左侧
+                💡 圈上亮起的 3 个大调（IV ← <strong>I</strong> → V），每个大调的内圈小调就是它的关系小调。<br>
+                外圈 = 大三和弦（I、IV、V），内圈 = 小三和弦（vi跟I、ii跟IV、iii跟V）
             </p>
             <div class="overflow-x-auto">
                 <table class="chord-table text-center" style="min-width:100%">
@@ -384,60 +385,43 @@
         const nodes = document.querySelectorAll(`.key-node[data-index="${index}"]`);
         nodes.forEach(n => n.classList.add('selected'));
 
-        // Calculate chord family arc
-        // I = index, IV = (index - 1 + 12) % 12, V = (index + 1) % 12,
-        // ii = (index + 2) % 12, vi = (index + 3) % 12, iii = (index + 4) % 12, vii = (index + 5) % 12
-        const chordIndices = [
-            (index - 1 + 12) % 12, // IV
-            index,                  // I
-            (index + 1) % 12,      // V
-            (index + 2) % 12,      // ii
-            (index + 3) % 12,      // vi
-            (index + 4) % 12,      // iii
-            (index + 5) % 12       // vii°
+        // Chord family: only 3 positions matter on the circle
+        // IV(ccw1): IV大 + ii小(内圈) | I(本位): I大 + vi小(内圈) | V(cw1): V大 + iii小(内圈)
+        const triadPositions = [
+            { idx: (index - 1 + 12) % 12, role: 'IV' },
+            { idx: index, role: 'I' },
+            { idx: (index + 1) % 12, role: 'V' }
         ];
 
-        // Draw highlighted arc ring markers
+        // Draw ring markers ONLY on the 3 triad positions
         const arcGroup = document.getElementById('chord-arc');
-        chordIndices.forEach((ci, order) => {
-            const pos = getPos(ci);
-            let ringColor, ringWidth;
-            // order: 0=IV, 1=I(tonic), 2=V, 3=ii_root, 4=vi_root, 5=iii_root, 6=vii_root
-            if (order === 1) { ringColor = '#4F8CFF'; ringWidth = '3.5'; } // I = tonic
-            else if (order === 0 || order === 2) { ringColor = '#2e7d32'; ringWidth = '2.5'; } // IV, V = major triads
-            else { ringColor = '#999'; ringWidth = '1.5'; } // root notes only
+        triadPositions.forEach(({ idx, role }) => {
+            const pos = getPos(idx);
+            const color = role === 'I' ? '#4F8CFF' : '#2e7d32';
+            const width = role === 'I' ? '3.5' : '2.5';
 
             const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             ring.setAttribute('cx', pos.x);
             ring.setAttribute('cy', pos.y);
             ring.setAttribute('r', majorDotR + 6);
             ring.setAttribute('fill', 'none');
-            ring.setAttribute('stroke', ringColor);
-            ring.setAttribute('stroke-width', ringWidth);
-            ring.setAttribute('stroke-dasharray', order <= 2 ? 'none' : '4 4');
+            ring.setAttribute('stroke', color);
+            ring.setAttribute('stroke-width', width);
             ring.setAttribute('class', 'chord-highlight');
-            ring.setAttribute('opacity', order <= 2 ? '0.8' : '0.5');
+            ring.setAttribute('opacity', '0.8');
             arcGroup.appendChild(ring);
         });
 
-        // Dim other keys
-        document.querySelectorAll('.key-node:not(.selected)').forEach(el => {
+        const triadIdxSet = triadPositions.map(p => p.idx);
+        // Dim keys not in the 3-position chord family
+        document.querySelectorAll('.key-node').forEach(el => {
             const idx = parseInt(el.getAttribute('data-index'));
-            if (!chordIndices.includes(idx)) {
+            if (!triadIdxSet.includes(idx)) {
                 el.style.opacity = '0.35';
             } else {
                 el.style.opacity = '1';
             }
         });
-        // Always keep selected + chord family at full opacity after a beat
-        setTimeout(() => {
-            document.querySelectorAll('.key-node').forEach(el => {
-                const idx = parseInt(el.getAttribute('data-index'));
-                if (!chordIndices.includes(idx) && idx !== index) {
-                    el.style.opacity = '0.35';
-                }
-            });
-        }, 50);
 
         // Update chord family card
         updateChordCard(index);
