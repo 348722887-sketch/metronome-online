@@ -2247,7 +2247,7 @@
                 const s = SettingsManager.load();
 
                 // Language
-                const lang = s.lang || localStorage.getItem('metronome-lang') || detectLang();
+                const lang = localStorage.getItem('metronome-lang') || s.lang || detectLang();
                 currentLang = lang;
                 applyLang(lang);
                 if (!s.lang) {
