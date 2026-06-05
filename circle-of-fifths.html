@@ -434,9 +434,8 @@
         addRing(arcGroup, viiPos, minorDotR + 5, '#6a1b9a', '2.5', '0.85');
         addLabel(arcGroup, viiPos, minorDotR + 6, 'vii°', '#6a1b9a');
 
-        // Dim everything outside the chord family
+        // Only IV/I/V triad positions stay bright; vii° gets its own ring but the position dims
         const familySet = new Set(triads.map(t => t.idx));
-        familySet.add(viiIdx);
         document.querySelectorAll('.key-node').forEach(el => {
             const idx = parseInt(el.getAttribute('data-index'));
             el.style.opacity = familySet.has(idx) ? '1' : '0.35';
