@@ -96,46 +96,46 @@
                 不够用时可以临时加短线，叫<strong>加线</strong>（上加线/下加线）。
             </p>
             <div class="flex justify-center mb-4">
-                <svg viewBox="0 0 620 200" style="max-width:580px;width:100%;height:auto" class="staff-svg">
-                    <!-- 5 lines -->
-                    <line x1="50" y1="40" x2="570" y2="40" stroke="#888" stroke-width="1.2"/>
-                    <line x1="50" y1="70" x2="570" y2="70" stroke="#888" stroke-width="1.2"/>
-                    <line x1="50" y1="100" x2="570" y2="100" stroke="#555" stroke-width="2"/>
-                    <line x1="50" y1="130" x2="570" y2="130" stroke="#888" stroke-width="1.2"/>
-                    <line x1="50" y1="160" x2="570" y2="160" stroke="#888" stroke-width="1.2"/>
+                <svg viewBox="0 0 620 420" style="max-width:600px;width:100%;height:auto" class="staff-svg">
+                    <!-- 5 lines - spaced 60px apart for readability -->
+                    <line x1="70" y1="60" x2="570" y2="60" stroke="#888" stroke-width="1.8"/>
+                    <line x1="70" y1="120" x2="570" y2="120" stroke="#888" stroke-width="1.8"/>
+                    <line x1="70" y1="180" x2="570" y2="180" stroke="#555" stroke-width="2.5"/>
+                    <line x1="70" y1="240" x2="570" y2="240" stroke="#888" stroke-width="1.8"/>
+                    <line x1="70" y1="300" x2="570" y2="300" stroke="#888" stroke-width="1.8"/>
 
                     <!-- Line numbers -->
-                    <text x="28" y="44" text-anchor="end" font-size="11" fill="#888">第5线</text>
-                    <text x="28" y="74" text-anchor="end" font-size="11" fill="#888">第4线</text>
-                    <text x="28" y="104" text-anchor="end" font-size="11" fill="#555">第3线</text>
-                    <text x="28" y="134" text-anchor="end" font-size="11" fill="#888">第2线</text>
-                    <text x="28" y="164" text-anchor="end" font-size="11" fill="#888">第1线</text>
+                    <text x="50" y="68" text-anchor="end" font-size="14" fill="#888">第5线</text>
+                    <text x="50" y="128" text-anchor="end" font-size="14" fill="#888">第4线</text>
+                    <text x="50" y="188" text-anchor="end" font-size="14" fill="#555">第3线</text>
+                    <text x="50" y="248" text-anchor="end" font-size="14" fill="#888">第2线</text>
+                    <text x="50" y="308" text-anchor="end" font-size="14" fill="#888">第1线</text>
 
                     <!-- Space labels -->
-                    <text x="46" y="58" font-size="9" fill="#4F8CFF">第4间</text>
-                    <text x="46" y="88" font-size="9" fill="#4F8CFF">第3间</text>
-                    <text x="46" y="118" font-size="9" fill="#4F8CFF">第2间</text>
-                    <text x="46" y="148" font-size="9" fill="#4F8CFF">第1间</text>
+                    <text x="65" y="95" font-size="13" fill="#4F8CFF">第4间</text>
+                    <text x="65" y="155" font-size="13" fill="#4F8CFF">第3间</text>
+                    <text x="65" y="215" font-size="13" fill="#4F8CFF">第2间</text>
+                    <text x="65" y="275" font-size="13" fill="#4F8CFF">第1间</text>
 
                     <!-- Ledger lines example -->
-                    <line x1="270" y1="190" x2="310" y2="190" stroke="#EC4899" stroke-width="1.5"/>
-                    <text x="290" y="178" text-anchor="middle" font-size="9" fill="#EC4899">下加一线</text>
-                    <line x1="390" y1="10" x2="430" y2="10" stroke="#EC4899" stroke-width="1.5"/>
-                    <text x="410" y="8" text-anchor="middle" font-size="9" fill="#EC4899">上加一线</text>
+                    <line x1="270" y1="360" x2="330" y2="360" stroke="#EC4899" stroke-width="2"/>
+                    <text x="300" y="348" text-anchor="middle" font-size="13" fill="#EC4899" font-weight="600">下加一线</text>
+                    <line x1="390" y1="0" x2="450" y2="0" stroke="#EC4899" stroke-width="2"/>
+                    <text x="420" y="16" text-anchor="middle" font-size="13" fill="#EC4899" font-weight="600">上加一线</text>
 
-                    <!-- C position marker -->
-                    <circle cx="290" cy="190" r="5" fill="#EC4899"/>
-                    <circle cx="410" cy="10" r="5" fill="#EC4899"/>
+                    <!-- Note markers -->
+                    <circle cx="300" cy="360" r="9" fill="#EC4899"/>
+                    <circle cx="420" cy="0" r="9" fill="#EC4899"/>
 
                     <!-- Arrow for counting direction -->
-                    <line x1="530" y1="165" x2="530" y2="35" stroke="#4F8CFF" stroke-width="1.5" marker-end="url(#arrowUp)"/>
-                    <text x="555" y="105" font-size="10" fill="#4F8CFF">从下</text>
-                    <text x="555" y="118" font-size="10" fill="#4F8CFF">往上</text>
-                    <text x="555" y="131" font-size="10" fill="#4F8CFF">数 →</text>
+                    <line x1="540" y1="310" x2="540" y2="50" stroke="#4F8CFF" stroke-width="2" marker-end="url(#arrowUp)"/>
+                    <text x="565" y="165" font-size="13" fill="#4F8CFF" font-weight="600">从下</text>
+                    <text x="565" y="183" font-size="13" fill="#4F8CFF" font-weight="600">往上</text>
+                    <text x="565" y="201" font-size="13" fill="#4F8CFF" font-weight="600">数 →</text>
 
                     <defs>
-                        <marker id="arrowUp" markerWidth="8" markerHeight="8" refX="0" refY="4" orient="auto">
-                            <path d="M0,8 L8,4 L0,0" fill="#4F8CFF"/>
+                        <marker id="arrowUp" markerWidth="10" markerHeight="10" refX="0" refY="5" orient="auto">
+                            <path d="M0,10 L10,5 L0,0" fill="#4F8CFF"/>
                         </marker>
                     </defs>
                 </svg>
