@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -39,6 +39,7 @@
     <meta name="google-site-verification" content="REPLACE_WITH_YOUR_VERIFICATION_CODE">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./js/i18n.js"></script>
     <script>
         tailwind.config = { theme: { extend: { colors: {
             surface: '#ffffff', 'surface-light': '#e8efe8', 'text-primary': '#1a2a1a',
@@ -260,11 +261,11 @@
 
         <!-- ===== Nav ===== -->
         <div class="w-full max-w-xl mx-auto flex flex-wrap justify-center gap-2 mb-2">
-            <a href="./tuner.html" class="nav-pill">乐器调音器</a>
-            <a href="./staff.html" class="nav-pill">认识五线谱</a>
-            <a href="./index.html" class="nav-pill active">免费在线节拍器</a>
-            <a href="./circle-of-fifths.html" class="nav-pill">音乐五度圈</a>
-            <a href="./ear-training.html" class="nav-pill">绝对音感练耳</a>
+            <a href="./tuner.html" class="nav-pill" data-i18n="nav-tuner">乐器调音器</a>
+            <a href="./staff.html" class="nav-pill" data-i18n="nav-staff">认识五线谱</a>
+            <a href="./index.html" class="nav-pill active" data-i18n="nav-metronome">免费在线节拍器</a>
+            <a href="./circle-of-fifths.html" class="nav-pill" data-i18n="nav-circle">音乐五度圈</a>
+            <a href="./ear-training.html" class="nav-pill" data-i18n="nav-ear">绝对音感练耳</a>
         </div>
 
         <!-- ===== Theme + Lang ===== -->

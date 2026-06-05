@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +6,7 @@
     <title>绝对音感练耳 — 在线节拍器</title>
     <meta name="description" content="音程练耳训练，随机听音辨音程，提升音乐听觉能力。">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./js/i18n.js"></script>
     <style>
         :root{--bg:#f2f7f2;--card-bg:#fff;--card-border:#d0ddd0;--text:#1a2a1a;--text2:#666;--mute:#999}
         body.dark{--bg:#0a0a0f;--card-bg:#141419;--card-border:#2a2a35;--text:#e0e0e0;--text2:#999;--mute:#666}
@@ -61,11 +62,11 @@
 
     <header class="flex flex-col items-center pt-8 pb-4 px-4">
         <div class="flex flex-wrap justify-center gap-2 mb-3">
-            <a href="./tuner.html" class="nav-pill">乐器调音器</a>
-            <a href="./staff.html" class="nav-pill">认识五线谱</a>
-            <a href="./index.html" class="nav-pill">免费在线节拍器</a>
-            <a href="./circle-of-fifths.html" class="nav-pill">音乐五度圈</a>
-            <a href="./ear-training.html" class="nav-pill active">绝对音感练耳</a>
+            <a href="./tuner.html" class="nav-pill" data-i18n="nav-tuner">乐器调音器</a>
+            <a href="./staff.html" class="nav-pill" data-i18n="nav-staff">认识五线谱</a>
+            <a href="./index.html" class="nav-pill" data-i18n="nav-metronome">免费在线节拍器</a>
+            <a href="./circle-of-fifths.html" class="nav-pill" data-i18n="nav-circle">音乐五度圈</a>
+            <a href="./ear-training.html" class="nav-pill active" data-i18n="nav-ear">绝对音感练耳</a>
         </div>
         <div class="flex items-center justify-center gap-3">
             <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
@@ -82,17 +83,17 @@
     <main class="flex-1 w-full max-w-2xl mx-auto px-4 pb-12">
 
         <div class="text-center mb-4">
-            <h1 class="text-3xl font-bold" style="color:var(--text)">🎵 绝对音感练耳</h1>
-            <p style="color:var(--mute);font-size:13px">听两个音 → 判断音程 → 翻答案对比</p>
+            <h1 class="text-3xl font-bold" style="color:var(--text)" data-i18n="ear-title">🎵 绝对音感练耳</h1>
+            <p style="color:var(--mute);font-size:13px" data-i18n="ear-desc">听两个音 → 判断音程 → 翻答案对比</p>
         </div>
 
         <!-- ===== Quiz Card ===== -->
         <div class="content-card text-center">
             <!-- Mode selector -->
             <div class="flex justify-center gap-2 mb-4">
-                <span class="interval-chip on" id="modeAsc" onclick="setDirection('asc')">⬆ 上行</span>
-                <span class="interval-chip" id="modeDesc" onclick="setDirection('desc')">⬇ 下行</span>
-                <span class="interval-chip" id="modeBoth" onclick="setDirection('both')">↕ 混合</span>
+                <span class="interval-chip on" id="modeAsc" onclick="setDirection('asc')" data-i18n="ear-asc">⬆ 上行</span>
+                <span class="interval-chip" id="modeDesc" onclick="setDirection('desc')" data-i18n="ear-desc-mode">⬇ 下行</span>
+                <span class="interval-chip" id="modeBoth" onclick="setDirection('both')" data-i18n="ear-both">↕ 混合</span>
             </div>
 
             <!-- Notes played display -->
@@ -102,7 +103,7 @@
             <button class="play-btn mb-3" id="playBtn" onclick="playInterval()" title="播放音程">
                 <span id="playIcon">▶</span>
             </button>
-            <p style="color:var(--mute);font-size:12px;margin-top:4px" id="playHint">点击播放音程</p>
+            <p style="color:var(--mute);font-size:12px;margin-top:4px" id="playHint" data-i18n="ear-play-hint">点击播放音程</p>
 
             <!-- Answer area -->
             <div class="mt-4" id="answerArea" style="display:none">
@@ -113,8 +114,8 @@
 
             <!-- Buttons -->
             <div class="flex justify-center gap-3 mt-4">
-                <button class="answer-btn" id="revealBtn" onclick="revealAnswer()" style="display:none">👁 翻看答案</button>
-                <button class="answer-btn" id="nextBtn" onclick="nextQuestion()" style="display:none">➡ 下一题</button>
+                <button class="answer-btn" id="revealBtn" onclick="revealAnswer()" style="display:none" data-i18n="ear-reveal">👁 翻看答案</button>
+                <button class="answer-btn" id="nextBtn" onclick="nextQuestion()" style="display:none" data-i18n="ear-next">➡ 下一题</button>
             </div>
 
             <!-- Score -->
@@ -127,22 +128,22 @@
 
         <!-- ===== Interval Filter ===== -->
         <div class="content-card">
-            <h2 class="text-base font-bold mb-3" style="color:var(--text)">🎯 选择练习音程</h2>
+            <h2 class="text-base font-bold mb-3" style="color:var(--text)" data-i18n="ear-filter-title">🎯 选择练习音程</h2>
             <div class="flex flex-wrap justify-center gap-2" id="intervalFilter"></div>
             <div class="flex justify-center gap-2 mt-3">
-                <button class="interval-chip" onclick="selectAll()">全选</button>
-                <button class="interval-chip" onclick="selectNone()">全不选</button>
-                <button class="interval-chip" onclick="selectEasy()">入门 (3/4/5 度)</button>
+                <button class="interval-chip" onclick="selectAll()" data-i18n="ear-select-all">全选</button>
+                <button class="interval-chip" onclick="selectNone()" data-i18n="ear-select-none">全不选</button>
+                <button class="interval-chip" onclick="selectEasy()" data-i18n="ear-select-easy">入门 (3/4/5 度)</button>
             </div>
         </div>
 
         <!-- ===== Reference ===== -->
         <div class="content-card">
-            <h2 class="text-lg font-bold mb-3" style="color:var(--text)">📋 音程速查表</h2>
+            <h2 class="text-lg font-bold mb-3" style="color:var(--text)" data-i18n="ear-ref-title">📋 音程速查表</h2>
             <div class="overflow-x-auto">
                 <table id="refTable">
                     <thead>
-                        <tr><th>半音数</th><th>音程</th><th>简称</th><th>性质</th><th>记忆歌曲</th></tr>
+                        <tr><th data-i18n="ear-semi-col">半音数</th><th data-i18n="ear-name-col">音程</th><th data-i18n="ear-abbr-col">简称</th><th data-i18n="ear-qual-col">性质</th><th data-i18n="ear-song-col">记忆歌曲</th></tr>
                     </thead>
                     <tbody id="refBody"></tbody>
                 </table>
@@ -152,7 +153,7 @@
     </main>
 
     <footer class="text-center text-xs py-6 border-t" style="color:var(--mute);border-color:var(--card-border)">
-        <a href="./index.html" class="text-blue-500 hover:underline">← 返回节拍器</a>
+        <a href="./index.html" class="text-blue-500 hover:underline" data-i18n="back-home">← 返回节拍器</a>
     </footer>
 
     <script>
@@ -321,8 +322,8 @@
         markDiv.className = 'flex justify-center gap-3 mt-3';
         markDiv.id = 'markButtons';
         markDiv.innerHTML = `
-            <button class="answer-btn" style="border-color:#4ECB71;color:#2e7d32" onclick="markCorrect()">✅ 我答对了</button>
-            <button class="answer-btn" style="border-color:#ef4444;color:#c62828" onclick="markWrong()">❌ 我答错了</button>
+            <button class="answer-btn" style="border-color:#4ECB71;color:#2e7d32" onclick="markCorrect()" data-i18n="ear-correct">✅ 我答对了</button>
+            <button class="answer-btn" style="border-color:#ef4444;color:#c62828" onclick="markWrong()" data-i18n="ear-wrong">❌ 我答错了</button>
         `;
         area.appendChild(markDiv);
     });

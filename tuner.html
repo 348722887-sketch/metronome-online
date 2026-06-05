@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>乐器调音器 — 在线节拍器</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./js/i18n.js"></script>
     <style>
         :root {
             --bg: #f2f7f2;
@@ -102,11 +103,11 @@
     <!-- ===== Header Nav ===== -->
     <header class="flex flex-col items-center pt-8 pb-4 px-4">
         <div class="flex flex-wrap justify-center gap-2 mb-3">
-            <a href="./tuner.html" class="nav-pill active">乐器调音器</a>
-            <a href="./staff.html" class="nav-pill">认识五线谱</a>
-            <a href="./index.html" class="nav-pill">免费在线节拍器</a>
-            <a href="./circle-of-fifths.html" class="nav-pill">音乐五度圈</a>
-            <a href="./ear-training.html" class="nav-pill">绝对音感练耳</a>
+            <a href="./tuner.html" class="nav-pill active" data-i18n="nav-tuner">乐器调音器</a>
+            <a href="./staff.html" class="nav-pill" data-i18n="nav-staff">认识五线谱</a>
+            <a href="./index.html" class="nav-pill" data-i18n="nav-metronome">免费在线节拍器</a>
+            <a href="./circle-of-fifths.html" class="nav-pill" data-i18n="nav-circle">音乐五度圈</a>
+            <a href="./ear-training.html" class="nav-pill" data-i18n="nav-ear">绝对音感练耳</a>
         </div>
         <div class="flex items-center justify-center gap-3">
             <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
@@ -123,7 +124,7 @@
     <main class="flex-1 w-full max-w-lg mx-auto px-4 pb-12">
 
         <div class="text-center mb-4">
-            <h1 class="text-3xl font-bold" style="color:var(--text)">🎸 乐器调音器</h1>
+            <h1 class="text-3xl font-bold" style="color:var(--text)" data-i18n="tuner-title">🎸 乐器调音器</h1>
             <p style="color:var(--mute);font-size:13px">Chromatic Tuner — 点击麦克风按钮开始</p>
         </div>
 
@@ -131,11 +132,11 @@
         <div class="tuner-frame">
             <!-- Mode chips -->
             <div class="flex flex-wrap justify-center gap-2 mb-5" id="modeBar">
-                <button class="mode-chip" data-mode="chromatic">半音阶</button>
-                <button class="mode-chip active" data-mode="guitar">🎸 吉他</button>
-                <button class="mode-chip" data-mode="ukulele">🪕 尤克里里</button>
-                <button class="mode-chip" data-mode="bass">贝斯</button>
-                <button class="mode-chip" data-mode="violin">🎻 小提琴</button>
+                <button class="mode-chip" data-mode="chromatic" data-i18n="tuner-chromatic">半音阶</button>
+                <button class="mode-chip active" data-mode="guitar" data-i18n="tuner-guitar">🎸 吉他</button>
+                <button class="mode-chip" data-mode="ukulele" data-i18n="tuner-ukulele">🪕 尤克里里</button>
+                <button class="mode-chip" data-mode="bass" data-i18n="tuner-bass">贝斯</button>
+                <button class="mode-chip" data-mode="violin" data-i18n="tuner-violin">🎻 小提琴</button>
             </div>
 
             <!-- String indicators (non-chromatic modes) -->
@@ -215,7 +216,7 @@
     </main>
 
     <footer class="text-center text-xs py-6 border-t" style="color:var(--mute);border-color:var(--card-border)">
-        <a href="./index.html" class="text-blue-500 hover:underline">← 返回节拍器</a>
+        <a href="./index.html" class="text-blue-500 hover:underline" data-i18n="back-home">← 返回节拍器</a>
     </footer>
 
     <script>

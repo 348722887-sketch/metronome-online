@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>认识五线谱 — 在线节拍器</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./js/i18n.js"></script>
     <style>
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f2f7f2;color:#1a2a1a;-webkit-font-smoothing:antialiased}
         ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#f2f7f2}::-webkit-scrollbar-thumb{background:#d0ddd0;border-radius:3px}
@@ -52,11 +53,11 @@
     <!-- ===== Header Nav ===== -->
     <header class="flex flex-col items-center pt-8 pb-4 px-4">
         <div class="flex flex-wrap justify-center gap-2 mb-3">
-            <a href="./tuner.html" class="nav-pill">乐器调音器</a>
-            <a href="./staff.html" class="nav-pill active">认识五线谱</a>
-            <a href="./index.html" class="nav-pill">免费在线节拍器</a>
-            <a href="./circle-of-fifths.html" class="nav-pill">音乐五度圈</a>
-            <a href="./ear-training.html" class="nav-pill">绝对音感练耳</a>
+            <a href="./tuner.html" class="nav-pill" data-i18n="nav-tuner">乐器调音器</a>
+            <a href="./staff.html" class="nav-pill active" data-i18n="nav-staff">认识五线谱</a>
+            <a href="./index.html" class="nav-pill" data-i18n="nav-metronome">免费在线节拍器</a>
+            <a href="./circle-of-fifths.html" class="nav-pill" data-i18n="nav-circle">音乐五度圈</a>
+            <a href="./ear-training.html" class="nav-pill" data-i18n="nav-ear">绝对音感练耳</a>
         </div>
         <div class="flex items-center justify-center gap-3">
             <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
@@ -84,7 +85,7 @@
 
         <!-- Title -->
         <div class="text-center mb-6">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-1">🎼 认识五线谱</h1>
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-1" data-i18n="staff-title">🎼 认识五线谱</h1>
             <p class="text-gray-500 text-sm">零基础入门——用最简单的话学会看谱</p>
         </div>
 
@@ -423,7 +424,7 @@
     </main>
 
     <footer class="text-center text-xs text-gray-400 py-6 border-t border-[#d0ddd0]">
-        <a href="./index.html" class="text-blue-500 hover:underline">← 返回节拍器</a>
+        <a href="./index.html" class="text-blue-500 hover:underline" data-i18n="back-home">← 返回节拍器</a>
     </footer>
 
     <script>
