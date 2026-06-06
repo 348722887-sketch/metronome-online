@@ -53,7 +53,7 @@ select{background:var(--card-bg);color:var(--mute);border-color:var(--card-borde
     <main class="flex-1 w-full px-4 pb-12">
         <div class="text-center mb-5">
             <h1 class="text-3xl font-bold mb-2" style="color:var(--text)">🎸 常用和弦图库</h1>
-            <p style="color:var(--mute);font-size:13px">点击和弦听真实吉他扫弦 · 学习每个和弦的乐理构成</p>
+            <p style="color:var(--mute);font-size:13px">点击和弦听扫弦 · 学习每个和弦的乐理构成</p>
         </div>
         <div class="flex flex-wrap justify-center gap-2 mb-5" id="keyTabs"></div>
         <div class="chord-hero" id="chordHero">
@@ -76,189 +76,117 @@ select{background:var(--card-bg);color:var(--mute);border-color:var(--card-borde
     <a href="./index.html" class="text-blue-500 hover:underline">← 返回节拍器</a>
 </footer>
 <script>
-const CHORDS_BY_KEY = {
-    'C': [
-        {name:'C',  type:'大三和弦', strings:[null,3,2,0,1,0], fingers:[null,3,2,null,1,null], notes:['C','E','G'], theory:'根音+大三度+纯五度。C大调主和弦(I级)。C-E-G，最基础的大三和弦。', enType:'Major', enTheory:'Root + major 3rd + perfect 5th. Tonic (I) in C major. Notes: C-E-G.'},
-        {name:'Dm', type:'小三和弦', strings:[null,null,0,2,3,1], fingers:[null,null,null,2,3,1], notes:['D','F','A'], theory:'根音+小三度+纯五度。C大调ii级。小三度+大三度的堆叠。', enType:'Minor', enTheory:'Root + minor 3rd + perfect 5th. The ii chord in C major. Minor 3rd + major 3rd stacked.'},
-        {name:'Em', type:'小三和弦', strings:[0,2,2,0,0,0], fingers:[null,2,3,null,null,null], notes:['E','G','B'], theory:'根音+小三度+纯五度。C大调iii级。六弦齐鸣，声音丰满。', enType:'Minor', enTheory:'Root + minor 3rd + perfect 5th. The iii chord. All strings ring — a rich open sound.'},
-        {name:'F',  type:'大三和弦', strings:[1,1,2,3,3,1], fingers:[1,1,2,3,4,1], notes:['F','A','C'], theory:'根音+大三度+纯五度。IV级下属和弦。食指1品大横按——初学者第一个横按挑战。', enType:'Major', enTheory:'Root + major 3rd + perfect 5th. IV (subdominant). Index finger 1st-fret barre — the first barre chord hurdle.'},
-        {name:'G',  type:'大三和弦', strings:[3,2,0,0,0,3], fingers:[3,2,null,null,null,4], notes:['G','B','D'], theory:'根音+大三度+纯五度。V级属和弦。开放和弦中声音最辉煌的一个，常用作乐曲的解决目标。', enType:'Major', enTheory:'Root + major 3rd + perfect 5th. V (dominant). The brightest open chord, often the resolution target.'},
-        {name:'Am', type:'小三和弦', strings:[null,0,2,2,1,0], fingers:[null,null,2,3,1,null], notes:['A','C','E'], theory:'根音+小三度+纯五度。vi级关系小调和弦。Am和C是关系大小调，共用完全相同的一组音。', enType:'Minor', enTheory:'Root + minor 3rd + perfect 5th. vi (relative minor). Am and C share the exact same notes — they are relative keys.'},
-        {name:'G7', type:'属七和弦', strings:[3,2,0,0,0,1], fingers:[3,2,null,null,null,1], notes:['G','B','D','F'], theory:'大三和弦+小七度。V7级属七。增加F音(降七度)制造强烈不稳定感，天生倾向解决到C和弦。', enType:'Dominant 7th', enTheory:'Major triad + minor 7th. V7 dominant. Adding F (flat 7th) creates tension that naturally resolves to C.'},
-    ],
-    'D': [
-        {name:'D',  type:'大三和弦', strings:[null,null,0,2,3,2], fingers:[null,null,null,1,3,2], notes:['D','F#','A'], theory:'D大调I级主和弦。5-6弦不弹。', enType:'Major', enTheory:'D major tonic (I). Don\'t play 5th-6th strings.'},
-        {name:'Em', type:'小三和弦', strings:[0,2,2,0,0,0], fingers:[null,2,3,null,null,null], notes:['E','G','B'], theory:'D大调ii级。', enType:'Minor', enTheory:'The ii chord in D major.'},
-        {name:'F#m', type:'小三和弦', strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1], notes:['F#','A','C#'], theory:'D大调iii级。2品食指大横按。', enType:'Minor', enTheory:'The iii chord. 2nd fret barre.'},
-        {name:'G',  type:'大三和弦', strings:[3,2,0,0,0,3], fingers:[3,2,null,null,null,4], notes:['G','B','D'], theory:'D大调IV下属和弦。', enType:'Major', enTheory:'The IV (subdominant) chord in D major.'},
-        {name:'A',  type:'大三和弦', strings:[null,0,2,2,2,0], fingers:[null,null,1,2,3,null], notes:['A','C#','E'], theory:'D大调V属和弦。', enType:'Major', enTheory:'The V (dominant) chord in D major.'},
-        {name:'Bm', type:'小三和弦', strings:[null,2,4,4,3,2], fingers:[null,1,3,4,2,1], notes:['B','D','F#'], theory:'D大调vi级。2品横按，根音在5弦。', enType:'Minor', enTheory:'The vi chord. 2nd fret barre with root on 5th string.'},
-        {name:'A7', type:'属七和弦', strings:[null,0,2,0,2,0], fingers:[null,null,2,null,3,null], notes:['A','C#','E','G'], theory:'D大调V7。增加G音倾向解决到D。', enType:'Dominant 7th', enTheory:'V7 in D major. Added G pulls toward D.'},
-    ],
-    'E': [
-        {name:'E',  type:'大三和弦', strings:[0,2,2,1,0,0], fingers:[null,2,3,1,null,null], notes:['E','G#','B'], theory:'E大调I级。吉他最自然的调性之一。', enType:'Major', enTheory:'E major tonic (I). One of guitar\'s most natural keys.'},
-        {name:'F#m', type:'小三和弦', strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1], notes:['F#','A','C#'], theory:'E大调ii级。2品横按。', enType:'Minor', enTheory:'The ii chord. 2nd fret barre.'},
-        {name:'G#m', type:'小三和弦', strings:[4,6,6,4,4,4], fingers:[1,3,4,1,1,1], notes:['G#','B','D#'], theory:'E大调iii级。4品横按。', enType:'Minor', enTheory:'The iii chord. 4th fret barre.'},
-        {name:'A',  type:'大三和弦', strings:[null,0,2,2,2,0], fingers:[null,null,1,2,3,null], notes:['A','C#','E'], theory:'E大调IV级。', enType:'Major', enTheory:'The IV chord in E major.'},
-        {name:'B',  type:'大三和弦', strings:[null,2,4,4,4,2], fingers:[null,1,2,3,4,1], notes:['B','D#','F#'], theory:'E大调V级。2品横按。', enType:'Major', enTheory:'The V chord. 2nd fret barre.'},
-        {name:'C#m', type:'小三和弦', strings:[null,4,6,6,5,4], fingers:[null,1,3,4,2,1], notes:['C#','E','G#'], theory:'E大调vi级关系小调。4品横按。', enType:'Minor', enTheory:'The vi (relative minor) chord. 4th fret barre.'},
-        {name:'B7', type:'属七和弦', strings:[null,2,1,2,0,2], fingers:[null,2,1,3,null,4], notes:['B','D#','F#','A'], theory:'E大调V7。开放属七，经典布鲁斯和弦。', enType:'Dominant 7th', enTheory:'V7 in E major. Classic blues chord.'},
-    ],
-    'F': [
-        {name:'F',  type:'大三和弦', strings:[1,3,3,2,1,1], fingers:[1,3,4,2,1,1], notes:['F','A','C'], theory:'F大调I级。1品大横按。', enType:'Major', enTheory:'F major tonic (I). 1st fret barre.'},
-        {name:'Gm', type:'小三和弦', strings:[3,5,5,3,3,3], fingers:[1,3,4,1,1,1], notes:['G','Bb','D'], theory:'F大调ii级。3品横按。', enType:'Minor', enTheory:'The ii chord. 3rd fret barre.'},
-        {name:'Am', type:'小三和弦', strings:[null,0,2,2,1,0], fingers:[null,null,2,3,1,null], notes:['A','C','E'], theory:'F大调iii级。开放和弦。', enType:'Minor', enTheory:'The iii chord. Open voicing.'},
-        {name:'Bb', type:'大三和弦', strings:[null,1,3,3,3,1], fingers:[null,1,2,3,4,1], notes:['Bb','D','F'], theory:'F大调IV级。1品横按。', enType:'Major', enTheory:'The IV chord. 1st fret barre.'},
-        {name:'C',  type:'大三和弦', strings:[null,3,2,0,1,0], fingers:[null,3,2,null,1,null], notes:['C','E','G'], theory:'F大调V级属和弦。', enType:'Major', enTheory:'The V (dominant) chord in F major.'},
-        {name:'Dm', type:'小三和弦', strings:[null,null,0,2,3,1], fingers:[null,null,null,2,3,1], notes:['D','F','A'], theory:'F大调vi级。', enType:'Minor', enTheory:'The vi chord in F major.'},
-        {name:'C7', type:'属七和弦', strings:[null,3,2,3,1,0], fingers:[null,3,2,4,1,null], notes:['C','E','G','Bb'], theory:'F大调V7。增加Bb制造紧张→解决到F。', enType:'Dominant 7th', enTheory:'V7 in F major. Added Bb creates pull toward F.'},
-    ],
-    'G': [
-        {name:'G',  type:'大三和弦', strings:[3,2,0,0,0,3], fingers:[3,2,null,null,null,4], notes:['G','B','D'], theory:'G大调I级。民谣吉他最常用的调性之一。', enType:'Major', enTheory:'G major tonic (I). One of the most common keys for acoustic guitar.'},
-        {name:'Am', type:'小三和弦', strings:[null,0,2,2,1,0], fingers:[null,null,2,3,1,null], notes:['A','C','E'], theory:'G大调ii级。', enType:'Minor', enTheory:'The ii chord in G major.'},
-        {name:'Bm', type:'小三和弦', strings:[null,2,4,4,3,2], fingers:[null,1,3,4,2,1], notes:['B','D','F#'], theory:'G大调iii级。2品横按。', enType:'Minor', enTheory:'The iii chord. 2nd fret barre.'},
-        {name:'C',  type:'大三和弦', strings:[null,3,2,0,1,0], fingers:[null,3,2,null,1,null], notes:['C','E','G'], theory:'G大调IV下属和弦。', enType:'Major', enTheory:'The IV (subdominant) chord in G major.'},
-        {name:'D',  type:'大三和弦', strings:[null,null,0,2,3,2], fingers:[null,null,null,1,3,2], notes:['D','F#','A'], theory:'G大调V属和弦。', enType:'Major', enTheory:'The V (dominant) chord in G major.'},
-        {name:'Em', type:'小三和弦', strings:[0,2,2,0,0,0], fingers:[null,2,3,null,null,null], notes:['E','G','B'], theory:'G大调vi级关系小调。Em和G共用相同音组——学会G就等于学会Em。', enType:'Minor', enTheory:'The vi (relative minor) chord. Em shares the same notes as G — learn one, you know both.'},
-        {name:'D7', type:'属七和弦', strings:[null,null,0,2,1,2], fingers:[null,null,null,2,1,3], notes:['D','F#','A','C'], theory:'G大调V7。增加C音制造紧张→天然解决到G。', enType:'Dominant 7th', enTheory:'V7 in G major. Added C creates tension naturally resolving to G.'},
-    ],
-    'A': [
-        {name:'A',  type:'大三和弦', strings:[null,0,2,2,2,0], fingers:[null,null,1,2,3,null], notes:['A','C#','E'], theory:'A大调I级。三根手指并排2品——最简单的大三和弦之一。', enType:'Major', enTheory:'A major tonic (I). Three fingers side by side at 2nd fret — one of the easiest majors.'},
-        {name:'Bm', type:'小三和弦', strings:[null,2,4,4,3,2], fingers:[null,1,3,4,2,1], notes:['B','D','F#'], theory:'A大调ii级。2品横按。', enType:'Minor', enTheory:'The ii chord. 2nd fret barre.'},
-        {name:'C#m', type:'小三和弦', strings:[null,4,6,6,5,4], fingers:[null,1,3,4,2,1], notes:['C#','E','G#'], theory:'A大调iii级。4品横按。', enType:'Minor', enTheory:'The iii chord. 4th fret barre.'},
-        {name:'D',  type:'大三和弦', strings:[null,null,0,2,3,2], fingers:[null,null,null,1,3,2], notes:['D','F#','A'], theory:'A大调IV级。', enType:'Major', enTheory:'The IV chord in A major.'},
-        {name:'E',  type:'大三和弦', strings:[0,2,2,1,0,0], fingers:[null,2,3,1,null,null], notes:['E','G#','B'], theory:'A大调V级。', enType:'Major', enTheory:'The V chord in A major.'},
-        {name:'F#m', type:'小三和弦', strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1], notes:['F#','A','C#'], theory:'A大调vi级关系小调。F#m和A共用完全相同音组。', enType:'Minor', enTheory:'The vi (relative minor). F#m shares the same notes as A major.'},
-        {name:'E7', type:'属七和弦', strings:[0,2,0,1,0,0], fingers:[null,2,null,1,null,null], notes:['E','G#','B','D'], theory:'A大调V7。开放属七，声音宽厚有力，布鲁斯必学和弦。', enType:'Dominant 7th', enTheory:'V7 in A major. Open dominant 7th with a wide, powerful sound. Essential for blues.'},
-    ],
-    'B': [
-        {name:'B',  type:'大三和弦', strings:[null,2,4,4,4,2], fingers:[null,1,2,3,4,1], notes:['B','D#','F#'], theory:'B大调I级。2品大横按。', enType:'Major', enTheory:'B major tonic (I). 2nd fret barre.'},
-        {name:'C#m', type:'小三和弦', strings:[null,4,6,6,5,4], fingers:[null,1,3,4,2,1], notes:['C#','E','G#'], theory:'B大调ii级。', enType:'Minor', enTheory:'The ii chord. Barre at 4th fret.'},
-        {name:'D#m', type:'小三和弦', strings:[null,6,8,8,7,6], fingers:[null,1,3,4,2,1], notes:['D#','F#','A#'], theory:'B大调iii级。6品横按，高把位。', enType:'Minor', enTheory:'The iii chord. 6th fret barre — upper register.'},
-        {name:'E',  type:'大三和弦', strings:[0,2,2,1,0,0], fingers:[null,2,3,1,null,null], notes:['E','G#','B'], theory:'B大调IV级。开放和弦。', enType:'Major', enTheory:'The IV chord. Open voicing.'},
-        {name:'F#', type:'大三和弦', strings:[2,4,4,3,2,2], fingers:[1,3,4,2,1,1], notes:['F#','A#','C#'], theory:'B大调V级。2品横按。', enType:'Major', enTheory:'The V chord. 2nd fret barre.'},
-        {name:'G#m', type:'小三和弦', strings:[4,6,6,4,4,4], fingers:[1,3,4,1,1,1], notes:['G#','B','D#'], theory:'B大调vi级关系小调。', enType:'Minor', enTheory:'The vi (relative minor). Barre at 4th fret.'},
-        {name:'F#7', type:'属七和弦', strings:[2,4,2,3,2,2], fingers:[1,3,1,2,1,1], notes:['F#','A#','C#','E'], theory:'B大调V7。2品横按+中指变形制造属七。', enType:'Dominant 7th', enTheory:'V7 in B major. Barre at 2nd fret with middle finger variation for the 7th.'},
-    ],
+// ===== CHORD DATA — exactly matching verified reference fingerings =====
+// muted: [string numbers to mute, 1-indexed: 1=highE, 6=lowE]
+// open: [string numbers played open]
+// barre: fret within diagram (1-indexed relative to diagram top)
+// fretStart: actual fret number label (shown left of diagram)
+// dots: [{str:1-6, fr:fret_number}]
+const DB = {
+'C':{t:'C大调I级。C-E-G构成。',et:'C Major Key. Tonic (I). Notes: C-E-G.',
+c:[
+{n:'C',mu:[6],o:[3,1],d:[{s:5,f:3},{s:4,f:2},{s:2,f:1}],nt:'C-E-G',ty:'大三和弦',en:'Major'},
+{n:'Dm',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:3},{s:1,f:1}],nt:'D-F-A',ty:'小三和弦',en:'Minor'},
+{n:'Em',mu:[],o:[6,3,2,1],d:[{s:5,f:2},{s:4,f:2}],nt:'E-G-B',ty:'小三和弦',en:'Minor'},
+{n:'F',mu:[],o:[],b:1,d:[{s:5,f:3},{s:4,f:3},{s:3,f:2}],nt:'F-A-C',ty:'大三和弦',en:'Major'},
+{n:'G',mu:[],o:[4,3,2],d:[{s:6,f:3},{s:5,f:2},{s:1,f:3}],nt:'G-B-D',ty:'大三和弦',en:'Major'},
+{n:'Am',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:1}],nt:'A-C-E',ty:'小三和弦',en:'Minor'},
+{n:'G7',mu:[],o:[4,3,2],d:[{s:6,f:3},{s:5,f:2},{s:1,f:1}],nt:'G-B-D-F',ty:'属七和弦',en:'Dominant 7th'},
+]},
+'D':{t:'D大调。两个升号(F#,C#)。',et:'D Major. Two sharps: F#, C#.',
+c:[
+{n:'D',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:3},{s:1,f:2}],nt:'D-F#-A',ty:'大三和弦',en:'Major'},
+{n:'Em',mu:[],o:[6,3,2,1],d:[{s:5,f:2},{s:4,f:2}],nt:'E-G-B',ty:'小三和弦',en:'Minor'},
+{n:'F#m',mu:[],o:[],b:1,fs:2,d:[{s:5,f:3},{s:4,f:3}],nt:'F#-A-C#',ty:'小三和弦',en:'Minor'},
+{n:'G',mu:[],o:[4,3,2],d:[{s:6,f:3},{s:5,f:2},{s:1,f:3}],nt:'G-B-D',ty:'大三和弦',en:'Major'},
+{n:'A',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:2}],nt:'A-C#-E',ty:'大三和弦',en:'Major'},
+{n:'Bm',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'B-D-F#',ty:'小三和弦',en:'Minor'},
+{n:'A7',mu:[6],o:[5,3,1],d:[{s:4,f:2},{s:2,f:2}],nt:'A-C#-E-G',ty:'属七和弦',en:'Dominant 7th'},
+]},
+'E':{t:'E大调。四个升号。吉他最自然的调性。',et:'E Major. Four sharps. Guitar\'s most natural key.',
+c:[
+{n:'E',mu:[],o:[6,2,1],d:[{s:5,f:2},{s:4,f:2},{s:3,f:1}],nt:'E-G#-B',ty:'大三和弦',en:'Major'},
+{n:'F#m',mu:[],o:[],b:1,fs:2,d:[{s:5,f:3},{s:4,f:3}],nt:'F#-A-C#',ty:'小三和弦',en:'Minor'},
+{n:'G#m',mu:[],o:[],b:1,fs:4,d:[{s:5,f:3},{s:4,f:3}],nt:'G#-B-D#',ty:'小三和弦',en:'Minor'},
+{n:'A',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:2}],nt:'A-C#-E',ty:'大三和弦',en:'Major'},
+{n:'B',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:3,f:3},{s:2,f:3}],nt:'B-D#-F#',ty:'大三和弦',en:'Major'},
+{n:'C#m',mu:[6],o:[],b:1,fs:4,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'C#-E-G#',ty:'小三和弦',en:'Minor'},
+{n:'B7',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:2,f:3}],nt:'B-D#-F#-A',ty:'属七和弦',en:'Dominant 7th'},
+]},
+'F':{t:'F大调。一个降号(Bb)。',et:'F Major. One flat: Bb.',
+c:[
+{n:'F',mu:[],o:[],b:1,d:[{s:5,f:3},{s:4,f:3},{s:3,f:2}],nt:'F-A-C',ty:'大三和弦',en:'Major'},
+{n:'Gm',mu:[],o:[],b:1,fs:3,d:[{s:5,f:3},{s:4,f:3}],nt:'G-Bb-D',ty:'小三和弦',en:'Minor'},
+{n:'Am',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:1}],nt:'A-C-E',ty:'小三和弦',en:'Minor'},
+{n:'Bb',mu:[6],o:[],b:1,d:[{s:4,f:3},{s:3,f:3},{s:2,f:3}],nt:'Bb-D-F',ty:'大三和弦',en:'Major'},
+{n:'C',mu:[6],o:[3,1],d:[{s:5,f:3},{s:4,f:2},{s:2,f:1}],nt:'C-E-G',ty:'大三和弦',en:'Major'},
+{n:'Dm',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:3},{s:1,f:1}],nt:'D-F-A',ty:'小三和弦',en:'Minor'},
+{n:'C7',mu:[6],o:[3,1],d:[{s:5,f:3},{s:4,f:2},{s:3,f:3},{s:2,f:1}],nt:'C-E-G-Bb',ty:'属七和弦',en:'Dominant 7th'},
+]},
+'G':{t:'G大调。一个升号(F#)。民谣最常用。',et:'G Major. One sharp: F#. Most common acoustic key.',
+c:[
+{n:'G',mu:[],o:[4,3,2],d:[{s:6,f:3},{s:5,f:2},{s:1,f:3}],nt:'G-B-D',ty:'大三和弦',en:'Major'},
+{n:'Am',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:1}],nt:'A-C-E',ty:'小三和弦',en:'Minor'},
+{n:'Bm',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'B-D-F#',ty:'小三和弦',en:'Minor'},
+{n:'C',mu:[6],o:[3,1],d:[{s:5,f:3},{s:4,f:2},{s:2,f:1}],nt:'C-E-G',ty:'大三和弦',en:'Major'},
+{n:'D',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:3},{s:1,f:2}],nt:'D-F#-A',ty:'大三和弦',en:'Major'},
+{n:'Em',mu:[],o:[6,3,2,1],d:[{s:5,f:2},{s:4,f:2}],nt:'E-G-B',ty:'小三和弦',en:'Minor'},
+{n:'D7',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:1},{s:1,f:2}],nt:'D-F#-A-C',ty:'属七和弦',en:'Dominant 7th'},
+]},
+'A':{t:'A大调。三个升号(F#,C#,G#)。',et:'A Major. Three sharps: F#, C#, G#.',
+c:[
+{n:'A',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:2}],nt:'A-C#-E',ty:'大三和弦',en:'Major'},
+{n:'Bm',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'B-D-F#',ty:'小三和弦',en:'Minor'},
+{n:'C#m',mu:[6],o:[],b:1,fs:4,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'C#-E-G#',ty:'小三和弦',en:'Minor'},
+{n:'D',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:3},{s:1,f:2}],nt:'D-F#-A',ty:'大三和弦',en:'Major'},
+{n:'E',mu:[],o:[6,2,1],d:[{s:5,f:2},{s:4,f:2},{s:3,f:1}],nt:'E-G#-B',ty:'大三和弦',en:'Major'},
+{n:'F#m',mu:[],o:[],b:1,fs:2,d:[{s:5,f:3},{s:4,f:3}],nt:'F#-A-C#',ty:'小三和弦',en:'Minor'},
+{n:'E7',mu:[],o:[6,4,2,1],d:[{s:5,f:2},{s:3,f:1}],nt:'E-G#-B-D',ty:'属七和弦',en:'Dominant 7th'},
+]},
+'B':{t:'B大调。五个升号。',et:'B Major. Five sharps.',
+c:[
+{n:'B',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:3,f:3},{s:2,f:3}],nt:'B-D#-F#',ty:'大三和弦',en:'Major'},
+{n:'C#m',mu:[6],o:[],b:1,fs:4,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'C#-E-G#',ty:'小三和弦',en:'Minor'},
+{n:'D#m',mu:[6],o:[],b:1,fs:6,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'D#-F#-A#',ty:'小三和弦',en:'Minor'},
+{n:'E',mu:[],o:[6,2,1],d:[{s:5,f:2},{s:4,f:2},{s:3,f:1}],nt:'E-G#-B',ty:'大三和弦',en:'Major'},
+{n:'F#',mu:[],o:[],b:1,fs:2,d:[{s:5,f:3},{s:4,f:3},{s:3,f:2}],nt:'F#-A#-C#',ty:'大三和弦',en:'Major'},
+{n:'G#m',mu:[],o:[],b:1,fs:4,d:[{s:5,f:3},{s:4,f:3}],nt:'G#-B-D#',ty:'小三和弦',en:'Minor'},
+{n:'F#7',mu:[],o:[],b:1,fs:2,d:[{s:5,f:3},{s:3,f:2}],nt:'F#-A#-C#-E',ty:'属七和弦',en:'Dominant 7th'},
+]},
 };
-
-const KEYS = ['C','D','E','F','G','A','B'];
-const SX = [15,27,39,51,63,75];
-const SY = [22,38,54,70,86];
-let activeKey = 'C', heroIdx = 0, audioCtx = null;
-function activeChord(){ return CHORDS_BY_KEY[activeKey][heroIdx]; }
-
-function ensureCtx(){
-    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-    if(audioCtx.state==='suspended') audioCtx.resume();
+const KEYS=['C','D','E','F','G','A','B'];
+const SX=[15,25,35,45,55,65],SY=[24,38,52,66,80];
+let ak='C',hi=0,ac=null;
+function gc(){return DB[ak].c[hi];}
+function ctx(){if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();}
+function play(){
+    ctx();const ch=gc(),bm=[40,45,50,55,59,64],n=[];
+    const live=new Set();if(ch.o)ch.o.forEach(s=>live.add(s));if(ch.d)ch.d.forEach(d=>live.add(d.str));
+    for(let s=6;s>=1;s--){if(!live.has(s))continue;if(ch.mu&&ch.mu.includes(s))continue;let f=0;if(ch.d){const dt=ch.d.find(d=>d.s===s);if(dt)f=dt.f;}n.push(bm[6-s]+f);}
+    const now=ac.currentTime;
+    n.forEach((m,i)=>{const fr=440*Math.pow(2,(m-69)/12),t=now+i*0.06;const o=ac.createOscillator();o.type='sine';o.frequency.value=fr;const g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.1,t+.008);g.gain.exponentialRampToValueAtTime(.001,t+2.5);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+2.7);});
 }
-
-function playHeroChord(){
-    ensureCtx();
-    const ch = activeChord();
-    const baseMidi = [40,45,50,55,59,64];
-    const notes = [];
-    ch.strings.forEach((val,i)=>{ if(val!==null) notes.push(baseMidi[i]+(val||0)); });
-    const now = audioCtx.currentTime;
-
-    notes.forEach((midi, i) => {
-        const freq = 440 * Math.pow(2, (midi-69)/12);
-        const t = now + i * 0.06; // strum stagger
-
-        // Single sine oscillator per note — pure, no harmonic clash in chords
-        const osc = audioCtx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-
-        const gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(0.1, t + 0.008);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 2.5);
-
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(t); osc.stop(t + 2.7);
-    });
+function svg(ch,lg){
+    const w=lg?160:80,h=lg?200:100,c='#4F8CFF',g='#a0aec0',d='#374151';
+    let s=`<svg viewBox="0 0 80 100" width="${w}" height="${h}"><g stroke="${g}" stroke-width="0.8">`;
+    SX.forEach(x=>s+=`<line x1="${x}" y1="24" x2="${x}" y2="80"/>`);
+    SY.forEach(y=>s+=`<line x1="15" y1="${y}" x2="65" y2="${y}"/>`);
+    s+=`</g>`;
+    const nw=ch.fs?1.0:2.5;
+    s+=`<line x1="14" y1="24" x2="66" y2="24" stroke="${d}" stroke-width="${nw}" stroke-linecap="round"/>`;
+    if(ch.fs)s+=`<text x="7" y="34" font-size="10" font-weight="700" fill="${g}" text-anchor="middle">${ch.fs}</text>`;
+    if(ch.mu)ch.mu.forEach(n=>{const x=SX[6-n];s+=`<g stroke="${g}" stroke-width="1.2" stroke-linecap="round"><line x1="${x-2.5}" y1="10" x2="${x+2.5}" y2="15"/><line x1="${x+2.5}" y1="10" x2="${x-2.5}" y2="15"/></g>`;});
+    if(ch.o)ch.o.forEach(n=>{const x=SX[6-n];s+=`<circle cx="${x}" cy="12.5" r="2.5" fill="none" stroke="${g}" stroke-width="1.2"/>`;});
+    if(ch.b){const by=SY[ch.b-1]+7;s+=`<rect x="13" y="${by-3}" width="54" height="6" rx="3" fill="${c}" opacity="0.8"/>`;}
+    if(ch.d)ch.d.forEach(d=>{const x=SX[6-d.s],y=SY[d.f-1]+7;s+=`<circle cx="${x}" cy="${y}" r="3.8" fill="${c}"/>`;});
+    s+=`</svg>`;return s;
 }
-
-function chordSVG(ch, large){
-    const w = large?160:80, h = large?200:100, c = '#4F8CFF', g = '#a0aec0', d = '#374151';
-    let s = `<svg viewBox="0 0 90 110" width="${w}" height="${h}"><g stroke="${g}" stroke-width="0.8">`;
-    SX.forEach(x => s += `<line x1="${x}" y1="22" x2="${x}" y2="100"/>`);
-    SY.forEach(y => s += `<line x1="15" y1="${y}" x2="75" y2="${y}"/>`);
-    s += `</g><line x1="14" y1="22" x2="76" y2="22" stroke="${d}" stroke-width="3" stroke-linecap="round"/>`;
-    const mf = Math.min(...ch.strings.filter(v=>v!==null&&v>0))||1;
-    if(mf>1) s += `<text x="10" y="16" fill="${g}" font-size="9" font-weight="700">${mf}fr</text>`;
-    ch.strings.forEach((val, idx) => {
-        const x = SX[idx];
-        if(val===null){
-            s += `<g stroke="${g}" stroke-width="1.2"><line x1="${x-2.5}" y1="10" x2="${x+2.5}" y2="15"/><line x1="${x+2.5}" y1="10" x2="${x-2.5}" y2="15"/></g>`;
-        } else if(val===0){
-            s += `<circle cx="${x}" cy="12" r="2.5" fill="none" stroke="${g}" stroke-width="1.2"/>`;
-        } else {
-            const fy = SY[val-1]+7;
-            s += `<circle cx="${x}" cy="${fy}" r="4.5" fill="${c}"/>`;
-        }
-    });
-    if(ch.fingers) ch.fingers.forEach((f, idx) => {
-        if(f===null||ch.strings[idx]===null||ch.strings[idx]===0) return;
-        const fy = SY[ch.strings[idx]-1]+7;
-        s += `<text x="${SX[idx]}" y="${fy+1}" text-anchor="middle" fill="#fff" font-size="7" font-weight="700">${f}</text>`;
-    });
-    s += `</svg>`;
-    return s;
-}
-
-
-function buildKeyTabs(){
-    const ct=document.getElementById('keyTabs'); ct.innerHTML='';
-    KEYS.forEach(k=>{
-        const b=document.createElement('button');
-        b.className='key-tab'+(k===activeKey?' on':'');
-        b.textContent=k+' 调'; b.onclick=()=>{activeKey=k;heroIdx=0;buildAll();};
-        ct.appendChild(b);
-    });
-}
-
-function updateHero(){
-    const ch=activeChord();
-    document.getElementById('heroName').textContent=ch.name;
-    document.getElementById('heroType').textContent=ch.type+' ('+ch.enType+')';
-    document.getElementById('heroSvg').innerHTML=chordSVG(ch,true);
-    document.getElementById('theoryContent').innerHTML=`
-        <div class="flex flex-wrap gap-1 mb-3">${ch.notes.map(n=>`<span class="theory-badge">${n}</span>`).join('')}</div>
-        <p style="color:var(--text2);font-size:14px;line-height:1.7">${ch.theory}</p>
-        <p style="color:var(--mute);font-size:13px;line-height:1.7;margin-top:6px">${ch.enTheory}</p>`;
-}
-
-function buildChordGrid(){
-    const grid=document.getElementById('chordGrid'); grid.innerHTML='';
-    CHORDS_BY_KEY[activeKey].forEach((ch,i)=>{
-        const card=document.createElement('div');
-        card.className='chord-grid-card'+(i===heroIdx?' active':'');
-        card.innerHTML=`<div class="name" style="color:${i===heroIdx?'var(--accent)':'var(--text)'}">${ch.name}</div><div class="type">${ch.type}</div>${chordSVG(ch,false)}`;
-        card.onclick=()=>{heroIdx=i;buildAll();playHeroChord();};
-        grid.appendChild(card);
-    });
-}
-
-function buildAll(){buildKeyTabs();updateHero();buildChordGrid();}
-buildAll();
-
-(function(){
-    const btn=document.getElementById('themeToggle');
-    const s=localStorage.getItem('metronome-theme');
-    if(s==='dark'){document.body.classList.add('dark');btn.textContent='🌙';}else{btn.textContent='☀️';}
-    btn.addEventListener('click',()=>{
-        document.body.classList.toggle('dark');
-        const d=document.body.classList.contains('dark');
-        btn.textContent=d?'🌙':'☀️';
-        localStorage.setItem('metronome-theme',d?'dark':'light');
-    });
-    const sel=document.getElementById('langSelectTop');
-    const sl=localStorage.getItem('metronome-lang');
-    if(sl) sel.value=sl;
-    sel.addEventListener('change',()=>localStorage.setItem('metronome-lang',sel.value));
-})();
+function bt(){const ct=document.getElementById('keyTabs');ct.innerHTML='';KEYS.forEach(k=>{const b=document.createElement('button');b.className='key-tab'+(k===ak?' on':'');b.textContent=k+' 调';b.onclick=()=>{ak=k;hi=0;ba();};ct.appendChild(b);});}
+function uh(){const ch=gc(),kd=DB[ak];document.getElementById('heroName').textContent=ch.n;document.getElementById('heroType').textContent=ch.ty+' ('+ch.en+')';document.getElementById('heroSvg').innerHTML=svg(ch,true);document.getElementById('theoryContent').innerHTML=`<div class="flex flex-wrap gap-1 mb-3">${ch.nt.split('-').map(n=>`<span class="theory-badge">${n}</span>`).join('')}</div><p style="color:var(--text2);font-size:14px;line-height:1.7">${kd.t}</p><p style="color:var(--mute);font-size:13px;line-height:1.7;margin-top:4px">${kd.et}</p>`;}
+function bg(){const grid=document.getElementById('chordGrid');grid.innerHTML='';DB[ak].c.forEach((ch,i)=>{const card=document.createElement('div');card.className='chord-grid-card'+(i===hi?' active':'');card.innerHTML=`<div class="name" style="color:${i===hi?'var(--accent)':'var(--text)'}">${ch.n}</div><div class="type">${ch.ty}</div>${svg(ch,false)}`;card.onclick=()=>{hi=i;ba();play();};grid.appendChild(card);});}
+function ba(){bt();uh();bg();}
+ba();
+(function(){const btn=document.getElementById('themeToggle');const s=localStorage.getItem('metronome-theme');if(s==='dark'){document.body.classList.add('dark');btn.textContent='🌙';}else{btn.textContent='☀️';}btn.addEventListener('click',()=>{document.body.classList.toggle('dark');const d=document.body.classList.contains('dark');btn.textContent=d?'🌙':'☀️';localStorage.setItem('metronome-theme',d?'dark':'light');});const sel=document.getElementById('langSelectTop');const sl=localStorage.getItem('metronome-lang');if(sl)sel.value=sl;sel.addEventListener('change',()=>localStorage.setItem('metronome-lang',sel.value));})();
 </script>
 </body>
 </html>
