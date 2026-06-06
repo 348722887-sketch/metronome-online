@@ -267,10 +267,11 @@
         }
     }
 
-    function playNote(midi, time, duration, vol) {
+    function playNote(midi, time, vol) {
         const inst = soundType === 'guitar' ? guitarInst : pianoInst;
         if (!inst) return;
-        inst.play(midiToName(midi), time, { gain: vol * 2.5, duration: duration });
+        // Let real sample play full length — natural decay sounds better
+        inst.play(midiToName(midi), time, { gain: vol * 2.5 });
     }
 
     async function playInterval() {
@@ -288,15 +289,16 @@
         const icon = document.getElementById('playIcon');
         btn.classList.add('playing'); icon.textContent = '⏸';
 
-        const now = audioCtx.currentTime + 0.05;
+        // Extra buffer after resume to ensure AudioContext is stable
+        const now = audioCtx.currentTime + 0.15;
         const note1 = currentRoot;
         const semi = currentInterval.semi;
         if (directionMode === 'both') currentDirection = Math.random() < 0.5 ? 'asc' : 'desc';
         else currentDirection = directionMode;
         const note2 = currentDirection === 'asc' ? currentRoot + semi : currentRoot - semi;
 
-        playNote(note1, now, 0.8, 0.6);
-        playNote(note2, now + 0.85, 0.8, 0.6);
+        playNote(note1, now, 0.8);
+        playNote(note2, now + 0.9, 0.8);
 
         // Store notes for reveal — don't show them yet (anti-cheat)
         const n1 = midiToName(note1).replace('#','♯');
@@ -312,7 +314,7 @@
         document.getElementById('answerArea').style.display = 'none';
         document.getElementById('scoreRow').style.display = 'flex';
 
-        setTimeout(() => { btn.classList.remove('playing'); icon.textContent = '▶'; }, 2000);
+        setTimeout(() => { btn.classList.remove('playing'); icon.textContent = '▶'; }, 2200);
     }
 
 
@@ -325,21 +327,21 @@
 
     function revealAnswer() {
         if (!currentInterval) return;
-        answered = true;
-        // Show the actual notes played
+        const iv = currentInterval;
+        const area = document.getElementById('answerArea');
         const q = window._quizNotes || { n1: '?', n2: '?' };
-        document.getElementById('noteDisplay').innerHTML = '第1音: <b>'+q.n1+'</b> &nbsp;→&nbsp; 第2音: <b>'+q.n2+'</b>';
-        
+        answered = true;
+
+        const dirLabel = currentDirection === 'asc' ? '上行' : '下行';
+
+        // Show notes + answer together in answer area
+        document.getElementById('answerText').innerHTML = q.n1 + ' &nbsp;→&nbsp; ' + q.n2;
+        document.getElementById('answerDetail').textContent = iv.name + ' (' + iv.abbr + ') · ' + iv.semi + ' 半音 · ' + iv.quality + ' · ' + dirLabel;
+        document.getElementById('answerSong').textContent = '🎵 ' + iv.song;
+
         area.style.display = 'block';
         document.getElementById('revealBtn').style.display = 'none';
         document.getElementById('nextBtn').style.display = 'inline-block';
-
-        const dirLabel = currentDirection === 'asc' ? '上行' : '下行';
-        document.getElementById('answerText').textContent = iv.name + ' (' + iv.abbr + ')';
-        document.getElementById('answerDetail').textContent = iv.en + ' · ' + iv.semi + ' 半音 · ' + iv.quality + ' · ' + dirLabel;
-        document.getElementById('answerSong').textContent = '🎵 ' + iv.song;
-
-        // Score tracking — user manually marks correct/wrong
         document.getElementById('nextBtn').textContent = '➡ 下一题';
     }
 
