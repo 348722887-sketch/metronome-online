@@ -155,11 +155,36 @@ const STR_MIDI=[40,45,50,55,59,64];
 
 function playChord(chord,t,dur){
     ctx();const now=ac.currentTime+t/1000;let idx=0;
-    chord.f.forEach((v,i)=>{if(v!==null){const m=STR_MIDI[i]+(v||0);const fr=440*Math.pow(2,(m-69)/12);
-    const osc=ac.createOscillator();osc.type='triangle';osc.frequency.value=fr;
-    const g=ac.createGain();g.gain.setValueAtTime(0,now+idx*0.04);g.gain.linearRampToValueAtTime(.08,now+idx*0.04+.005);g.gain.exponentialRampToValueAtTime(.001,now+idx*0.04+dur/1000*.6);
-    const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=Math.min(fr*5,4000);
-    osc.connect(g);g.connect(f);f.connect(ac.destination);osc.start(now+idx*0.04);osc.stop(now+idx*0.04+dur/1000*.7);idx++;}});
+    chord.f.forEach((v,i)=>{
+        if(v===null)return;
+        const m=STR_MIDI[i]+(v||0);
+        const fr=440*Math.pow(2,(m-69)/12);
+        const strumTime=now+idx*0.035;
+        const decay=dur/1000;
+        // Karplus-Strong plucked string: noise burst → delay loop → lowpass damping
+        const delayTime=1/fr;
+        const delay=ac.createDelay(delayTime*2); // maxDelay must be >= delayTime
+        delay.delayTime.value=delayTime;
+        const feedback=ac.createGain();
+        feedback.gain.setValueAtTime(0.88,strumTime);
+        feedback.gain.exponentialRampToValueAtTime(0.3,strumTime+decay);
+        const damping=ac.createBiquadFilter();
+        damping.type='lowpass';damping.frequency.value=Math.min(fr*6,8000);
+        // Excitation: short noise burst simulating the pluck
+        const noiseLen=Math.max(4,Math.floor(ac.sampleRate*delayTime*.5));
+        const noiseBuf=ac.createBuffer(1,noiseLen,ac.sampleRate);
+        const nd=noiseBuf.getChannelData(0);
+        for(let j=0;j<noiseLen;j++)nd[j]=(Math.random()*2-1)*Math.pow(1-j/noiseLen,2);
+        const noise=ac.createBufferSource();noise.buffer=noiseBuf;
+        const outGain=ac.createGain();
+        outGain.gain.setValueAtTime(.12,strumTime);
+        outGain.gain.exponentialRampToValueAtTime(.001,strumTime+decay);
+        // Chain: noise→delay→damping→feedback→delay (loop), damping→output
+        noise.connect(delay);delay.connect(damping);
+        damping.connect(feedback);feedback.connect(delay);
+        damping.connect(outGain);outGain.connect(ac.destination);
+        noise.start(strumTime);idx++;
+    });
 }
 
 function playDrum(name,t){
