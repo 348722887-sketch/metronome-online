@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>在线鼓机 — 在线节拍器</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="./js/i18n.js"></script>
+<style>
+:root{--bg:#f2f7f2;--card-bg:#fff;--card-border:#d0ddd0;--text:#1a2a1a;--text2:#555;--mute:#999;--accent:#4F8CFF}
+body.dark{--bg:#0a0a0f;--card-bg:#141419;--card-border:#2a2a35;--text:#e0e0e0;--text2:#999;--mute:#666}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+.nav-pill{padding:6px 16px;border-radius:8px;background:linear-gradient(135deg,#4F8CFF 0%,#6B5CFF 100%);color:#fff;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s ease;white-space:nowrap}
+.nav-pill:hover{box-shadow:0 4px 16px rgba(79,140,255,.4);transform:translateY(-1px)}
+.nav-pill.active{background:#4F8CFF;box-shadow:0 2px 8px rgba(79,140,255,.3)}
+.theme-btn{background:none;border:1px solid var(--card-border);border-radius:6px;font-size:16px;cursor:pointer;padding:2px 5px;line-height:1;transition:all .2s ease;outline:none;color:var(--text)}
+.theme-btn:hover{background:var(--bg);border-color:#4F8CFF}
+.card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.04);margin-bottom:16px}
+body.dark .card{border-color:#2a2a35}
+.preset-chip{padding:6px 14px;border-radius:16px;border:1.5px solid var(--card-border);background:var(--card-bg);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s ease;white-space:nowrap}
+.preset-chip:hover{border-color:var(--accent);color:var(--accent)}
+.preset-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+body.dark .preset-chip{border-color:#2a2a35;background:#1a1a21}
+body.dark .preset-chip.on{background:var(--accent);border-color:var(--accent)}
+.step-cell{width:28px;height:28px;border-radius:4px;background:#e8efe8;cursor:pointer;transition:all .1s ease;border:1px solid transparent;position:relative}
+.step-cell.on{background:var(--accent);box-shadow:0 0 8px rgba(79,140,255,.4)}
+.step-cell.active{box-shadow:0 0 0 2px #fff,0 0 12px rgba(79,140,255,.6);transform:scale(1.1);z-index:2}
+.step-cell.beat{background:#d0dde0}
+.step-cell.beat.on{background:var(--accent)}
+.step-cell.beat.active{background:#6B5CFF}
+body.dark .step-cell{background:#2a2a35}
+body.dark .step-cell.beat{background:#3a3a45}
+.btn-play-lg{padding:16px 40px;border-radius:30px;background:linear-gradient(135deg,#4F8CFF,#6B5CFF);color:#fff;font-size:18px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(79,140,255,.35);transition:all .2s ease;display:inline-flex;align-items:center;gap:8px}
+.btn-play-lg:hover{transform:scale(1.03)}
+.btn-play-lg.playing{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 4px 20px rgba(239,68,68,.35)}
+.bpm-display{font-size:48px;font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1}
+.drum-label{font-size:12px;font-weight:700;color:var(--text2);width:56px;flex-shrink:0;text-align:right;padding-right:8px}
+footer{border-color:var(--card-border)!important}
+body.dark footer{border-color:#2a2a35!important}
+select{background:var(--card-bg);color:var(--mute);border-color:var(--card-border)}
+</style>
+</head>
+<body class="min-h-screen flex items-start justify-center py-6 px-4" style="background:#f2f7f2;">
+<div class="hidden md:flex flex-col gap-5" style="flex-shrink:0;width:130px;margin-right:20px;margin-top:30px">
+    <a href="./tuner.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-tuner">乐器调音器</a>
+    <a href="./staff.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-staff">认识五线谱</a>
+    <a href="./index.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-metronome">免费在线节拍器</a>
+    <a href="./circle-of-fifths.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-circle">音乐五度圈</a>
+    <a href="./ear-training.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-ear">绝对音感练耳</a>
+    <a href="./chords.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px">常用和弦</a>
+    <a href="./drum-machine.html" class="nav-pill text-center active" style="padding:14px 10px;font-size:13px">在线鼓机</a>
+</div>
+<div class="flex flex-col items-center w-full max-w-3xl">
+    <div class="w-full flex items-center justify-center gap-3 mb-1">
+        <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
+        <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer">
+            <option value="zh-CN">🇨🇳 中文</option><option value="en">🇬🇧 English</option><option value="ja">🇯🇵 日本語</option><option value="ko">🇰🇷 한국어</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="it">🇮🇹 Italiano</option><option value="es">🇪🇸 Español</option><option value="pt">🇧🇷 Português</option><option value="el">🇬🇷 Ελληνικά</option><option value="ru">🇷🇺 Русский</option><option value="pl">🇵🇱 Polski</option><option value="th">🇹🇭 ไทย</option><option value="vi">🇻🇳 Tiếng Việt</option><option value="my">🇲🇲 မြန်မာ</option>
+        </select>
+    </div>
+    <main class="flex-1 w-full px-4 pb-12">
+        <div class="text-center mb-4">
+            <h1 class="text-3xl font-bold mb-1" style="color:var(--text)">🥁 在线鼓机</h1>
+            <p style="color:var(--mute);font-size:13px">16步进音序器 · 8种风格预设 · 点击格子编辑节奏</p>
+        </div>
+        <!-- Horizontal Nav -->
+        <div class="w-full flex flex-wrap justify-center gap-2 mb-4">
+            <a href="./tuner.html" class="nav-pill" style="padding:6px 14px;font-size:13px" data-i18n="nav-tuner">乐器调音器</a>
+            <a href="./staff.html" class="nav-pill" style="padding:6px 14px;font-size:13px" data-i18n="nav-staff">认识五线谱</a>
+            <a href="./index.html" class="nav-pill" style="padding:6px 14px;font-size:13px" data-i18n="nav-metronome">免费在线节拍器</a>
+            <a href="./circle-of-fifths.html" class="nav-pill" style="padding:6px 14px;font-size:13px" data-i18n="nav-circle">音乐五度圈</a>
+            <a href="./ear-training.html" class="nav-pill" style="padding:6px 14px;font-size:13px" data-i18n="nav-ear">绝对音感练耳</a>
+            <a href="./chords.html" class="nav-pill" style="padding:6px 14px;font-size:13px">常用和弦</a>
+            <a href="./drum-machine.html" class="nav-pill active" style="padding:6px 14px;font-size:13px">在线鼓机</a>
+        </div>
+        <!-- Preset selector -->
+        <div class="card text-center">
+            <div class="flex flex-wrap justify-center gap-2 mb-4" id="presetBar"></div>
+            <!-- Step grid -->
+            <div class="overflow-x-auto" style="margin:0 auto;max-width:620px">
+                <div id="stepGrid" style="display:inline-block;min-width:560px"></div>
+            </div>
+        </div>
+        <!-- Controls -->
+        <div class="card text-center">
+            <div class="flex flex-wrap items-center justify-center gap-6">
+                <div class="bpm-display" id="bpmDisplay">120</div>
+                <button class="btn-play-lg" id="playBtn" onclick="togglePlay()">
+                    <span id="playIcon">▶</span> <span id="playLabel">播放</span>
+                </button>
+                <button class="preset-chip" id="tapBtn" onclick="tapTempo()" style="padding:10px 18px;font-size:14px">👆 TAP</button>
+            </div>
+            <div class="flex items-center justify-center gap-4 mt-4" style="max-width:400px;margin:16px auto 0">
+                <span style="font-size:12px;color:var(--mute)">40</span>
+                <input type="range" id="bpmSlider" min="40" max="220" value="120" oninput="setBPM(this.value)" style="flex:1">
+                <span style="font-size:12px;color:var(--mute)">220</span>
+            </div>
+            <p class="text-xs mt-2" style="color:var(--mute)">空格键 播放/停止 · ←→ ±5BPM · 点击格子编辑节奏</p>
+        </div>
+    </main>
+</div>
+<footer class="text-center text-xs py-6 border-t" style="color:var(--mute);border-color:var(--card-border)">
+    <a href="./index.html" class="text-blue-500 hover:underline">← 返回节拍器</a>
+</footer>
+<script>
+// ===== DRUM SYNTHESIS ENGINE =====
+let ac=null, bpm=120, playing=false, stepIdx=-1, timerId=null;
+function ctx(){if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();}
+
+function playDrum(name,t){
+    ctx();const now=ac.currentTime+t/1000;
+    const g=ac.createGain();g.connect(ac.destination);
+    if(name==='kick'){
+        const o=ac.createOscillator();o.type='sine';o.frequency.setValueAtTime(150,now);o.frequency.exponentialRampToValueAtTime(40,now+.08);
+        g.gain.setValueAtTime(.8,now);g.gain.exponentialRampToValueAtTime(.001,now+.25);
+        o.connect(g);o.start(now);o.stop(now+.3);
+    }else if(name==='snare'){
+        const o=ac.createOscillator();o.type='triangle';o.frequency.value=200;
+        g.gain.setValueAtTime(.5,now);g.gain.exponentialRampToValueAtTime(.001,now+.15);
+        const n=ac.createOscillator();const ng=ac.createGain();
+        // noise via rapid random frequency modulation
+        const bn=ac.createBufferSource();const buf=ac.createBuffer(1,ac.sampleRate*.1,ac.sampleRate);const d=buf.getChannelData(0);
+        for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+        bn.buffer=buf;const bf=ac.createBiquadFilter();bf.type='highpass';bf.frequency.value=1000;
+        ng.gain.setValueAtTime(.3,now);ng.gain.exponentialRampToValueAtTime(.001,now+.1);
+        bn.connect(bf);bf.connect(ng);ng.connect(ac.destination);
+        o.connect(g);bn.start(now);
+    }else if(name==='hhclosed'){
+        const bn=ac.createBufferSource();const buf=ac.createBuffer(1,ac.sampleRate*.05,ac.sampleRate);const d=buf.getChannelData(0);
+        for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+        bn.buffer=buf;const bf=ac.createBiquadFilter();bf.type='highpass';bf.frequency.value=8000;
+        g.gain.setValueAtTime(.15,now);g.gain.exponentialRampToValueAtTime(.001,now+.05);
+        bn.connect(bf);bf.connect(g);bn.start(now);
+    }else if(name==='hhopen'){
+        const bn=ac.createBufferSource();const buf=ac.createBuffer(1,ac.sampleRate*.3,ac.sampleRate);const d=buf.getChannelData(0);
+        for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+        bn.buffer=buf;const bf=ac.createBiquadFilter();bf.type='highpass';bf.frequency.value=6000;
+        g.gain.setValueAtTime(.2,now);g.gain.exponentialRampToValueAtTime(.001,now+.25);
+        bn.connect(bf);bf.connect(g);bn.start(now);
+    }else if(name==='tomhi'){
+        const o=ac.createOscillator();o.type='sine';o.frequency.setValueAtTime(300,now);o.frequency.exponentialRampToValueAtTime(150,now+.1);
+        g.gain.setValueAtTime(.4,now);g.gain.exponentialRampToValueAtTime(.001,now+.2);
+        o.connect(g);o.start(now);o.stop(now+.25);
+    }else if(name==='tomlo'){
+        const o=ac.createOscillator();o.type='sine';o.frequency.setValueAtTime(200,now);o.frequency.exponentialRampToValueAtTime(80,now+.12);
+        g.gain.setValueAtTime(.5,now);g.gain.exponentialRampToValueAtTime(.001,now+.25);
+        o.connect(g);o.start(now);o.stop(now+.3);
+    }else if(name==='crash'){
+        const bn=ac.createBufferSource();const buf=ac.createBuffer(1,ac.sampleRate*.8,ac.sampleRate);const d=buf.getChannelData(0);
+        for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+        bn.buffer=buf;const bf=ac.createBiquadFilter();bf.type='highpass';bf.frequency.value=4000;
+        g.gain.setValueAtTime(.25,now);g.gain.exponentialRampToValueAtTime(.001,now+.7);
+        bn.connect(bf);bf.connect(g);bn.start(now);
+    }else if(name==='clap'){
+        const bn=ac.createBufferSource();const buf=ac.createBuffer(1,ac.sampleRate*.08,ac.sampleRate);const d=buf.getChannelData(0);
+        for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+        bn.buffer=buf;const bf=ac.createBiquadFilter();bf.type='bandpass';bf.frequency.value=2000;bf.Q.value=1;
+        g.gain.setValueAtTime(.35,now);g.gain.exponentialRampToValueAtTime(.001,now+.08);
+        bn.connect(bf);bf.connect(g);bn.start(now);
+    }
+}
+
+// ===== PATTERN DATA =====
+const DRUMS=['kick','snare','hhclosed','hhopen','tomhi','tomlo','crash','clap'];
+const DRUM_NAMES={kick:'底鼓',snare:'军鼓',hhclosed:'闭镲',hhopen:'开镲',tomhi:'高桶鼓',tomlo:'低桶鼓',crash:'吊镲',clap:'拍手'};
+const STEPS=16;
+
+const PRESETS={
+    '流行':{bpm:110,pattern:{
+        kick:   [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0],
+        snare:  [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+        hhclosed:[1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0],
+        hhopen: [0,0,0,0, 0,0,0,1, 0,0,0,0, 0,0,0,0],
+        tomhi:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        tomlo:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        crash:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        clap:   [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    }},
+    '摇滚':{bpm:130,pattern:{
+        kick:   [1,0,0,0, 1,0,1,0, 1,0,0,0, 1,0,0,0],
+        snare:  [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+        hhclosed:[1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0],
+        hhopen: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1],
+        tomhi:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        tomlo:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        crash:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        clap:   [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    }},
+    '爵士':{bpm:140,pattern:{
+        kick:   [1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,1,0],
+        snare:  [0,0,0,0, 1,0,0,0, 0,0,1,0, 1,0,0,0],
+        hhclosed:[0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        hhopen: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0],
+        tomhi:  [0,0,1,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        tomlo:  [0,0,0,0, 0,0,1,0, 0,0,0,0, 0,0,0,0],
+        crash:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        clap:   [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    }},
+    '布鲁斯':{bpm:100,pattern:{
+        kick:   [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0],
+        snare:  [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,1,0],
+        hhclosed:[0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        hhopen: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        tomhi:  [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0],
+        tomlo:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        crash:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        clap:   [1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    }},
+    '雷鬼':{bpm:80,pattern:{
+        kick:   [1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0],
+        snare:  [0,0,0,0, 0,0,1,0, 0,0,0,0, 0,0,1,0],
+        hhclosed:[0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1],
+        hhopen: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        tomhi:  [0,0,0,0, 0,1,0,0, 0,0,0,0, 0,1,0,0],
+        tomlo:  [0,0,0,1, 0,0,0,0, 0,0,0,1, 0,0,0,0],
+        crash:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        clap:   [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+    }},
+    '放克':{bpm:105,pattern:{
+        kick:   [1,0,0,1, 0,0,1,0, 1,0,0,0, 1,0,0,0],
+        snare:  [0,0,0,0, 1,0,0,0, 0,0,1,0, 1,0,0,0],
+        hhclosed:[0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        hhopen: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        tomhi:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        tomlo:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        crash:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        clap:   [0,0,1,0, 0,0,0,0, 0,1,0,0, 0,0,1,0],
+    }},
+    '电子':{bpm:128,pattern:{
+        kick:   [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0],
+        snare:  [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+        hhclosed:[0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0],
+        hhopen: [0,0,0,1, 0,0,0,0, 0,0,0,1, 0,0,0,0],
+        tomhi:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        tomlo:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        crash:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1],
+        clap:   [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+    }},
+    '民谣':{bpm:90,pattern:{
+        kick:   [1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0],
+        snare:  [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+        hhclosed:[1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0],
+        hhopen: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        tomhi:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        tomlo:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        crash:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        clap:   [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+    }},
+};
+
+let currentPreset='流行';
+let pattern=JSON.parse(JSON.stringify(PRESETS['流行'].pattern));
+
+function applyPreset(name){
+    currentPreset=name;
+    pattern=JSON.parse(JSON.stringify(PRESETS[name].pattern));
+    bpm=PRESETS[name].bpm;
+    document.getElementById('bpmSlider').value=bpm;
+    document.getElementById('bpmDisplay').textContent=bpm;
+    drawGrid();
+    drawPresets();
+}
+
+function toggleCell(drum,step){
+    pattern[drum][step]=pattern[drum][step]?0:1;
+    drawGrid();
+}
+
+function drawGrid(){
+    const grid=document.getElementById('stepGrid');
+    let h='<div style="display:flex;flex-direction:column;gap:3px">';
+    DRUMS.forEach(d=>{
+        h+='<div style="display:flex;align-items:center;gap:2px">';
+        h+='<span class="drum-label">'+DRUM_NAMES[d]+'</span>';
+        for(let s=0;s<STEPS;s++){
+            const on=pattern[d][s]?' on':'';
+            const beat=s%4===0?' beat':'';
+            const active=(playing&&stepIdx===s)?' active':'';
+            h+='<div class="step-cell'+on+beat+active+'" onclick="toggleCell(\''+d+'\','+s+')" title="'+(s+1)+'"></div>';
+        }
+        h+='</div>';
+    });
+    h+='<div style="display:flex;align-items:center;gap:2px;margin-top:2px">';
+    h+='<span class="drum-label" style="font-size:10px">节拍</span>';
+    for(let s=0;s<STEPS;s++){
+        h+='<div style="width:28px;text-align:center;font-size:10px;color:var(--mute)">'+(s%4===0?'<b>'+(Math.floor(s/4)+1)+'</b>':(s%4===2?'·':''))+'</div>';
+    }
+    h+='</div></div>';
+    grid.innerHTML=h;
+}
+
+function drawPresets(){
+    const bar=document.getElementById('presetBar');
+    bar.innerHTML='';
+    Object.keys(PRESETS).forEach(name=>{
+        const chip=document.createElement('span');
+        chip.className='preset-chip'+(name===currentPreset?' on':'');
+        chip.textContent=name;
+        chip.onclick=()=>{if(playing)stopPlay();applyPreset(name);};
+        bar.appendChild(chip);
+    });
+}
+
+function playStep(){
+    if(!playing)return;
+    stepIdx=(stepIdx+1)%STEPS;
+    DRUMS.forEach(d=>{if(pattern[d][stepIdx])playDrum(d,0);});
+    drawGrid();
+    const interval=60000/bpm/4;
+    timerId=setTimeout(playStep,interval);
+}
+
+function togglePlay(){
+    if(playing){stopPlay();return;}
+    ctx();playing=true;stepIdx=-1;
+    document.getElementById('playBtn').classList.add('playing');
+    document.getElementById('playIcon').textContent='⏹';
+    document.getElementById('playLabel').textContent='停止';
+    playStep();
+}
+function stopPlay(){
+    playing=false;stepIdx=-1;
+    clearTimeout(timerId);
+    document.getElementById('playBtn').classList.remove('playing');
+    document.getElementById('playIcon').textContent='▶';
+    document.getElementById('playLabel').textContent='播放';
+    drawGrid();
+}
+
+function setBPM(v){bpm=parseInt(v);document.getElementById('bpmDisplay').textContent=bpm;}
+
+let tapTimes=[];
+function tapTempo(){
+    const now=Date.now();tapTimes.push(now);
+    if(tapTimes.length>8)tapTimes.shift();
+    if(tapTimes.length>1){
+        const intervals=[];
+        for(let i=1;i<tapTimes.length;i++)intervals.push(tapTimes[i]-tapTimes[i-1]);
+        const avg=intervals.reduce((a,b)=>a+b,0)/intervals.length;
+        bpm=Math.round(60000/avg);
+        bpm=Math.max(40,Math.min(220,bpm));
+        document.getElementById('bpmSlider').value=bpm;
+        document.getElementById('bpmDisplay').textContent=bpm;
+    }
+    document.getElementById('tapBtn').classList.add('on');
+    setTimeout(()=>document.getElementById('tapBtn').classList.remove('on'),150);
+}
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
+    if(e.code==='Space'){e.preventDefault();togglePlay();}
+    if(e.code==='ArrowLeft'){e.preventDefault();setBPM(Math.max(40,bpm-5));document.getElementById('bpmSlider').value=bpm;}
+    if(e.code==='ArrowRight'){e.preventDefault();setBPM(Math.min(220,bpm+5));document.getElementById('bpmSlider').value=bpm;}
+});
+
+drawGrid();drawPresets();
+
+// Theme + lang
+(function(){const btn=document.getElementById('themeToggle');const s=localStorage.getItem('metronome-theme');if(s==='dark'){document.body.classList.add('dark');btn.textContent='🌙';}else{btn.textContent='☀️';}btn.addEventListener('click',()=>{document.body.classList.toggle('dark');const d=document.body.classList.contains('dark');btn.textContent=d?'🌙':'☀️';localStorage.setItem('metronome-theme',d?'dark':'light');});const sel=document.getElementById('langSelectTop');const sl=localStorage.getItem('metronome-lang');if(sl)sel.value=sl;sel.addEventListener('change',()=>localStorage.setItem('metronome-lang',sel.value));})();
+</script>
+</body>
+</html>
