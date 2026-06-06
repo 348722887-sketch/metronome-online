@@ -77,7 +77,12 @@ async function toggle() {
         analyser.fftSize = 2048;
         analyser.smoothingTimeConstant = 0.3;
         src.connect(analyser);
-        // No bandpass filters — raw mic input for diagnosis
+        // CRITICAL for iOS: connect to destination via zero-gain node.
+        // iOS Safari WILL NOT process an audio graph that isn't connected to destination.
+        const silentGain = ctx.createGain();
+        silentGain.gain.value = 0;
+        analyser.connect(silentGain);
+        silentGain.connect(ctx.destination);
 
         running = true;
         document.getElementById('btn').textContent = '⏹ 停止';
