@@ -304,21 +304,22 @@
         }
     })();
 
-    // ===== AUDIO ENGINE (v3 — normalized autocorrelation + temporal stability) =====
+    // ===== AUDIO ENGINE (v4 — pitchy MPM pitch detection) =====
     let ctx=null, analyser=null, bandpassLP=null, bandpassHP=null, running=false, mode='guitar';
+    let detector=null; // pitchy PitchDetector instance
     let smoothedHz=null;
     let smoothedCents=0;
     let lastDetectionTime=0;
-
     let pitchHistory = [];
-    const HISTORY_SIZE = 4;  // 4 frames for tighter stability
-    const HOLD_MS = 1800;
+    const HISTORY_SIZE = 3;
+    const HOLD_MS = 1500;
+    const CLARITY_THRESHOLD = 0.85; // pitchy built-in noise rejection
 
     function getBandpassRange(m) {
         switch(m) {
-            case 'bass':    return {low:35, high:600};
+            case 'bass':    return {low:35, high:500};
             case 'violin':  return {low:180, high:2500};
-            case 'ukulele': return {low:200, high:1200};
+            case 'ukulele': return {low:180, high:1200};
             case 'guitar':
             default:        return {low:65, high:1200};
         }
@@ -327,8 +328,16 @@
     async function toggleTuner() {
         if (running) { stopTuner(); return; }
         try {
+            // iOS: AudioContext BEFORE getUserMedia
             ctx = new (window.AudioContext||window.webkitAudioContext)();
             if (ctx.state === 'suspended') { await ctx.resume(); }
+
+            // Load pitchy dynamically (ESM)
+            if (!detector) {
+                const mod = await import('https://esm.sh/pitchy@4.1.0');
+                detector = mod.PitchDetector.forFloat32Array(4096); // matches analyser.fftSize
+                // Note: 4096 gives best accuracy for McLeod Pitch Method
+            }
 
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
@@ -347,8 +356,8 @@
             bandpassLP.Q.value = 0.7;
 
             analyser = ctx.createAnalyser();
-            analyser.fftSize = 2048;
-            analyser.smoothingTimeConstant = 0.3;
+            analyser.fftSize = 4096; // pitchy recommends 4096 for best accuracy
+            analyser.smoothingTimeConstant = 0.2;
 
             src.connect(bandpassHP);
             bandpassHP.connect(bandpassLP);
@@ -391,101 +400,63 @@
         updateStrings(null);
     }
 
-    function detectPitch(buf) {
-        const n = buf.length, sr = ctx.sampleRate;
-        const minLag = Math.floor(sr / 1500); // C6
-        const maxLag = Math.floor(sr / 40);   // E1 (bass low string)
-        if (maxLag >= n) return { freq: -1, rms: 0, corr: 0 };
-
-        let r0 = 0;
-        for (let i = 0; i < n; i++) r0 += buf[i] * buf[i];
-        const rms = Math.sqrt(r0 / n);
-
-        if (rms < 0.0015) return { freq: -2, rms: rms, corr: 0 };
-
-        // Dual-mode: raw for precision, normalized for noise gate
-        let bestLag = -1, bestRaw = 0, bestNorm = -Infinity;
-        const rawVals = new Float32Array(maxLag);
-
-        for (let lag = minLag; lag < maxLag; lag++) {
-            let r = 0, d1 = 0, d2 = 0;
-            for (let i = 0; i < n - lag; i++) {
-                r += buf[i] * buf[i + lag];
-                d1 += buf[i] * buf[i];
-                d2 += buf[i + lag] * buf[i + lag];
-            }
-            rawVals[lag] = r;
-            const denom = Math.sqrt(d1 * d2);
-            const norm = denom > 1e-9 ? r / denom : 0;
-            if (norm > bestNorm) { bestNorm = norm; bestLag = lag; bestRaw = r; }
-        }
-
-        // Gate using NORMALIZED correlation (amplitude-independent, reliable)
-        if (bestLag < 0 || bestNorm < 0.80) return { freq: -3, rms: rms, corr: bestNorm };
-
-        // Frequency from RAW autocorrelation + parabolic interpolation (more accurate)
-        const rawAt = (lag) => (lag >= minLag && lag < maxLag) ? rawVals[lag] : 0;
-        const a = rawAt(bestLag - 1), b = bestRaw, c = rawAt(bestLag + 1);
-        const div = 2 * (2 * b - a - c);
-        const p = Math.abs(div) > 1e-9 ? (a - c) / div : 0;
-        const refinedLag = bestLag + p;
-        const freq = refinedLag > 0 ? sr / refinedLag : sr / bestLag;
-
-        return { freq, rms: rms, corr: bestNorm };
-    }
-
     function tick() {
         if (!running) return;
         const buf = new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(buf);
         const now = performance.now();
-        const result = detectPitch(buf);
-        const f = result.freq, rms = result.rms, corr = result.corr;
+
+        // pitchy MPM detection: returns [frequency, clarity]
+        const [freq, clarity] = detector.findPitch(buf, ctx.sampleRate);
+
+        // Compute RMS for debug
+        let r0 = 0;
+        for (let i = 0; i < buf.length; i++) r0 += buf[i] * buf[i];
+        const rms = Math.sqrt(r0 / buf.length);
 
         let gateStatus = '等待信号…';
 
-        if (f > 30 && f < 2000) {
-            pitchHistory.push(f);
+        if (freq > 30 && freq < 2000 && clarity > CLARITY_THRESHOLD) {
+            // Temporal stability check
+            pitchHistory.push(freq);
             if (pitchHistory.length > HISTORY_SIZE) pitchHistory.shift();
 
             let isStable = false;
             if (pitchHistory.length === HISTORY_SIZE) {
-                // Use median to reject outlier frames, then check spread
-                const sorted = [...pitchHistory].sort((a, b) => a - b);
-                const median = sorted[Math.floor(sorted.length / 2)];
-                isStable = (sorted[sorted.length - 1] - sorted[0]) / median < 0.02; // 2% spread
+                const max = Math.max(...pitchHistory);
+                const min = Math.min(...pitchHistory);
+                isStable = (max - min) / min < 0.02;
             }
 
             if (isStable) {
-                // Median filters out single-frame outliers better than average
-                const sorted = [...pitchHistory].sort((a, b) => a - b);
-                const medianFreq = sorted[Math.floor(sorted.length / 2)];
+                const medianFreq = [...pitchHistory].sort((a, b) => a - b)[Math.floor(pitchHistory.length / 2)];
                 lastDetectionTime = now;
-                gateStatus = '🎵 信号锁定';
+                gateStatus = '🎵 信号锁定 (clarity:' + (clarity * 100).toFixed(0) + '%)';
 
                 if (smoothedHz === null) {
                     smoothedHz = medianFreq;
                 } else {
-                    smoothedHz = smoothedHz * 0.7 + medianFreq * 0.3;
+                    smoothedHz = smoothedHz * 0.6 + medianFreq * 0.4;
                 }
 
                 const rawMidi = 69 + 12 * Math.log2(smoothedHz / 440);
                 const nearestNote = Math.round(rawMidi);
                 const centsOff = 100 * (rawMidi - nearestNote);
-                smoothedCents = smoothedCents * 0.65 + centsOff * 0.35;
+                smoothedCents = smoothedCents * 0.6 + centsOff * 0.4;
 
                 updateDisplay(midiToNote(nearestNote), smoothedCents, nearestNote);
                 updateStrings(nearestNote);
             } else {
-                gateStatus = '⏳ 捕获中(' + pitchHistory.length + '/' + HISTORY_SIZE + ')';
+                gateStatus = '⏳ 捕获中(' + pitchHistory.length + '/' + HISTORY_SIZE + ') clarity:' + (clarity * 100).toFixed(0) + '%';
             }
-        } else if (f === -2) {
-            gateStatus = '🔇 音量过低';
-        } else if (f === -3) {
-            gateStatus = '📡 非乐音(' + (corr * 100).toFixed(0) + '%)';
+        } else if (clarity <= CLARITY_THRESHOLD && freq > 0) {
+            gateStatus = '📡 非乐音(clarity:' + (clarity * 100).toFixed(0) + '%)';
+        } else if (freq <= 0) {
+            gateStatus = '🔇 无信号';
         }
 
-        if (f <= 30 || f >= 2000) {
+        // Hold display
+        if (freq <= 30 || freq >= 2000 || clarity <= CLARITY_THRESHOLD) {
             if (smoothedHz !== null && (now - lastDetectionTime) < HOLD_MS) {
                 smoothedCents *= 0.95;
                 const rawMidi = 69 + 12 * Math.log2(smoothedHz / 440);
@@ -501,16 +472,17 @@
             }
         }
 
+        // Debug panel
         const rmsDb = rms > 1e-10 ? 20 * Math.log10(rms) : -120;
         document.getElementById('dbRms').textContent = rmsDb.toFixed(1) + ' dB';
-        document.getElementById('dbCorr').textContent = (corr * 100).toFixed(1) + '%';
+        document.getElementById('dbCorr').textContent = (clarity * 100).toFixed(1) + '%';
         document.getElementById('dbPar').textContent = gateStatus;
         document.getElementById('dbFreq').textContent = smoothedHz ? smoothedHz.toFixed(1) + ' Hz' : '--';
         document.getElementById('dbCents').textContent = smoothedHz ? smoothedCents.toFixed(0) + '¢' : '--';
         document.getElementById('dbMusical').textContent = pitchHistory.length;
-        document.getElementById('dbNoise').textContent = (f===-3?'噪声':(f===-2?'静音':'乐音'));
+        document.getElementById('dbNoise').textContent = (freq>0&&clarity>CLARITY_THRESHOLD?'乐音':'噪声');
         document.getElementById('dbRmsDelta').textContent = '-';
-        document.getElementById('dbGates').textContent = '归一化自相关+时域稳定 v3.0';
+        document.getElementById('dbGates').textContent = 'pitchy MPM v4.0';
 
         requestAnimationFrame(tick);
     }
