@@ -72,8 +72,7 @@
 
         <div class="flex flex-col items-center w-full max-w-2xl">
 
-    <main class="flex-1 w-full max-w-2xl mx-auto px-4 pb-12" class="relative">
-        <div class="absolute top-4 right-5 flex items-center gap-2">
+            <div class="w-full flex items-center justify-center gap-3 mb-1">
             <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
             <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer">
                 <option value="zh-CN">🇨🇳 中文</option>
@@ -93,6 +92,8 @@
                 <option value="my">🇲🇲 မြန်မာ</option>
             </select>
         </div>
+
+    <main class="flex-1 w-full max-w-2xl mx-auto px-4 pb-12 relative">
 
         <div class="text-center mb-4">
             <h1 class="text-3xl font-bold" style="color:var(--text)" data-i18n="ear-title">🎵 绝对音感练耳</h1>
@@ -174,19 +175,24 @@
     <script>
     // ===== INTERVAL DATA =====
     const INTERVALS = [
-        { id:'m2',  name:'小二度',   en:'minor 2nd',    semi:1,  quality:'不协和', song:'《黑色幽默》"难过是因为…"', abbr:'m2' },
-        { id:'M2',  name:'大二度',   en:'major 2nd',    semi:2,  quality:'不协和', song:'《你听得到》"想我是…"', abbr:'M2' },
-        { id:'m3',  name:'小三度',   en:'minor 3rd',    semi:3,  quality:'协和',   song:'《简单爱》"我想大声…"', abbr:'m3' },
-        { id:'M3',  name:'大三度',   en:'major 3rd',    semi:4,  quality:'协和',   song:'《轨迹》"怎么隐藏…"', abbr:'M3' },
-        { id:'P4',  name:'纯四度',   en:'perfect 4th',  semi:5,  quality:'完全协和', song:'《婚礼进行曲》《七里香》', abbr:'P4' },
-        { id:'TT',  name:'增四/减五', en:'tritone',      semi:6,  quality:'紧张',   song:'救护车声 / Maria', abbr:'TT' },
-        { id:'P5',  name:'纯五度',   en:'perfect 5th',  semi:7,  quality:'完全协和', song:'《她的睫毛》/ 星战主题', abbr:'P5' },
-        { id:'m6',  name:'小六度',   en:'minor 6th',    semi:8,  quality:'协和',   song:'《死了都要爱》', abbr:'m6' },
-        { id:'M6',  name:'大六度',   en:'major 6th',    semi:9,  quality:'协和',   song:'《安静》前奏 / 《世界末日》', abbr:'M6' },
-        { id:'m7',  name:'小七度',   en:'minor 7th',    semi:10, quality:'不协和', song:'《好久不见》"我来到…"', abbr:'m7' },
-        { id:'M7',  name:'大七度',   en:'major 7th',    semi:11, quality:'不协和', song:'《晴天》"握着你手…"', abbr:'M7' },
-        { id:'P8',  name:'纯八度',   en:'perfect octave', semi:12, quality:'完全协和', song:'Somewhere Over the Rainbow', abbr:'P8' }
+        { id:'m2',  semi:1,  qualityKey:'ear-c',  abbr:'m2', songKey:'song-m2' },
+        { id:'M2',  semi:2,  qualityKey:'ear-c',  abbr:'M2', songKey:'song-M2' },
+        { id:'m3',  semi:3,  qualityKey:'ear-cc', abbr:'m3', songKey:'song-m3' },
+        { id:'M3',  semi:4,  qualityKey:'ear-cc', abbr:'M3', songKey:'song-M3' },
+        { id:'P4',  semi:5,  qualityKey:'ear-cp', abbr:'P4', songKey:'song-P4' },
+        { id:'TT',  semi:6,  qualityKey:'ear-ct', abbr:'TT', songKey:'song-TT' },
+        { id:'P5',  semi:7,  qualityKey:'ear-cp', abbr:'P5', songKey:'song-P5' },
+        { id:'m6',  semi:8,  qualityKey:'ear-cc', abbr:'m6', songKey:'song-m6' },
+        { id:'M6',  semi:9,  qualityKey:'ear-cc', abbr:'M6', songKey:'song-M6' },
+        { id:'m7',  semi:10, qualityKey:'ear-c',  abbr:'m7', songKey:'song-m7' },
+        { id:'M7',  semi:11, qualityKey:'ear-c',  abbr:'M7', songKey:'song-M7' },
+        { id:'P8',  semi:12, qualityKey:'ear-cp', abbr:'P8', songKey:'song-P8' }
     ];
+
+    function getLang() { return localStorage.getItem('metronome-lang') || 'zh-CN'; }
+    function ivName(iv) { return t('int-'+iv.id, getLang()); }
+    function ivQuality(iv) { return t(iv.qualityKey, getLang()); }
+    function ivSong(iv) { return t(iv.songKey, getLang()); }
 
     // ===== STATE =====
     let audioCtx = null;
@@ -205,7 +211,8 @@
         INTERVALS.forEach(iv => {
             const chip = document.createElement('span');
             chip.className = 'interval-chip' + (enabledIntervals.has(iv.id) ? ' on' : '');
-            chip.textContent = iv.name + ' (' + iv.abbr + ')';
+            chip.setAttribute('data-i18n', 'int-'+iv.id);
+            chip.textContent = ivName(iv) + ' (' + iv.abbr + ')';
             chip.addEventListener('click', () => { updatePresetButtons('none');
                 if (enabledIntervals.has(iv.id)) {
                     if (enabledIntervals.size <= 1) return; // keep at least 1
@@ -329,12 +336,13 @@
         const q = window._quizNotes || { n1: '?', n2: '?' };
         answered = true;
 
-        const dirLabel = currentDirection === 'asc' ? '上行' : '下行';
+        const lg = getLang();
+        const dirLabel = t(currentDirection==='asc'?'ear-asc':'ear-desc-mode', lg).replace(/^[⬆⬇↕]\s*/, '');
 
-        // Show notes + answer together in answer area
+        // Show notes + answer with i18n translations
         document.getElementById('answerText').innerHTML = q.n1 + ' &nbsp;→&nbsp; ' + q.n2;
-        document.getElementById('answerDetail').textContent = iv.name + ' (' + iv.abbr + ') · ' + iv.semi + ' 半音 · ' + iv.quality + ' · ' + dirLabel;
-        document.getElementById('answerSong').textContent = '🎵 ' + iv.song;
+        document.getElementById('answerDetail').textContent = ivName(iv) + ' (' + iv.abbr + ') · ' + iv.semi + ' ' + t('ear-semi-col', lg) + ' · ' + ivQuality(iv) + ' · ' + dirLabel;
+        document.getElementById('answerSong').textContent = '🎵 ' + ivSong(iv);
 
         area.style.display = 'block';
         document.getElementById('revealBtn').style.display = 'none';
@@ -403,9 +411,9 @@
         const body = document.getElementById('refBody');
         INTERVALS.forEach(iv => {
             const tr = document.createElement('tr');
-            [iv.semi, '<b>'+iv.name+'</b> ('+iv.abbr+')', iv.abbr,
-             '<span style="font-size:12px">'+iv.quality+'</span>',
-             '<span style="font-size:12px">'+iv.song+'</span>'].forEach(v => {
+            [iv.semi, '<b>'+ivName(iv)+'</b> ('+iv.abbr+')', iv.abbr,
+             '<span style="font-size:12px">'+ivQuality(iv)+'</span>',
+             '<span style="font-size:12px">'+ivSong(iv)+'</span>'].forEach(v => {
                 const td = document.createElement('td'); td.innerHTML = v; tr.appendChild(td);
             });
             body.appendChild(tr);

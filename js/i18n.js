@@ -164,6 +164,20 @@ _T('int-m7','小七度','minor 7th','septième mineure','kleine Septime','settim
 _T('int-M7','大七度','major 7th','septième majeure','große Septime','settima maggiore','séptima mayor','sétima maior','μεγάλη εβδόμη','большая септима','septyma wielka','長七度','장7도','เมเจอร์เซเวนธ์','quãng 7 trưởng','အကြီးစားသတ္တမ');
 _T('int-P8','纯八度','perfect octave','octave juste','reine Oktave','ottava giusta','octava justa','oitava justa','καθαρή οκτάβα','чистая октава','oktawa czysta','完全八度','완전8도','เพอร์เฟคออกเทฟ','quãng 8 đúng','စင်ကြယ်အဋ္ဌမ');
 
+// --- Memory songs for ear training ---
+_T('song-m2','《黑色幽默》"难过是因为…"','Jaws theme / "Black Humor"','Les Dents de la Mer','Der Weisse Hai','Lo Squalo','Tiburón','Tubarão','Τα Σαγόνια','Челюсти','Szczęki','ジョーズ','죠스','จอว์ส','Jaws','Jaws');
+_T('song-M2','《你听得到》"想我是…"','Happy Birthday / "Frere Jacques"','Joyeux anniversaire','Happy Birthday','Happy Birthday','Cumpleaños feliz','Parabéns','Χρόνια Πολλά','С Днём Рождения','Sto Lat','ハッピーバースデー','생일축하','แฮปปี้เบิร์ธเดย์','Happy Birthday','Happy Birthday');
+_T('song-m3','《简单爱》"我想大声…"','Greensleeves / "O Canada"','Greensleeves','Greensleeves','Greensleeves','Greensleeves','Greensleeves','Greensleeves','Greensleeves','Greensleeves','グリーンスリーブス','Greensleeves','Greensleeves','Greensleeves','Greensleeves');
+_T('song-M3','《轨迹》"怎么隐藏…"','"Oh When the Saints" / "Morning Has Broken"','Oh When the Saints','Oh When the Saints','Oh When the Saints','Oh When the Saints','Oh When the Saints','Oh When the Saints','Oh When the Saints','Oh When the Saints','聖者が町に','성자의 행진','Oh When the Saints','Oh When the Saints','Oh When the Saints');
+_T('song-P4','《婚礼进行曲》《七里香》','Wedding March / "Amazing Grace"','Marche Nuptiale','Hochzeitsmarsch','Marcia Nuziale','Marcha Nupcial','Marcha Nupcial','Γαμήλιο Εμβατήριο','Свадебный Марш','Marsz Weselny','結婚行進曲','결혼행진곡','เพลงมาร์ช','Here Comes the Bride','Wedding March');
+_T('song-TT','救护车声 / Maria','"Maria" (West Side Story) / Ambulance siren','Maria / Sirène','Maria / Sirene','Maria / Sirena','Maria / Sirena','Maria / Sirene','Maria','Maria','Maria','マリア','Maria','Maria','Maria','Maria');
+_T('song-P5','《她的睫毛》/ 星战主题','Star Wars theme / "Twinkle Twinkle"','Star Wars','Star Wars','Star Wars','Star Wars','Star Wars','Star Wars','Звёздные Войны','Star Wars','スターウォーズ','스타워즈','Star Wars','Star Wars','Star Wars');
+_T('song-m6','《死了都要爱》','"Love Story" / Chopin Waltz','Love Story','Love Story','Love Story','Love Story','Love Story','Love Story','Love Story','Love Story','Love Story','Love Story','Love Story','Love Story','Love Story');
+_T('song-M6','《安静》前奏 / 《世界末日》','"My Way" / "Take the A Train"','My Way','My Way','My Way','My Way','My Way','My Way','My Way','My Way','My Way','My Way','My Way','My Way','My Way');
+_T('song-m7','《好久不见》"我来到…"','"Star Trek" theme / "Somewhere"','Star Trek','Star Trek','Star Trek','Star Trek','Star Trek','Star Trek','Стар Трек','Star Trek','スター・トレック','스타트렉','Star Trek','Star Trek','Star Trek');
+_T('song-M7','《晴天》"握着你手…"','"Bali Hai" / "Pure Imagination"','Bali Hai','Bali Hai','Bali Hai','Bali Hai','Bali Hai','Bali Hai','Bali Hai','Bali Hai','Bali Hai','Bali Hai','Bali Hai','Bali Hai','Bali Hai');
+_T('song-P8','Somewhere Over the Rainbow','"Over the Rainbow"','Over the Rainbow','Over the Rainbow','Over the Rainbow','Over the Rainbow','Over the Rainbow','Over the Rainbow','Over the Rainbow','Over the Rainbow','虹の彼方に','Over the Rainbow','Over the Rainbow','Over the Rainbow','Over the Rainbow');
+
 // --- misc ---
 _T('ear-c','不协和','Dissonant','Dissonant','Dissonant','Dissonante','Disonante','Dissonante','Διάφωνο','Диссонанс','Dysonans','不協和','불협화','ไม่กลมกลืน','Nghịch','အသံမညီ');
 _T('ear-cc','协和','Consonant','Consonant','Konsonant','Consonante','Consonante','Consonante','Σύμφωνο','Консонанс','Konsonans','協和','협화','กลมกลืน','Thuận','အသံညီ');
