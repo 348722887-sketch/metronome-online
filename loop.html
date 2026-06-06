@@ -6,6 +6,8 @@
 <title>Loop伴奏循环 — 在线节拍器</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="./js/i18n.js"></script>
+<script src="https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js"></script>
+<script src="https://surikov.github.io/webaudiofontdata/sound/0250_SoundBlasterOld_sf2.js"></script>
 <style>
 :root{--bg:#f2f7f2;--card-bg:#fff;--card-border:#d0ddd0;--text:#1a2a1a;--text2:#555;--mute:#999;--accent:#4F8CFF}
 body.dark{--bg:#0a0a0f;--card-bg:#141419;--card-border:#2a2a35;--text:#e0e0e0;--text2:#999;--mute:#666}
@@ -152,39 +154,31 @@ progression=[
 
 function ctx(){if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();}
 const STR_MIDI=[40,45,50,55,59,64];
+let wafPlayer=null, instReady=false;
+
+function initWAF(){
+    if(instReady)return;
+    ctx();
+    if(!wafPlayer)wafPlayer=new WebAudioFontPlayer();
+    try{wafPlayer.loader.decodeAfterLoading(ac,'_tone_0250_SoundBlasterOld_sf2');instReady=true;}
+    catch(e){console.log('WAF load failed, falling back');}
+}
 
 function playChord(chord,t,dur){
-    ctx();const now=ac.currentTime+t/1000;let idx=0;
-    chord.f.forEach((v,i)=>{
-        if(v===null)return;
-        const m=STR_MIDI[i]+(v||0);
-        const fr=440*Math.pow(2,(m-69)/12);
-        const strumTime=now+idx*0.035;
-        const decay=dur/1000;
-        // Karplus-Strong plucked string: noise burst → delay loop → lowpass damping
-        const delayTime=1/fr;
-        const delay=ac.createDelay(delayTime*2); // maxDelay must be >= delayTime
-        delay.delayTime.value=delayTime;
-        const feedback=ac.createGain();
-        feedback.gain.setValueAtTime(0.88,strumTime);
-        feedback.gain.exponentialRampToValueAtTime(0.3,strumTime+decay);
-        const damping=ac.createBiquadFilter();
-        damping.type='lowpass';damping.frequency.value=Math.min(fr*6,8000);
-        // Excitation: short noise burst simulating the pluck
-        const noiseLen=Math.max(4,Math.floor(ac.sampleRate*delayTime*.5));
-        const noiseBuf=ac.createBuffer(1,noiseLen,ac.sampleRate);
-        const nd=noiseBuf.getChannelData(0);
-        for(let j=0;j<noiseLen;j++)nd[j]=(Math.random()*2-1)*Math.pow(1-j/noiseLen,2);
-        const noise=ac.createBufferSource();noise.buffer=noiseBuf;
-        const outGain=ac.createGain();
-        outGain.gain.setValueAtTime(.12,strumTime);
-        outGain.gain.exponentialRampToValueAtTime(.001,strumTime+decay);
-        // Chain: noise→delay→damping→feedback→delay (loop), damping→output
-        noise.connect(delay);delay.connect(damping);
-        damping.connect(feedback);feedback.connect(delay);
-        damping.connect(outGain);outGain.connect(ac.destination);
-        noise.start(strumTime);idx++;
-    });
+    initWAF();
+    const notes=[];
+    chord.f.forEach((v,i)=>{if(v!==null)notes.push(STR_MIDI[i]+(v||0));});
+    try{
+        if(instReady&&typeof _tone_0250_SoundBlasterOld_sf2!=='undefined'){
+            wafPlayer.queueStrumDown(ac,ac.destination,_tone_0250_SoundBlasterOld_sf2,ac.currentTime+t/1000,notes,dur/900,0.7,0.04);
+        }else{
+            // Fallback: triangle wave
+            const now=ac.currentTime+t/1000;notes.forEach((m,i)=>{const fr=440*Math.pow(2,(m-69)/12);const o=ac.createOscillator();o.type='triangle';o.frequency.value=fr;const g=ac.createGain();g.gain.setValueAtTime(0,now+i*0.04);g.gain.linearRampToValueAtTime(.08,now+i*0.04+.005);g.gain.exponentialRampToValueAtTime(.001,now+i*0.04+dur/1000*.6);o.connect(g);g.connect(ac.destination);o.start(now+i*0.04);o.stop(now+i*0.04+dur/1000*.7);});
+        }
+    }catch(e){
+        // Fallback on error
+        const now=ac.currentTime+t/1000;notes.forEach((m,i)=>{const fr=440*Math.pow(2,(m-69)/12);const o=ac.createOscillator();o.type='triangle';o.frequency.value=fr;const g=ac.createGain();g.gain.setValueAtTime(0,now+i*0.04);g.gain.linearRampToValueAtTime(.08,now+i*0.04+.005);g.gain.exponentialRampToValueAtTime(.001,now+i*0.04+dur/1000*.6);o.connect(g);g.connect(ac.destination);o.start(now+i*0.04);o.stop(now+i*0.04+dur/1000*.7);});
+    }
 }
 
 function playDrum(name,t){
