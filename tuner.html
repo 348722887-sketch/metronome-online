@@ -345,10 +345,10 @@
         if (running) { stopTuner(); return; }
         try {
             // echoCancellation/noiseSuppression/autoGainControl MUST be false — they destroy pure tones
-            const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+            // iOS REQUIRES AudioContext to be created & resumed BEFORE getUserMedia
             ctx = new (window.AudioContext||window.webkitAudioContext)();
-            // iOS Safari suspends AudioContext until user gesture — must explicitly resume
             if (ctx.state === 'suspended') { await ctx.resume(); }
+            const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
             const src = ctx.createMediaStreamSource(stream);
 
             // === BANDPASS PRE-FILTER: key noise immunity layer ===
@@ -368,11 +368,15 @@
             analyser.fftSize=2048;
             analyser.smoothingTimeConstant=0.3;
 
-            // Chain: mic → highpass → lowpass → analyser
+            // Chain: mic → highpass → lowpass → analyser → silentGain → destination
             src.connect(bandpassHP);
             bandpassHP.connect(bandpassLP);
             bandpassLP.connect(analyser);
-            // Don't connect to speakers — we're analysis only
+            // iOS REQUIRES audio graph connected to destination for processing
+            const silentGain = ctx.createGain();
+            silentGain.gain.value = 0;
+            analyser.connect(silentGain);
+            silentGain.connect(ctx.destination);
 
             running=true;
             document.getElementById('powerIcon').textContent='⏹';

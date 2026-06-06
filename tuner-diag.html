@@ -58,15 +58,18 @@ async function toggle() {
     }
     log('✅','getUserMedia 可用');
 
-    // === STEP 2: Enumerate devices ===
-    log('📋','枚举音频设备…');
-    const devices=await navigator.mediaDevices.enumerateDevices();
-    const audioInputs=devices.filter(d=>d.kind==='audioinput');
-    log('🎙 发现音频输入设备',audioInputs.length+' 个');
-    audioInputs.forEach(d=>log('  📱',d.label||'(无标签) — '+d.deviceId.slice(0,8)+'…'));
+    // === STEP 2: Create AudioContext FIRST (iOS requires this BEFORE getUserMedia) ===
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    log('🔊 AudioContext 创建','sampleRate='+ctx.sampleRate+'Hz, state='+ctx.state);
 
-    // === STEP 3: Get mic stream ===
-    log('🎤','请求麦克风 (audio:true)…');
+    if(ctx.state==='suspended'){
+      log('⏳','正在 resume…');
+      await ctx.resume();
+      log('✅','resume 完成, state='+ctx.state);
+    }
+
+    // === STEP 3: Get mic stream (AFTER AudioContext is running) ===
+    log('🎤','请求麦克风…');
     stream=await navigator.mediaDevices.getUserMedia({audio:true});
     log('✅','getUserMedia 成功');
 
@@ -78,8 +81,6 @@ async function toggle() {
       log('    enabled',t.enabled);
       log('    muted',t.muted);
       log('    readyState',t.readyState);
-      log('    constraints',JSON.stringify(t.getConstraints()));
-      log('    settings',JSON.stringify(t.getSettings()));
     });
 
     if(tracks.length===0){
@@ -87,15 +88,8 @@ async function toggle() {
       return;
     }
 
-    // === STEP 5: Create AudioContext ===
-    ctx=new (window.AudioContext||window.webkitAudioContext)();
-    log('🔊 AudioContext 创建','sampleRate='+ctx.sampleRate+'Hz, state='+ctx.state);
-
-    if(ctx.state==='suspended'){
-      log('⏳','正在 resume…');
-      await ctx.resume();
-      log('✅','resume 完成, state='+ctx.state);
-    }
+    // Log track settings (after connection, so we know HW capabilities)
+    log('  settings',JSON.stringify(tracks[0].getSettings()));
 
     // === STEP 6: Create script processor (alternative to analyser) ===
     const src=ctx.createMediaStreamSource(stream);
