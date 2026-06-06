@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loop伴奏循环 — 在线节拍器</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="./js/i18n.js"></script>
+<style>
+:root{--bg:#f2f7f2;--card-bg:#fff;--card-border:#d0ddd0;--text:#1a2a1a;--text2:#555;--mute:#999;--accent:#4F8CFF}
+body.dark{--bg:#0a0a0f;--card-bg:#141419;--card-border:#2a2a35;--text:#e0e0e0;--text2:#999;--mute:#666}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+.nav-pill{padding:6px 16px;border-radius:8px;background:linear-gradient(135deg,#4F8CFF 0%,#6B5CFF 100%);color:#fff;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s ease;white-space:nowrap}
+.nav-pill:hover{box-shadow:0 4px 16px rgba(79,140,255,.4);transform:translateY(-1px)}
+.nav-pill.active{background:#4F8CFF;box-shadow:0 2px 8px rgba(79,140,255,.3)}
+.theme-btn{background:none;border:1px solid var(--card-border);border-radius:6px;font-size:16px;cursor:pointer;padding:2px 5px;line-height:1;transition:all .2s ease;outline:none;color:var(--text)}
+.theme-btn:hover{background:var(--bg);border-color:#4F8CFF}
+.card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.04);margin-bottom:16px}
+body.dark .card{border-color:#2a2a35}
+.chip{padding:6px 14px;border-radius:16px;border:1.5px solid var(--card-border);background:var(--card-bg);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s ease;white-space:nowrap;user-select:none}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+body.dark .chip{border-color:#2a2a35;background:#1a1a21}
+body.dark .chip.on{background:var(--accent);border-color:var(--accent)}
+.chord-slot{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;background:rgba(79,140,255,.06);border:1px dashed var(--accent);transition:all .2s ease}
+.chord-slot.active-chord{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 16px rgba(79,140,255,.4);transform:scale(1.05)}
+.chord-slot .name{font-size:18px;font-weight:800;min-width:32px;text-align:center}
+.btn-play-lg{padding:16px 40px;border-radius:30px;background:linear-gradient(135deg,#4F8CFF,#6B5CFF);color:#fff;font-size:18px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(79,140,255,.35);transition:all .2s ease;display:inline-flex;align-items:center;gap:8px}
+.btn-play-lg:hover{transform:scale(1.03)}
+.btn-play-lg.playing{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 4px 20px rgba(239,68,68,.35)}
+footer{border-color:var(--card-border)!important}
+body.dark footer{border-color:#2a2a35!important}
+select{background:var(--card-bg);color:var(--mute);border-color:var(--card-border)}
+</style>
+</head>
+<body class="min-h-screen flex items-start justify-center py-6 px-4" style="background:#f2f7f2;">
+<div class="hidden md:flex flex-col gap-5" style="flex-shrink:0;width:130px;margin-right:20px;margin-top:30px">
+    <a href="./tuner.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px">乐器调音器</a>
+    <a href="./staff.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px">认识五线谱</a>
+    <a href="./index.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px">免费在线节拍器</a>
+    <a href="./circle-of-fifths.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px">音乐五度圈</a>
+    <a href="./ear-training.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px">绝对音感练耳</a>
+    <a href="./chords.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px">常用和弦</a>
+    <a href="./drum-machine.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px">在线鼓机</a>
+    <a href="./loop.html" class="nav-pill text-center active" style="padding:14px 10px;font-size:13px">Loop循环</a>
+</div>
+<div class="flex flex-col items-center w-full max-w-2xl">
+    <div class="w-full flex items-center justify-center gap-3 mb-1">
+        <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
+        <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer">
+            <option value="zh-CN">🇨🇳 中文</option><option value="en">🇬🇧 English</option><option value="ja">🇯🇵 日本語</option><option value="ko">🇰🇷 한국어</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="it">🇮🇹 Italiano</option><option value="es">🇪🇸 Español</option><option value="pt">🇧🇷 Português</option><option value="el">🇬🇷 Ελληνικά</option><option value="ru">🇷🇺 Русский</option><option value="pl">🇵🇱 Polski</option><option value="th">🇹🇭 ไทย</option><option value="vi">🇻🇳 Tiếng Việt</option><option value="my">🇲🇲 မြန်မာ</option>
+        </select>
+    </div>
+    <main class="flex-1 w-full px-4 pb-12">
+        <div class="text-center mb-4">
+            <h1 class="text-3xl font-bold mb-1" style="color:var(--text)">🔄 Loop 伴奏循环</h1>
+            <p style="color:var(--mute);font-size:13px">选和弦走向 → 加鼓节奏 → 自动生成伴奏循环</p>
+        </div>
+        <!-- Chord palette -->
+        <div class="card">
+            <div class="text-sm font-bold mb-3" style="color:var(--text2)">🎵 点击和弦加入进行</div>
+            <div class="flex flex-wrap gap-2 mb-4" id="chordPalette"></div>
+            <!-- Chord progression -->
+            <div class="text-sm font-bold mb-3" style="color:var(--text2)">📋 和弦进行 <span style="font-size:11px;color:var(--mute)">(点击和弦切换拍数,点击×删除)</span></div>
+            <div class="flex flex-wrap items-center gap-2" id="progression" style="min-height:48px">
+                <span style="color:var(--mute);font-size:13px" id="emptyHint">👆 从上面选和弦加入</span>
+            </div>
+        </div>
+        <!-- Rhythm + BPM + Play -->
+        <div class="card text-center">
+            <div class="flex flex-wrap justify-center items-center gap-6">
+                <div>
+                    <div class="text-xs mb-2" style="color:var(--mute)">🥁 节奏风格</div>
+                    <div class="flex flex-wrap justify-center gap-2" id="rhythmBar"></div>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-6 mt-5">
+                <div style="font-size:48px;font-weight:900;color:var(--accent);line-height:1" id="bpmDisplay">100</div>
+                <button class="btn-play-lg" id="playBtn" onclick="togglePlay()">
+                    <span id="playIcon">▶</span> <span id="playLabel">播放</span>
+                </button>
+                <span class="chip" id="tapBtn" onclick="tapTempo()" style="padding:10px 18px;font-size:14px">👆 TAP</span>
+            </div>
+            <div class="flex items-center justify-center gap-4 mt-4" style="max-width:400px;margin:16px auto 0">
+                <span style="font-size:12px;color:var(--mute)">40</span>
+                <input type="range" id="bpmSlider" min="40" max="220" value="100" oninput="setBPM(this.value)" style="flex:1">
+                <span style="font-size:12px;color:var(--mute)">220</span>
+            </div>
+            <!-- Progress bar -->
+            <div class="mt-4" style="height:3px;background:var(--card-border);border-radius:2px;overflow:hidden">
+                <div id="progressBar" style="height:100%;width:0;background:var(--accent);transition:width .1s linear;border-radius:2px"></div>
+            </div>
+            <p class="text-xs mt-2" style="color:var(--mute)">空格键 播放/停止 · 共<span id="totalBeats">0</span>拍 <span id="totalBars">0</span>小节</p>
+        </div>
+    </main>
+</div>
+<footer class="text-center text-xs py-6 border-t" style="color:var(--mute);border-color:var(--card-border)">
+    <a href="./index.html" class="text-blue-500 hover:underline">← 返回节拍器</a>
+</footer>
+<script>
+// ===== CHORD PALETTE: 7 keys × 7 chords each =====
+const KEYS=['C','D','E','F','G','A','B'];
+const CHORDS_BY_KEY={
+'C':[{n:'C',f:[null,3,2,0,1,0]},{n:'Dm',f:[null,null,0,2,3,1]},{n:'Em',f:[0,2,2,0,0,0]},{n:'F',f:[1,3,3,2,1,1]},{n:'G',f:[3,2,0,0,0,3]},{n:'Am',f:[null,0,2,2,1,0]},{n:'G7',f:[3,2,0,0,0,1]}],
+'D':[{n:'D',f:[null,null,0,2,3,2]},{n:'Em',f:[0,2,2,0,0,0]},{n:'F#m',f:[2,4,4,2,2,2]},{n:'G',f:[3,2,0,0,0,3]},{n:'A',f:[null,0,2,2,2,0]},{n:'Bm',f:[null,2,4,4,3,2]},{n:'A7',f:[null,0,2,0,2,0]}],
+'E':[{n:'E',f:[0,2,2,1,0,0]},{n:'F#m',f:[2,4,4,2,2,2]},{n:'G#m',f:[4,6,6,4,4,4]},{n:'A',f:[null,0,2,2,2,0]},{n:'B',f:[null,2,4,4,4,2]},{n:'C#m',f:[null,4,6,6,5,4]},{n:'B7',f:[null,2,1,2,0,2]}],
+'F':[{n:'F',f:[1,3,3,2,1,1]},{n:'Gm',f:[3,5,5,3,3,3]},{n:'Am',f:[null,0,2,2,1,0]},{n:'Bb',f:[null,1,3,3,3,1]},{n:'C',f:[null,3,2,0,1,0]},{n:'Dm',f:[null,null,0,2,3,1]},{n:'C7',f:[null,3,2,3,1,0]}],
+'G':[{n:'G',f:[3,2,0,0,0,3]},{n:'Am',f:[null,0,2,2,1,0]},{n:'Bm',f:[null,2,4,4,3,2]},{n:'C',f:[null,3,2,0,1,0]},{n:'D',f:[null,null,0,2,3,2]},{n:'Em',f:[0,2,2,0,0,0]},{n:'D7',f:[null,null,0,2,1,2]}],
+'A':[{n:'A',f:[null,0,2,2,2,0]},{n:'Bm',f:[null,2,4,4,3,2]},{n:'C#m',f:[null,4,6,6,5,4]},{n:'D',f:[null,null,0,2,3,2]},{n:'E',f:[0,2,2,1,0,0]},{n:'F#m',f:[2,4,4,2,2,2]},{n:'E7',f:[0,2,2,1,3,0]}],
+'B':[{n:'B',f:[null,2,4,4,4,2]},{n:'C#m',f:[null,4,6,6,5,4]},{n:'D#m',f:[null,6,8,8,7,6]},{n:'E',f:[0,2,2,1,0,0]},{n:'F#',f:[2,4,4,3,2,2]},{n:'G#m',f:[4,6,6,4,4,4]},{n:'F#7',f:[2,4,2,3,2,2]}],
+};
+
+// Rhythm presets (drum patterns as {drum:[16 steps]})
+const RHYTHMS={
+'流行':{bpm:100,p:{k:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]}},
+'摇滚':{bpm:120,p:{k:[1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]}},
+'爵士':{bpm:140,p:{k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0],s:[0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0],h:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]}},
+'布鲁斯':{bpm:90,p:{k:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0],h:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}},
+'雷鬼':{bpm:80,p:{k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0],h:[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]}},
+'放克':{bpm:105,p:{k:[1,0,0,1,0,0,1,0,1,0,0,0,1,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0],h:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0]}},
+'电子':{bpm:128,p:{k:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0]}},
+'民谣':{bpm:90,p:{k:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],s:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],h:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]}},
+};
+
+// State
+let progression=[], activeKey='C', rhythm='流行', bpm=100, playing=false;
+let currentBeat=0, currentStep=-1, timerId=null, ac=null;
+let selectedChordIdx=-1; // which chord in progression to replace
+
+// Init: add default chords
+progression=[
+    {chord:CHORDS_BY_KEY['C'][0], beats:4},
+    {chord:CHORDS_BY_KEY['C'][4], beats:4},
+    {chord:CHORDS_BY_KEY['C'][5], beats:4},
+    {chord:CHORDS_BY_KEY['C'][3], beats:4},
+];
+
+function ctx(){if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();}
+const STR_MIDI=[40,45,50,55,59,64];
+
+function playChord(chord,t,dur){
+    ctx();const now=ac.currentTime+t/1000;let idx=0;
+    chord.f.forEach((v,i)=>{if(v!==null){const m=STR_MIDI[i]+(v||0);const fr=440*Math.pow(2,(m-69)/12);
+    const osc=ac.createOscillator();osc.type='triangle';osc.frequency.value=fr;
+    const g=ac.createGain();g.gain.setValueAtTime(0,now+idx*0.04);g.gain.linearRampToValueAtTime(.08,now+idx*0.04+.005);g.gain.exponentialRampToValueAtTime(.001,now+idx*0.04+dur/1000*.6);
+    const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=Math.min(fr*5,4000);
+    osc.connect(g);g.connect(f);f.connect(ac.destination);osc.start(now+idx*0.04);osc.stop(now+idx*0.04+dur/1000*.7);idx++;}});
+}
+
+function playDrum(name,t){
+    ctx();const now=ac.currentTime+t/1000;
+    const g=ac.createGain();g.connect(ac.destination);
+    if(name==='k'){const o=ac.createOscillator();o.type='sine';o.frequency.setValueAtTime(150,now);o.frequency.exponentialRampToValueAtTime(40,now+.08);g.gain.setValueAtTime(.7,now);g.gain.exponentialRampToValueAtTime(.001,now+.25);o.connect(g);o.start(now);o.stop(now+.3);}
+    else if(name==='s'){const o=ac.createOscillator();o.type='triangle';o.frequency.value=200;g.gain.setValueAtTime(.4,now);g.gain.exponentialRampToValueAtTime(.001,now+.12);const bn=ac.createBufferSource();const buf=ac.createBuffer(1,ac.sampleRate*.08,ac.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;bn.buffer=buf;const bf=ac.createBiquadFilter();bf.type='highpass';bf.frequency.value=1000;const ng=ac.createGain();ng.gain.setValueAtTime(.25,now);ng.gain.exponentialRampToValueAtTime(.001,now+.1);bn.connect(bf);bf.connect(ng);ng.connect(ac.destination);o.connect(g);bn.start(now);}
+    else if(name==='h'){const bn=ac.createBufferSource();const buf=ac.createBuffer(1,ac.sampleRate*.04,ac.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;bn.buffer=buf;const bf=ac.createBiquadFilter();bf.type='highpass';bf.frequency.value=8000;g.gain.setValueAtTime(.1,now);g.gain.exponentialRampToValueAtTime(.001,now+.04);bn.connect(bf);bf.connect(g);bn.start(now);}
+}
+
+function step(){
+    if(!playing||progression.length===0)return;
+    const totalBeats=progression.reduce((s,c)=>s+c.beats,0)*4; // *4 = 16th steps
+    if(totalBeats===0){stopPlay();return;}
+    currentStep=(currentStep+1)%totalBeats;
+
+    // Find which chord we're on
+    let beatAcc=0, chordIdx=-1, beatInChord=0;
+    for(let i=0;i<progression.length;i++){
+        const steps=progression[i].beats*4;
+        if(currentStep<beatAcc+steps){chordIdx=i;beatInChord=currentStep-beatAcc;break;}
+        beatAcc+=steps;
+    }
+    // Play chord on first step of each chord
+    if(beatInChord===0&&chordIdx>=0){
+        const dur=progression[chordIdx].beats*60000/bpm;
+        playChord(progression[chordIdx].chord,0,dur);
+    }
+    // Play drum
+    const r=RHYTHMS[rhythm].p;
+    if(r.k&&r.k[currentStep%16])playDrum('k',0);
+    if(r.s&&r.s[currentStep%16])playDrum('s',0);
+    if(r.h&&r.h[currentStep%16])playDrum('h',0);
+
+    currentBeat=chordIdx;
+    updateUI();
+    const interval=60000/bpm/4;
+    timerId=setTimeout(step,interval);
+}
+
+function togglePlay(){
+    if(playing){stopPlay();return;}
+    if(progression.length===0)return;
+    ctx();playing=true;currentStep=-1;currentBeat=0;
+    document.getElementById('playBtn').classList.add('playing');
+    document.getElementById('playIcon').textContent='⏹';
+    document.getElementById('playLabel').textContent='停止';
+    step();
+}
+function stopPlay(){
+    playing=false;currentStep=-1;currentBeat=-1;
+    clearTimeout(timerId);
+    document.getElementById('playBtn').classList.remove('playing');
+    document.getElementById('playIcon').textContent='▶';
+    document.getElementById('playLabel').textContent='播放';
+    document.getElementById('progressBar').style.width='0';
+    updateUI();
+}
+
+function setBPM(v){bpm=parseInt(v);document.getElementById('bpmDisplay').textContent=bpm;}
+function setRhythm(name){rhythm=name;bpm=RHYTHMS[name].bpm;document.getElementById('bpmSlider').value=bpm;document.getElementById('bpmDisplay').textContent=bpm;drawRhythms();}
+function toggleBeats(idx){progression[idx].beats=progression[idx].beats===2?4:2;updateUI();}
+function removeChord(idx){progression.splice(idx,1);updateUI();}
+function selectChord(chord){if(selectedChordIdx>=0&&selectedChordIdx<progression.length){progression[selectedChordIdx]={chord,beats:progression[selectedChordIdx].beats};selectedChordIdx=-1;}else{progression.push({chord,beats:4});}updateUI();}
+
+function drawPalette(){
+    const p=document.getElementById('chordPalette');
+    p.innerHTML='<div style="display:flex;gap:8px;margin-bottom:6px">'+KEYS.map(k=>'<span class="chip'+(k===activeKey?' on':'')+'" onclick="activeKey=\''+k+'\';drawPalette()" style="font-weight:700">'+k+'调</span>').join('')+'</div>';
+    p.innerHTML+='<div class="flex flex-wrap gap-2">'+CHORDS_BY_KEY[activeKey].map(c=>'<span class="chip" onclick="selectChord(CHORDS_BY_KEY[\''+activeKey+'\']['+CHORDS_BY_KEY[activeKey].indexOf(c)+'])">'+c.n+'</span>').join('')+'</div>';
+}
+
+function updateUI(){
+    const prog=document.getElementById('progression');
+    if(progression.length===0){
+        prog.innerHTML='<span style="color:var(--mute);font-size:13px">👆 从上面选和弦加入</span>';
+    }else{
+        prog.innerHTML=progression.map((c,i)=>{
+            const active=i===currentBeat&&playing;
+            return '<div class="chord-slot'+(active?' active-chord':'')+'" style="cursor:pointer" onclick="toggleBeats('+i+')">'+
+                '<span class="name">'+c.chord.n+'</span>'+
+                '<span style="font-size:11px;color:'+(active?'rgba(255,255,255,.7)':'var(--mute)')+'">'+c.beats+'拍</span>'+
+                '<span style="cursor:pointer;margin-left:2px;color:'+(active?'rgba(255,255,255,.6)':'var(--mute)')+'" onclick="event.stopPropagation();removeChord('+i+')">×</span>'+
+                '</div>';
+        }).join('')+'<span class="chip" style="border-style:dashed" onclick="selectedChordIdx=-1">+</span>';
+    }
+    const totalBeats=progression.reduce((s,c)=>s+c.beats,0);
+    document.getElementById('totalBeats').textContent=totalBeats;
+    document.getElementById('totalBars').textContent=Math.floor(totalBeats/4);
+    if(playing){
+        const totalSteps=totalBeats*4;
+        const pct=totalSteps>0?(currentStep+1)/totalSteps*100:0;
+        document.getElementById('progressBar').style.width=pct+'%';
+    }
+}
+
+function drawRhythms(){
+    const bar=document.getElementById('rhythmBar');
+    bar.innerHTML=Object.keys(RHYTHMS).map(name=>'<span class="chip'+(name===rhythm?' on':'')+'" onclick="setRhythm(\''+name+'\')">'+name+'</span>').join('');
+}
+
+let tapTimes=[];
+function tapTempo(){
+    const now=Date.now();tapTimes.push(now);if(tapTimes.length>8)tapTimes.shift();
+    if(tapTimes.length>1){const intervals=[];for(let i=1;i<tapTimes.length;i++)intervals.push(tapTimes[i]-tapTimes[i-1]);const avg=intervals.reduce((a,b)=>a+b,0)/intervals.length;bpm=Math.round(60000/avg);bpm=Math.max(40,Math.min(220,bpm));document.getElementById('bpmSlider').value=bpm;document.getElementById('bpmDisplay').textContent=bpm;}
+    document.getElementById('tapBtn').classList.add('on');setTimeout(()=>document.getElementById('tapBtn').classList.remove('on'),150);
+}
+
+document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
+    if(e.code==='Space'){e.preventDefault();togglePlay();}
+});
+
+drawPalette();drawRhythms();updateUI();
+setBPM(RHYTHMS[rhythm].bpm);document.getElementById('bpmSlider').value=bpm;
+
+(function(){const btn=document.getElementById('themeToggle');const s=localStorage.getItem('metronome-theme');if(s==='dark'){document.body.classList.add('dark');btn.textContent='🌙';}else{btn.textContent='☀️';}btn.addEventListener('click',()=>{document.body.classList.toggle('dark');const d=document.body.classList.contains('dark');btn.textContent=d?'🌙':'☀️';localStorage.setItem('metronome-theme',d?'dark':'light');});const sel=document.getElementById('langSelectTop');const sl=localStorage.getItem('metronome-lang');if(sl)sel.value=sl;sel.addEventListener('change',()=>localStorage.setItem('metronome-lang',sel.value));})();
+</script>
+</body>
+</html>
