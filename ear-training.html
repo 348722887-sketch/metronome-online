@@ -103,11 +103,6 @@
                 <span class="interval-chip" id="modeDesc" onclick="setDirection('desc')" data-i18n="ear-desc-mode">⬇ 下行</span>
                 <span class="interval-chip" id="modeBoth" onclick="setDirection('both')" data-i18n="ear-both">↕ 混合</span>
             </div>
-            <!-- Sound selector -->
-            <div class="flex justify-center gap-2 mb-4">
-                <span class="interval-chip on" id="soundPiano" onclick="setSound('piano')">🎹 钢琴</span>
-                <span class="interval-chip" id="soundGuitar" onclick="setSound('guitar')">🎸 吉他</span>
-            </div>
 
             <!-- Notes played display -->
             <div class="text-gray-500 text-xs mb-3" id="noteDisplay" style="min-height:18px">点击下方按钮随机出题</div>
@@ -195,7 +190,6 @@
     let correctTotal = 0, wrongTotal = 0;
     let currentRoot = 60;
     let enabledIntervals = new Set(INTERVALS.filter(i=>['m3','M3','P4','P5','P8'].includes(i.id)).map(i=>i.id));
-    let soundType = 'piano'; // 'piano' | 'guitar'
 
     // ===== BUILD FILTER CHIPS =====
     function buildFilter() {
@@ -230,12 +224,6 @@
         document.getElementById('modeBoth').classList.toggle('on', dir==='both');
     }
 
-    function setSound(type) {
-        soundType = type;
-        document.getElementById('soundPiano').classList.toggle('on', type==='piano');
-        document.getElementById('soundGuitar').classList.toggle('on', type==='guitar');
-    }
-
     // ===== AUDIO: reliable oscillator synthesis =====
     const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
     function midiToName(midi) { return NOTE_NAMES[midi%12] + Math.floor(midi/12-1); }
@@ -253,18 +241,11 @@
             osc.type = 'triangle';
             osc.frequency.value = freq * detune;
             const gain = audioCtx.createGain();
-            if (soundType === 'guitar') {
-                // Fast pluck: instant attack, quick decay
-                gain.gain.setValueAtTime(0, startTime);
-                gain.gain.linearRampToValueAtTime(vol * 1.5, startTime + 0.003);
-                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration * 0.5);
-            } else {
-                // Piano-like: quick attack, slower decay
-                gain.gain.setValueAtTime(0, startTime);
-                gain.gain.linearRampToValueAtTime(vol * 1.2, startTime + 0.01);
-                gain.gain.exponentialRampToValueAtTime(vol * 0.3, startTime + 0.4);
-                gain.gain.linearRampToValueAtTime(0, startTime + duration);
-            }
+            // Warm musical tone: quick attack, natural decay
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(vol * 1.2, startTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(vol * 0.3, startTime + 0.4);
+            gain.gain.linearRampToValueAtTime(0, startTime + duration);
             const filter = audioCtx.createBiquadFilter();
             filter.type = 'lowpass';
             filter.frequency.value = Math.min(freq * 6, 5000);
