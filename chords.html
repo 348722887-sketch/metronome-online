@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>常用和弦图库 — 在线节拍器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./js/i18n.js"></script>
+    <style>
+        :root{--bg:#f2f7f2;--card-bg:#fff;--card-border:#d0ddd0;--text:#1a2a1a;--text2:#666;--mute:#999}
+        body.dark{--bg:#0a0a0f;--card-bg:#141419;--card-border:#2a2a35;--text:#e0e0e0;--text2:#999;--mute:#666}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#d0ddd0;border-radius:3px}
+
+        .nav-pill{padding:6px 16px;border-radius:8px;background:linear-gradient(135deg,#4F8CFF 0%,#6B5CFF 100%);color:#fff;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s ease;white-space:nowrap}
+        .nav-pill:hover{box-shadow:0 4px 16px rgba(79,140,255,.4);transform:translateY(-1px)}
+        .nav-pill.active{background:#4F8CFF;box-shadow:0 2px 8px rgba(79,140,255,.3)}
+        .theme-btn{background:none;border:1px solid var(--card-border);border-radius:6px;font-size:16px;cursor:pointer;padding:2px 5px;line-height:1;transition:all .2s ease;outline:none;color:var(--text)}
+        .theme-btn:hover{background:var(--bg);border-color:#4F8CFF}
+
+        .key-btn{padding:10px 14px;border-radius:8px;border:none;background:var(--card-bg);color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s ease;width:100%;text-align:center}
+        .key-btn:hover{background:#e8efe8;color:var(--text)}
+        .key-btn.on{background:#4F8CFF;color:#fff;box-shadow:0 2px 12px rgba(79,140,255,.3)}
+        body.dark .key-btn{background:#1a1a21;border:1px solid #2a2a35}
+        body.dark .key-btn:hover{background:#2a2a35}
+        body.dark .key-btn.on{background:#4F8CFF;border-color:#4F8CFF}
+
+        .chord-card{cursor:pointer;padding:8px 4px;border-radius:12px;transition:all .15s ease;display:flex;flex-direction:column;align-items:center}
+        .chord-card:hover{background:rgba(79,140,255,.08)}
+        .chord-card.playing{background:rgba(79,140,255,.15)}
+        .chord-card .chord-name{font-size:15px;font-weight:700;margin-bottom:2px}
+        .chord-card .chord-name.highlight{color:#4F8CFF}
+
+        footer{border-color:var(--card-border)!important}
+        body.dark footer{border-color:#2a2a35!important}
+        select{background:var(--card-bg);color:var(--mute);border-color:var(--card-border)}
+        .no-scrollbar::-webkit-scrollbar{display:none}
+        .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+    </style>
+</head>
+<body class="min-h-screen flex items-start justify-center py-6 px-4" style="background:#f2f7f2;">
+
+    <!-- ===== Left Sidebar ===== -->
+    <div class="hidden lg:flex flex-col gap-4" style="flex-shrink:0;width:130px;margin-right:20px;margin-top:110px">
+        <a href="./tuner.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-tuner">乐器调音器</a>
+        <a href="./staff.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-staff">认识五线谱</a>
+        <a href="./index.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-metronome">免费在线节拍器</a>
+        <a href="./circle-of-fifths.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-circle">音乐五度圈</a>
+        <a href="./ear-training.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-ear">绝对音感练耳</a>
+        <a href="./chords.html" class="nav-pill text-center active" style="padding:14px 10px;font-size:13px">常用和弦</a>
+    </div>
+
+    <div class="flex flex-col items-center w-full max-w-2xl">
+
+        <div class="w-full flex items-center justify-center gap-3 mb-1">
+            <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
+            <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer">
+                <option value="zh-CN">🇨🇳 中文</option><option value="en">🇬🇧 English</option><option value="ja">🇯🇵 日本語</option><option value="ko">🇰🇷 한국어</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="it">🇮🇹 Italiano</option><option value="es">🇪🇸 Español</option><option value="pt">🇧🇷 Português</option><option value="el">🇬🇷 Ελληνικά</option><option value="ru">🇷🇺 Русский</option><option value="pl">🇵🇱 Polski</option><option value="th">🇹🇭 ไทย</option><option value="vi">🇻🇳 Tiếng Việt</option><option value="my">🇲🇲 မြန်မာ</option>
+            </select>
+        </div>
+
+        <main class="flex-1 w-full max-w-2xl mx-auto px-4 pb-12">
+            <div class="text-center mb-4">
+                <h1 class="text-3xl font-bold" style="color:var(--text)">🎸 常用和弦图库</h1>
+                <p style="color:var(--mute);font-size:13px">点击和弦听声音 · 点击左侧切换调性</p>
+            </div>
+
+            <div class="flex gap-3" style="min-height:500px">
+                <!-- Left: Key selector -->
+                <div class="flex flex-col gap-1" style="width:80px;flex-shrink:0" id="keyBar"></div>
+
+                <!-- Right: Chord grid -->
+                <div class="flex-1">
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-2" id="chordGrid"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="text-center text-xs py-6 border-t" style="color:var(--mute);border-color:var(--card-border)">
+        <a href="./index.html" class="text-blue-500 hover:underline">← 返回节拍器</a>
+    </footer>
+
+    <script>
+    // ===== CHORD DATA =====
+    const chordDB = {
+        'C': [
+            {name:'C',  strings:['x',0,0,2,3,1], fingers:['-','-','-',2,3,1]},
+            {name:'Dm', strings:['x','x',0,2,3,1], fingers:['-','-','-',2,3,1]},
+            {name:'Em', strings:[0,2,2,0,0,0], fingers:['-',2,3,'-','-','-']},
+            {name:'F',  strings:[1,1,2,3,3,1], fingers:[1,1,2,3,4,1]},
+            {name:'G',  strings:[3,2,0,0,0,3], fingers:[3,2,'-','-','-',4]},
+            {name:'Am', strings:['x',0,2,2,1,0], fingers:['-','-',2,3,1,'-']},
+            {name:'G7', strings:[3,2,0,0,0,1], fingers:[3,2,'-','-','-',1]},
+        ],
+        'D': [
+            {name:'D',  strings:['x','x',0,2,3,2], fingers:['-','-','-',1,3,2]},
+            {name:'Em', strings:[0,2,2,0,0,0], fingers:['-',2,3,'-','-','-']},
+            {name:'F♯m',strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1]},
+            {name:'G',  strings:[3,2,0,0,0,3], fingers:[3,2,'-','-','-',4]},
+            {name:'A',  strings:['x',0,2,2,2,0], fingers:['-','-',1,2,3,'-']},
+            {name:'Bm', strings:['x',2,4,4,3,2], fingers:['-',1,3,4,2,1]},
+            {name:'A7', strings:['x',0,2,0,2,0], fingers:['-','-',2,'-',3,'-']},
+        ],
+        'E': [
+            {name:'E',  strings:[0,2,2,1,0,0], fingers:['-',2,3,1,'-','-']},
+            {name:'F♯m',strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1]},
+            {name:'G♯m',strings:[4,6,6,4,4,4], fingers:[1,3,4,1,1,1]},
+            {name:'A',  strings:['x',0,2,2,2,0], fingers:['-','-',1,2,3,'-']},
+            {name:'B',  strings:['x',2,4,4,4,2], fingers:['-',1,2,3,4,1]},
+            {name:'C♯m',strings:['x',4,6,6,5,4], fingers:['-',1,3,4,2,1]},
+            {name:'B7', strings:['x',2,1,2,0,2], fingers:['-',2,1,3,'-',4]},
+        ],
+        'F': [
+            {name:'F',  strings:[1,1,2,3,3,1], fingers:[1,1,2,3,4,1]},
+            {name:'Gm', strings:[3,5,5,3,3,3], fingers:[1,3,4,1,1,1]},
+            {name:'Am', strings:['x',0,2,2,1,0], fingers:['-','-',2,3,1,'-']},
+            {name:'B♭', strings:['x',1,3,3,3,1], fingers:['-',1,2,3,4,1]},
+            {name:'C',  strings:['x',0,0,2,3,1], fingers:['-','-','-',2,3,1]},
+            {name:'Dm', strings:['x','x',0,2,3,1], fingers:['-','-','-',2,3,1]},
+            {name:'C7', strings:['x',0,2,3,1,3], fingers:['-','-',2,3,1,4]},
+        ],
+        'G': [
+            {name:'G',  strings:[3,2,0,0,0,3], fingers:[3,2,'-','-','-',4]},
+            {name:'Am', strings:['x',0,2,2,1,0], fingers:['-','-',2,3,1,'-']},
+            {name:'Bm', strings:['x',2,4,4,3,2], fingers:['-',1,3,4,2,1]},
+            {name:'C',  strings:['x',0,0,2,3,1], fingers:['-','-','-',2,3,1]},
+            {name:'D',  strings:['x','x',0,2,3,2], fingers:['-','-','-',1,3,2]},
+            {name:'Em', strings:[0,2,2,0,0,0], fingers:['-',2,3,'-','-','-']},
+            {name:'D7', strings:['x','x',0,2,1,2], fingers:['-','-','-',2,1,3]},
+        ],
+        'A': [
+            {name:'A',  strings:['x',0,2,2,2,0], fingers:['-','-',1,2,3,'-']},
+            {name:'Bm', strings:['x',2,4,4,3,2], fingers:['-',1,3,4,2,1]},
+            {name:'C♯m',strings:['x',4,6,6,5,4], fingers:['-',1,3,4,2,1]},
+            {name:'D',  strings:['x','x',0,2,3,2], fingers:['-','-','-',1,3,2]},
+            {name:'E',  strings:[0,2,2,1,0,0], fingers:['-',2,3,1,'-','-']},
+            {name:'F♯m',strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1]},
+            {name:'E7', strings:[0,2,0,1,0,0], fingers:['-',2,'-',1,'-','-']},
+        ],
+        'B': [
+            {name:'B',  strings:['x',2,4,4,4,2], fingers:['-',1,2,3,4,1]},
+            {name:'C♯m',strings:['x',4,6,6,5,4], fingers:['-',1,3,4,2,1]},
+            {name:'D♯m',strings:['x',6,8,8,7,6], fingers:['-',1,3,4,2,1]},
+            {name:'E',  strings:[0,2,2,1,0,0], fingers:['-',2,3,1,'-','-']},
+            {name:'F♯', strings:[2,4,4,3,2,2], fingers:[1,3,4,2,1,1]},
+            {name:'G♯m',strings:[4,6,6,4,4,4], fingers:[1,3,4,1,1,1]},
+            {name:'F♯7',strings:[2,4,2,3,2,2], fingers:[1,3,1,2,1,1]},
+        ],
+    };
+
+    const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    const STRING_BASE = [64,59,55,50,45,40]; // MIDI for E2,A2,D3,G3,B3,E4
+
+    let activeKey = 'C';
+    let audioCtx = null;
+
+    function ensureCtx() {
+        if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    // Play chord: strum all non-muted strings
+    function playChord(chord) {
+        ensureCtx();
+        const now = audioCtx.currentTime;
+        chord.strings.forEach((s, i) => {
+            if (s === 'x' || s === 0) return; // muted or open
+            const midi = STRING_BASE[i] + parseInt(s);
+            const freq = 440 * Math.pow(2, (midi - 69) / 12);
+            // Slight stagger for strum effect
+            const t = now + i * 0.04;
+            [0, 0.003].forEach(detune => {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'triangle';
+                osc.frequency.value = freq * (1 + detune);
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.25, t + 0.005);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = Math.min(freq * 5, 4000);
+                osc.connect(gain); gain.connect(filter); filter.connect(audioCtx.destination);
+                osc.start(t); osc.stop(t + 1.6);
+            });
+        });
+    }
+
+    // Generate SVG chord diagram
+    function chordSVG(chord, highlight) {
+        const c = highlight ? '#4F8CFF' : '#8e9bb0';
+        const sc = highlight ? '#4F8CFF' : '#abb7c9';
+        const tc = highlight ? '#4F8CFF' : '#374151';
+        const xs = [15,25,35,45,55,65];
+        const ys = [20,34,48,62,76];
+
+        let s = `<svg viewBox="0 0 80 100" class="w-full h-auto"><g stroke="${sc}" stroke-width="0.8">`;
+        xs.forEach(x => s += `<line x1="${x}" y1="20" x2="${x}" y2="76"/>`);
+        ys.forEach(y => s += `<line x1="15" y1="${y}" x2="65" y2="${y}"/>`);
+        s += `</g><line x1="14" y1="20" x2="66" y2="20" stroke="${sc}" stroke-width="2.5" stroke-linecap="round"/>`;
+
+        // Muted X and Open O marks
+        chord.strings.forEach((val, idx) => {
+            const x = xs[5 - idx];
+            if (val === 'x') {
+                s += `<g stroke="${sc}" stroke-width="1.2"><line x1="${x-2.5}" y1="8" x2="${x+2.5}" y2="13"/><line x1="${x+2.5}" y1="8" x2="${x-2.5}" y2="13"/></g>`;
+            } else if (val === 0) {
+                s += `<circle cx="${x}" cy="10" r="2.5" fill="none" stroke="${sc}" stroke-width="1.2"/>`;
+            }
+        });
+
+        // Finger dots
+        chord.strings.forEach((val, idx) => {
+            if (val === 'x' || val === 0) return;
+            const fret = parseInt(val);
+            const x = xs[5 - idx];
+            const y = ys[fret - 1] + 7;
+            s += `<circle cx="${x}" cy="${y}" r="4" fill="${c}"/>`;
+        });
+
+        // Finger numbers
+        if (chord.fingers) {
+            chord.fingers.forEach((f, idx) => {
+                if (f === '-' || chord.strings[idx] === 'x' || chord.strings[idx] === 0) return;
+                const fret = parseInt(chord.strings[idx]);
+                const x = xs[5 - idx];
+                const y = ys[fret - 1] + 7;
+                s += `<text x="${x}" y="${y+1}" text-anchor="middle" fill="#fff" font-size="7" font-weight="700">${f}</text>`;
+            });
+        }
+
+        s += `</svg>`;
+        return s;
+    }
+
+    // Build key selector sidebar
+    function buildKeyBar() {
+        const bar = document.getElementById('keyBar');
+        bar.innerHTML = '';
+        Object.keys(chordDB).forEach(key => {
+            const btn = document.createElement('button');
+            btn.className = 'key-btn' + (key === activeKey ? ' on' : '');
+            btn.textContent = key + '调';
+            btn.onclick = () => { activeKey = key; buildKeyBar(); buildChords(); };
+            bar.appendChild(btn);
+        });
+    }
+
+    // Build chord grid
+    function buildChords() {
+        const grid = document.getElementById('chordGrid');
+        grid.innerHTML = '';
+        const chords = chordDB[activeKey] || [];
+        chords.forEach((chord, i) => {
+            const card = document.createElement('div');
+            card.className = 'chord-card';
+            const nameClass = i === 0 ? 'highlight' : '';
+            card.innerHTML = `
+                <span class="chord-name ${nameClass}">${chord.name}</span>
+                <div style="width:100%;max-width:100px">${chordSVG(chord, i === 0)}</div>
+            `;
+            card.onclick = () => {
+                // Highlight this card
+                document.querySelectorAll('.chord-card').forEach(c => c.classList.remove('playing'));
+                document.querySelectorAll('.chord-name').forEach(n => n.classList.remove('highlight'));
+                card.classList.add('playing');
+                card.querySelector('.chord-name').classList.add('highlight');
+                playChord(chord);
+                setTimeout(() => card.classList.remove('playing'), 1600);
+            };
+            grid.appendChild(card);
+        });
+    }
+
+    buildKeyBar();
+    buildChords();
+
+    // ===== THEME + LANG =====
+    (function(){
+        const btn = document.getElementById('themeToggle');
+        const s = localStorage.getItem('metronome-theme');
+        if (s === 'dark') { document.body.classList.add('dark'); btn.textContent = '🌙'; } else { btn.textContent = '☀️'; }
+        btn.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            const d = document.body.classList.contains('dark');
+            btn.textContent = d ? '🌙' : '☀️';
+            localStorage.setItem('metronome-theme', d ? 'dark' : 'light');
+        });
+        const sel = document.getElementById('langSelectTop');
+        const sl = localStorage.getItem('metronome-lang');
+        if (sl) sel.value = sl;
+        sel.addEventListener('change', () => localStorage.setItem('metronome-lang', sel.value));
+    })();
+    </script>
+</body>
+</html>
