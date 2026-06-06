@@ -209,7 +209,7 @@
             <p style="color:#999;font-size:11px;text-align:center;margin-top:8px" id="hintText">点击麦克风按钮，允许浏览器访问麦克风</p>
 
             <!-- Debug overlay — shows real-time internal metrics -->
-            <div id="debugPanel" style="display:none;margin-top:12px;padding:10px 14px;background:rgba(0,0,0,.75);border-radius:10px;font-family:monospace;font-size:11px;line-height:1.6;color:#0f0;max-width:420px">
+            <div id="debugPanel" style="display:none;margin-top:12px;padding:10px 14px;background:rgba(0,0,0,.8);border-radius:10px;font-family:monospace;font-size:13px;line-height:1.8;color:#0f0;max-width:420px">
                 <div style="display:flex;justify-content:space-between;margin-bottom:4px">
                     <span>🔍 调试面板</span>
                     <span id="dbOnset" style="color:#f80">等待拨弦…</span>
@@ -323,8 +323,8 @@
     let onsetActive=false;       // currently in a "listening window" after detecting onset
     let onsetTimeout=0;          // time when listening window expires
     let rmsHistory=[];           // last ~200ms of RMS values for onset detection
-    const RMS_HISTORY_MS=200;    // lookback window for onset detection
-    const ONSET_DB_THRESHOLD=6;  // 6dB jump = onset (string pluck)
+    const RMS_HISTORY_MS=300;    // lookback window for onset detection (longer→easier to detect)
+    const ONSET_DB_THRESHOLD=3;  // 3dB jump = onset (was 6, too strict for phone mics)
     const SUSTAIN_WINDOW_MS=3000;// how long to keep listening after onset (string decay)
     let lastRmsDb=-100;         // previous frame RMS in dB
     let rmsDbDelta=0;            // current frame-to-frame RMS change in dB
@@ -347,6 +347,8 @@
             // echoCancellation/noiseSuppression/autoGainControl MUST be false — they destroy pure tones
             const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
             ctx = new (window.AudioContext||window.webkitAudioContext)();
+            // iOS Safari suspends AudioContext until user gesture — must explicitly resume
+            if (ctx.state === 'suspended') { await ctx.resume(); }
             const src = ctx.createMediaStreamSource(stream);
 
             // === BANDPASS PRE-FILTER: key noise immunity layer ===
@@ -416,9 +418,8 @@
         const rms=Math.sqrt(r0/n);
 
         // === RMS AMPLITUDE GATE ===
-        // Typical room ambient: -60 to -50 dBFS. Musical tones: -30 to -10 dBFS.
-        // Gate at -48 dBFS (about 0.4% of full scale) — below this is silence or faint noise
-        if (rms < 0.004) return {freq:-2, rms, corrRatio:0}; // special code: too quiet
+        // Gate at -54 dBFS (about 0.2% of full scale) — below this is near silence
+        if (rms < 0.002) return {freq:-2, rms, corrRatio:0}; // special code: too quiet
 
         // Autocorrelation
         let bestLag=-1, bestVal=0;
@@ -537,7 +538,7 @@
         // Steady-state noise (fans, hums) won't trigger onset
         if (!onsetActive) {
             const onsetNow = detectOnset(rmsDb);
-            if (onsetNow && rms > 0.002) { // also require minimum amplitude
+            if (onsetNow && rms > 0.001) { // also require minimum amplitude (lowered for phone mics)
                 onsetActive = true;
                 onsetTimeout = now + SUSTAIN_WINDOW_MS;
                 musicalFrameCount = 0;
