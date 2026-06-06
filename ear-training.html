@@ -98,10 +98,15 @@
         <!-- ===== Quiz Card ===== -->
         <div class="content-card text-center">
             <!-- Mode selector -->
-            <div class="flex justify-center gap-2 mb-4">
+            <div class="flex justify-center gap-2 mb-2">
                 <span class="interval-chip on" id="modeAsc" onclick="setDirection('asc')" data-i18n="ear-asc">⬆ 上行</span>
                 <span class="interval-chip" id="modeDesc" onclick="setDirection('desc')" data-i18n="ear-desc-mode">⬇ 下行</span>
                 <span class="interval-chip" id="modeBoth" onclick="setDirection('both')" data-i18n="ear-both">↕ 混合</span>
+            </div>
+            <!-- Sound selector -->
+            <div class="flex justify-center gap-2 mb-4">
+                <span class="interval-chip on" id="soundPiano" onclick="setSound('piano')">🎹 钢琴</span>
+                <span class="interval-chip" id="soundGuitar" onclick="setSound('guitar')">🎸 吉他</span>
             </div>
 
             <!-- Notes played display -->
@@ -188,8 +193,9 @@
     let directionMode = 'both';
     let answered = false;
     let correctTotal = 0, wrongTotal = 0;
-    let currentRoot = 60; // random per question
+    let currentRoot = 60;
     let enabledIntervals = new Set(INTERVALS.filter(i=>['m3','M3','P4','P5','P8'].includes(i.id)).map(i=>i.id));
+    let soundType = 'piano'; // 'piano' | 'guitar'
 
     // ===== BUILD FILTER CHIPS =====
     function buildFilter() {
@@ -224,6 +230,12 @@
         document.getElementById('modeBoth').classList.toggle('on', dir==='both');
     }
 
+    function setSound(type) {
+        soundType = type;
+        document.getElementById('soundPiano').classList.toggle('on', type==='piano');
+        document.getElementById('soundGuitar').classList.toggle('on', type==='guitar');
+    }
+
     // ===== AUDIO =====
     async function ensureCtx() {
         if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -231,16 +243,53 @@
     }
 
     function playTone(midi, startTime, duration, vol) {
-        const osc = audioCtx.createOscillator();
+        if (soundType === 'guitar') playGuitarTone(midi, startTime, duration, vol);
+        else playPianoTone(midi, startTime, duration, vol);
+    }
+
+    function playPianoTone(midi, startTime, duration, vol) {
+        const freq = 440 * Math.pow(2, (midi - 69) / 12);
+        // Two slightly detuned triangle oscillators for natural chorus/warmth
+        [1, 1.004].forEach(detune => {
+            const osc = audioCtx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.value = freq * detune;
+            const oscGain = audioCtx.createGain();
+            // Piano ADSR envelope
+            oscGain.gain.setValueAtTime(0, startTime);
+            oscGain.gain.linearRampToValueAtTime(vol, startTime + 0.01);
+            oscGain.gain.exponentialRampToValueAtTime(vol * 0.45, startTime + 0.6);
+            oscGain.gain.linearRampToValueAtTime(0, startTime + duration);
+            // Low-pass filter softens brightness → piano-like warmth
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = Math.min(freq * 5, 4000);
+            osc.connect(oscGain); oscGain.connect(filter); filter.connect(audioCtx.destination);
+            osc.start(startTime); osc.stop(startTime + duration + 0.1);
+        });
+    }
+
+    function playGuitarTone(midi, startTime, duration, vol) {
+        const freq = 440 * Math.pow(2, (midi - 69) / 12);
+        // Noise burst → resonant filter = plucked string sound (Karplus-Strong principle)
+        const nLen = Math.floor(audioCtx.sampleRate * 0.04);
+        const buf = audioCtx.createBuffer(1, nLen, audioCtx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < nLen; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / nLen);
+        const noise = audioCtx.createBufferSource(); noise.buffer = buf;
+        const resonator = audioCtx.createBiquadFilter();
+        resonator.type = 'bandpass'; resonator.frequency.value = freq; resonator.Q.value = 20;
+        // Second harmonic for body
+        const res2 = audioCtx.createBiquadFilter();
+        res2.type = 'bandpass'; res2.frequency.value = freq * 2; res2.Q.value = 10;
         const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = 440 * Math.pow(2, (midi - 69) / 12);
         gain.gain.setValueAtTime(0, startTime);
-        gain.gain.linearRampToValueAtTime(vol, startTime + 0.02);
-        gain.gain.setValueAtTime(vol, startTime + duration - 0.05);
-        gain.gain.linearRampToValueAtTime(0, startTime + duration);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(startTime); osc.stop(startTime + duration);
+        gain.gain.linearRampToValueAtTime(vol * 1.8, startTime + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+        noise.connect(resonator); noise.connect(res2);
+        resonator.connect(gain); res2.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(startTime);
     }
 
     async function playInterval() {
