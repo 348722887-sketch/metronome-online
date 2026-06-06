@@ -384,7 +384,6 @@
             document.getElementById('powerIcon').textContent = '⏹';
             document.getElementById('powerBtn').classList.add('on');
             document.getElementById('hintText').textContent = '正在监听…请弹奏一个音';
-            document.getElementById('debugPanel').style.display = 'block';
             tick();
         } catch(e) {
             document.getElementById('hintText').textContent = '⚠ 无法访问麦克风，请检查权限';
