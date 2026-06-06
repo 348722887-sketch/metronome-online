@@ -6,7 +6,6 @@
 <title>常用和弦图库 — 在线节拍器</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="./js/i18n.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/webaudiofont@3.0.4/build/webaudiofont.min.js"></script>
 <style>
 :root{--bg:#f2f7f2;--card-bg:#fff;--card-border:#d0ddd0;--text:#1a2a1a;--text2:#555;--mute:#999;--accent:#4F8CFF}
 body.dark{--bg:#0a0a0f;--card-bg:#141419;--card-border:#2a2a35;--text:#e0e0e0;--text2:#999;--mute:#666}
@@ -146,12 +145,45 @@ const CHORDS_BY_KEY = {
 const KEYS = ['C','D','E','F','G','A','B'];
 const SX = [15,25,35,45,55,65];
 const SY = [22,36,50,64,78];
-let activeKey = 'C', heroIdx = 0, audioCtx = null, wafPlayer = null;
+let activeKey = 'C', heroIdx = 0, audioCtx = null;
 function activeChord(){ return CHORDS_BY_KEY[activeKey][heroIdx]; }
 
 function ensureCtx(){
     if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
     if(audioCtx.state==='suspended') audioCtx.resume();
+}
+
+function playHeroChord(){
+    ensureCtx();
+    const ch = activeChord();
+    const baseMidi = [40,45,50,55,59,64];
+    const notes = [];
+    ch.strings.forEach((val,i)=>{ if(val!==null) notes.push(baseMidi[i]+(val||0)); });
+    const now = audioCtx.currentTime;
+
+    notes.forEach((midi, i) => {
+        const freq = 440 * Math.pow(2, (midi-69)/12);
+        const t = now + i * 0.05; // staggered strum
+
+        // Dual oscillators per note for richer tone
+        [1, 1.003].forEach(detune => {
+            const osc = audioCtx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.value = freq * detune;
+
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.15, t + 0.005);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 2.0);
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = Math.min(freq * 5, 5000);
+
+            osc.connect(gain); gain.connect(filter); filter.connect(audioCtx.destination);
+            osc.start(t); osc.stop(t + 2.2);
+        });
+    });
 }
 
 function chordSVG(ch, large){
@@ -182,29 +214,6 @@ function chordSVG(ch, large){
     return s;
 }
 
-function playHeroChord(){
-    ensureCtx();
-    if(!wafPlayer) wafPlayer = new WebAudioFontPlayer();
-    const ch = activeChord();
-    const baseMidi = [40,45,50,55,59,64];
-    const notes = [];
-    ch.strings.forEach((val,i)=>{ if(val!==null) notes.push(baseMidi[i]+(val||0)); });
-    try {
-        const info = wafPlayer.loader.findInstrument(24);
-        wafPlayer.queueStrumDown(audioCtx, audioCtx.destination, info, audioCtx.currentTime, notes, 1.5, 1);
-    } catch(e){
-        notes.forEach((midi,i)=>{
-            const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
-            osc.type='triangle'; osc.frequency.value=440*Math.pow(2,(midi-69)/12);
-            const t=audioCtx.currentTime+i*0.04;
-            gain.gain.setValueAtTime(0,t);
-            gain.gain.linearRampToValueAtTime(0.2,t+0.005);
-            gain.gain.exponentialRampToValueAtTime(0.001,t+1.5);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(t); osc.stop(t+1.6);
-        });
-    }
-}
 
 function buildKeyTabs(){
     const ct=document.getElementById('keyTabs'); ct.innerHTML='';
