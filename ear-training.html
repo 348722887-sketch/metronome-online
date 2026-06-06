@@ -7,8 +7,7 @@
     <meta name="description" content="音程练耳训练，随机听音辨音程，提升音乐听觉能力。">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="./js/i18n.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
-    <style>
+        <style>
         :root{--bg:#f2f7f2;--card-bg:#fff;--card-border:#d0ddd0;--text:#1a2a1a;--text2:#666;--mute:#999}
         body.dark{--bg:#0a0a0f;--card-bg:#141419;--card-border:#2a2a35;--text:#e0e0e0;--text2:#999;--mute:#666}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
@@ -237,9 +236,7 @@
         document.getElementById('soundGuitar').classList.toggle('on', type==='guitar');
     }
 
-    // ===== AUDIO: soundfont-player (real instrument samples) =====
-    let pianoInst = null, guitarInst = null, instrumentsLoaded = false;
-
+    // ===== AUDIO: reliable oscillator synthesis =====
     const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
     function midiToName(midi) { return NOTE_NAMES[midi%12] + Math.floor(midi/12-1); }
 
@@ -248,40 +245,36 @@
         if (audioCtx.state === 'suspended') await audioCtx.resume();
     }
 
-    async function loadInstruments() {
-        if (instrumentsLoaded) return;
-        await ensureCtx();
-        const notes = [];
-        for (let m = 48; m <= 83; m++) notes.push(midiToName(m));
-        const opts = { notes, gain: 1 };
-        try {
-            [pianoInst, guitarInst] = await Promise.all([
-                Soundfont.instrument(audioCtx, 'acoustic_grand_piano', opts),
-                Soundfont.instrument(audioCtx, 'acoustic_guitar_nylon', opts)
-            ]);
-            instrumentsLoaded = true;
-            document.getElementById('playHint').textContent = '音色已加载，点击播放音程';
-        } catch(e) {
-            console.error('Soundfont load failed:', e);
-            document.getElementById('playHint').textContent = '⚠ 音色加载失败，请刷新重试';
-        }
-    }
-
-    function playNote(midi, offset, vol) {
-        const inst = soundType === 'guitar' ? guitarInst : pianoInst;
-        if (!inst) return;
-        // offset is RELATIVE seconds from now (soundfont-player API, NOT AudioContext absolute time)
-        inst.play(midiToName(midi), offset, { gain: vol * 2.5 });
+    function playTone(midi, startTime, duration, vol) {
+        const freq = 440 * Math.pow(2, (midi - 69) / 12);
+        // Dual triangle oscillators with slight detune for warm, musical tone
+        [1, 1.003].forEach(detune => {
+            const osc = audioCtx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.value = freq * detune;
+            const gain = audioCtx.createGain();
+            if (soundType === 'guitar') {
+                // Fast pluck: instant attack, quick decay
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(vol * 1.5, startTime + 0.003);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration * 0.5);
+            } else {
+                // Piano-like: quick attack, slower decay
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(vol * 1.2, startTime + 0.01);
+                gain.gain.exponentialRampToValueAtTime(vol * 0.3, startTime + 0.4);
+                gain.gain.linearRampToValueAtTime(0, startTime + duration);
+            }
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = Math.min(freq * 6, 5000);
+            osc.connect(gain); gain.connect(filter); filter.connect(audioCtx.destination);
+            osc.start(startTime); osc.stop(startTime + duration + 0.1);
+        });
     }
 
     async function playInterval() {
         await ensureCtx();
-        if (!instrumentsLoaded) {
-            document.getElementById('playHint').textContent = '正在加载音色…请稍后再点';
-            await loadInstruments();
-            if (!instrumentsLoaded) return;
-        }
-
         pickNewInterval();
         currentRoot = 48 + Math.floor(Math.random() * 24);
 
@@ -289,17 +282,17 @@
         const icon = document.getElementById('playIcon');
         btn.classList.add('playing'); icon.textContent = '⏸';
 
-        // soundfont-player uses RELATIVE time offsets, NOT absolute AudioContext time
+        const now = audioCtx.currentTime + 0.05;
         const note1 = currentRoot;
         const semi = currentInterval.semi;
         if (directionMode === 'both') currentDirection = Math.random() < 0.5 ? 'asc' : 'desc';
         else currentDirection = directionMode;
         const note2 = currentDirection === 'asc' ? currentRoot + semi : currentRoot - semi;
 
-        playNote(note1, 0.15, 0.8);       // 0.15s from now
-        playNote(note2, 0.15 + 0.9, 0.8);  // 1.05s from now
+        playTone(note1, now, 1.0, 0.7);
+        playTone(note2, now + 0.85, 1.0, 0.7);
 
-        // Store notes for reveal — don't show them yet (anti-cheat)
+        // Store notes for reveal (anti-cheat: hidden until user clicks reveal)
         const n1 = midiToName(note1).replace('#','♯');
         const n2 = midiToName(note2).replace('#','♯');
         window._quizNotes = { n1, n2 };
@@ -313,7 +306,7 @@
         document.getElementById('answerArea').style.display = 'none';
         document.getElementById('scoreRow').style.display = 'flex';
 
-        setTimeout(() => { btn.classList.remove('playing'); icon.textContent = '▶'; }, 2200);
+        setTimeout(() => { btn.classList.remove('playing'); icon.textContent = '▶'; }, 2000);
     }
 
 
