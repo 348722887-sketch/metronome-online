@@ -1,297 +1,261 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>常用和弦图库 — 在线节拍器</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="./js/i18n.js"></script>
-    <style>
-        :root{--bg:#f2f7f2;--card-bg:#fff;--card-border:#d0ddd0;--text:#1a2a1a;--text2:#666;--mute:#999}
-        body.dark{--bg:#0a0a0f;--card-bg:#141419;--card-border:#2a2a35;--text:#e0e0e0;--text2:#999;--mute:#666}
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#d0ddd0;border-radius:3px}
-
-        .nav-pill{padding:6px 16px;border-radius:8px;background:linear-gradient(135deg,#4F8CFF 0%,#6B5CFF 100%);color:#fff;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s ease;white-space:nowrap}
-        .nav-pill:hover{box-shadow:0 4px 16px rgba(79,140,255,.4);transform:translateY(-1px)}
-        .nav-pill.active{background:#4F8CFF;box-shadow:0 2px 8px rgba(79,140,255,.3)}
-        .theme-btn{background:none;border:1px solid var(--card-border);border-radius:6px;font-size:16px;cursor:pointer;padding:2px 5px;line-height:1;transition:all .2s ease;outline:none;color:var(--text)}
-        .theme-btn:hover{background:var(--bg);border-color:#4F8CFF}
-
-        .key-btn{padding:10px 14px;border-radius:8px;border:none;background:var(--card-bg);color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s ease;width:100%;text-align:center}
-        .key-btn:hover{background:#e8efe8;color:var(--text)}
-        .key-btn.on{background:#4F8CFF;color:#fff;box-shadow:0 2px 12px rgba(79,140,255,.3)}
-        body.dark .key-btn{background:#1a1a21;border:1px solid #2a2a35}
-        body.dark .key-btn:hover{background:#2a2a35}
-        body.dark .key-btn.on{background:#4F8CFF;border-color:#4F8CFF}
-
-        .chord-card{cursor:pointer;padding:8px 4px;border-radius:12px;transition:all .15s ease;display:flex;flex-direction:column;align-items:center}
-        .chord-card:hover{background:rgba(79,140,255,.08)}
-        .chord-card.playing{background:rgba(79,140,255,.15)}
-        .chord-card .chord-name{font-size:15px;font-weight:700;margin-bottom:2px}
-        .chord-card .chord-name.highlight{color:#4F8CFF}
-
-        footer{border-color:var(--card-border)!important}
-        body.dark footer{border-color:#2a2a35!important}
-        select{background:var(--card-bg);color:var(--mute);border-color:var(--card-border)}
-        .no-scrollbar::-webkit-scrollbar{display:none}
-        .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>常用和弦图库 — 在线节拍器</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="./js/i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/webaudiofont@3.0.4/build/webaudiofont.min.js"></script>
+<style>
+:root{--bg:#f2f7f2;--card-bg:#fff;--card-border:#d0ddd0;--text:#1a2a1a;--text2:#555;--mute:#999;--accent:#4F8CFF}
+body.dark{--bg:#0a0a0f;--card-bg:#141419;--card-border:#2a2a35;--text:#e0e0e0;--text2:#999;--mute:#666}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#d0ddd0;border-radius:3px}
+.nav-pill{padding:6px 16px;border-radius:8px;background:linear-gradient(135deg,#4F8CFF 0%,#6B5CFF 100%);color:#fff;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s ease;white-space:nowrap}
+.nav-pill:hover{box-shadow:0 4px 16px rgba(79,140,255,.4);transform:translateY(-1px)}
+.nav-pill.active{background:#4F8CFF;box-shadow:0 2px 8px rgba(79,140,255,.3)}
+.theme-btn{background:none;border:1px solid var(--card-border);border-radius:6px;font-size:16px;cursor:pointer;padding:2px 5px;line-height:1;transition:all .2s ease;outline:none;color:var(--text)}
+.theme-btn:hover{background:var(--bg);border-color:#4F8CFF}
+.key-tab{padding:8px 16px;border-radius:20px;border:2px solid transparent;background:var(--card-bg);color:var(--text2);font-size:15px;font-weight:700;cursor:pointer;transition:all .15s ease;white-space:nowrap}
+.key-tab:hover{border-color:var(--accent);color:var(--accent)}
+.key-tab.on{background:var(--accent);color:#fff;box-shadow:0 2px 16px rgba(79,140,255,.3)}
+body.dark .key-tab{background:#1a1a21;border-color:#2a2a35}
+body.dark .key-tab.on{background:var(--accent);border-color:var(--accent)}
+.chord-hero{background:var(--card-bg);border:2px solid var(--card-border);border-radius:20px;padding:32px 24px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.06);margin-bottom:16px}
+body.dark .chord-hero{border-color:#2a2a35}
+.chord-grid-card{cursor:pointer;padding:12px 8px;border-radius:14px;transition:all .18s ease;text-align:center}
+.chord-grid-card:hover{background:rgba(79,140,255,.08);transform:translateY(-2px)}
+.chord-grid-card.active{background:rgba(79,140,255,.12);box-shadow:0 0 0 2px var(--accent)}
+.chord-grid-card .name{font-size:18px;font-weight:800;margin-bottom:4px}
+.chord-grid-card .type{font-size:11px;color:var(--mute);margin-bottom:4px}
+.theory-badge{display:inline-block;padding:4px 10px;border-radius:10px;background:rgba(79,140,255,.1);color:var(--accent);font-size:12px;font-weight:600;margin:2px}
+footer{border-color:var(--card-border)!important}
+body.dark footer{border-color:#2a2a35!important}
+select{background:var(--card-bg);color:var(--mute);border-color:var(--card-border)}
+</style>
 </head>
 <body class="min-h-screen flex items-start justify-center py-6 px-4" style="background:#f2f7f2;">
-
-    <!-- ===== Left Sidebar ===== -->
-    <div class="hidden lg:flex flex-col gap-4" style="flex-shrink:0;width:130px;margin-right:20px;margin-top:110px">
-        <a href="./tuner.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-tuner">乐器调音器</a>
-        <a href="./staff.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-staff">认识五线谱</a>
-        <a href="./index.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-metronome">免费在线节拍器</a>
-        <a href="./circle-of-fifths.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-circle">音乐五度圈</a>
-        <a href="./ear-training.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-ear">绝对音感练耳</a>
-        <a href="./chords.html" class="nav-pill text-center active" style="padding:14px 10px;font-size:13px">常用和弦</a>
+<div class="hidden lg:flex flex-col gap-4" style="flex-shrink:0;width:130px;margin-right:20px;margin-top:110px">
+    <a href="./tuner.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-tuner">乐器调音器</a>
+    <a href="./staff.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-staff">认识五线谱</a>
+    <a href="./index.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-metronome">免费在线节拍器</a>
+    <a href="./circle-of-fifths.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-circle">音乐五度圈</a>
+    <a href="./ear-training.html" class="nav-pill text-center" style="padding:14px 10px;font-size:13px" data-i18n="nav-ear">绝对音感练耳</a>
+    <a href="./chords.html" class="nav-pill text-center active" style="padding:14px 10px;font-size:13px">常用和弦</a>
+</div>
+<div class="flex flex-col items-center w-full max-w-3xl">
+    <div class="w-full flex items-center justify-center gap-3 mb-1">
+        <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
+        <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer">
+            <option value="zh-CN">🇨🇳 中文</option><option value="en">🇬🇧 English</option><option value="ja">🇯🇵 日本語</option><option value="ko">🇰🇷 한국어</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="it">🇮🇹 Italiano</option><option value="es">🇪🇸 Español</option><option value="pt">🇧🇷 Português</option><option value="el">🇬🇷 Ελληνικά</option><option value="ru">🇷🇺 Русский</option><option value="pl">🇵🇱 Polski</option><option value="th">🇹🇭 ไทย</option><option value="vi">🇻🇳 Tiếng Việt</option><option value="my">🇲🇲 မြန်မာ</option>
+        </select>
     </div>
-
-    <div class="flex flex-col items-center w-full max-w-2xl">
-
-        <div class="w-full flex items-center justify-center gap-3 mb-1">
-            <button id="themeToggle" class="theme-btn" title="日间/夜间模式">☀️</button>
-            <select id="langSelectTop" class="bg-transparent border border-[#d0ddd0] rounded text-gray-500 text-xs py-0.5 px-1.5 focus:outline-none focus:border-accent cursor-pointer">
-                <option value="zh-CN">🇨🇳 中文</option><option value="en">🇬🇧 English</option><option value="ja">🇯🇵 日本語</option><option value="ko">🇰🇷 한국어</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="it">🇮🇹 Italiano</option><option value="es">🇪🇸 Español</option><option value="pt">🇧🇷 Português</option><option value="el">🇬🇷 Ελληνικά</option><option value="ru">🇷🇺 Русский</option><option value="pl">🇵🇱 Polski</option><option value="th">🇹🇭 ไทย</option><option value="vi">🇻🇳 Tiếng Việt</option><option value="my">🇲🇲 မြန်မာ</option>
-            </select>
+    <main class="flex-1 w-full px-4 pb-12">
+        <div class="text-center mb-5">
+            <h1 class="text-3xl font-bold mb-2" style="color:var(--text)">🎸 常用和弦图库</h1>
+            <p style="color:var(--mute);font-size:13px">点击和弦听真实吉他扫弦 · 学习每个和弦的乐理构成</p>
         </div>
+        <div class="flex flex-wrap justify-center gap-2 mb-5" id="keyTabs"></div>
+        <div class="chord-hero" id="chordHero">
+            <div style="font-size:56px;font-weight:900;color:var(--accent);margin-bottom:4px" id="heroName">C</div>
+            <div style="font-size:14px;color:var(--mute);margin-bottom:20px" id="heroType"></div>
+            <div class="flex justify-center mb-5" id="heroSvg" style="min-height:160px"></div>
+            <button onclick="playHeroChord()" style="padding:12px 32px;border-radius:30px;background:linear-gradient(135deg,#4F8CFF,#6B5CFF);color:#fff;font-size:16px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(79,140,255,.35);transition:all .2s ease">▶ 播放扫弦</button>
+        </div>
+        <div class="chord-hero" style="text-align:left" id="theoryPanel">
+            <h3 class="text-lg font-bold mb-3" style="color:var(--text)">📐 和弦构成</h3>
+            <div id="theoryContent"></div>
+        </div>
+        <div style="background:var(--card-bg);border:2px solid var(--card-border);border-radius:20px;padding:20px;box-shadow:0 4px 24px rgba(0,0,0,.06)">
+            <h3 class="text-lg font-bold mb-4 text-center" style="color:var(--text)">浏览所有和弦</h3>
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-2" id="chordGrid"></div>
+        </div>
+    </main>
+</div>
+<footer class="text-center text-xs py-6 border-t" style="color:var(--mute);border-color:var(--card-border)">
+    <a href="./index.html" class="text-blue-500 hover:underline">← 返回节拍器</a>
+</footer>
+<script>
+const CHORDS_BY_KEY = {
+    'C': [
+        {name:'C',  type:'大三和弦', strings:[null,3,2,0,1,0], fingers:[null,3,2,null,1,null], notes:['C','E','G'], theory:'根音+大三度+纯五度。C大调主和弦(I级)。C-E-G，最基础的大三和弦。', enType:'Major', enTheory:'Root + major 3rd + perfect 5th. Tonic (I) in C major. Notes: C-E-G.'},
+        {name:'Dm', type:'小三和弦', strings:[null,null,0,2,3,1], fingers:[null,null,null,2,3,1], notes:['D','F','A'], theory:'根音+小三度+纯五度。C大调ii级。小三度+大三度的堆叠。', enType:'Minor', enTheory:'Root + minor 3rd + perfect 5th. The ii chord in C major. Minor 3rd + major 3rd stacked.'},
+        {name:'Em', type:'小三和弦', strings:[0,2,2,0,0,0], fingers:[null,2,3,null,null,null], notes:['E','G','B'], theory:'根音+小三度+纯五度。C大调iii级。六弦齐鸣，声音丰满。', enType:'Minor', enTheory:'Root + minor 3rd + perfect 5th. The iii chord. All strings ring — a rich open sound.'},
+        {name:'F',  type:'大三和弦', strings:[1,1,2,3,3,1], fingers:[1,1,2,3,4,1], notes:['F','A','C'], theory:'根音+大三度+纯五度。IV级下属和弦。食指1品大横按——初学者第一个横按挑战。', enType:'Major', enTheory:'Root + major 3rd + perfect 5th. IV (subdominant). Index finger 1st-fret barre — the first barre chord hurdle.'},
+        {name:'G',  type:'大三和弦', strings:[3,2,0,0,0,3], fingers:[3,2,null,null,null,4], notes:['G','B','D'], theory:'根音+大三度+纯五度。V级属和弦。开放和弦中声音最辉煌的一个，常用作乐曲的解决目标。', enType:'Major', enTheory:'Root + major 3rd + perfect 5th. V (dominant). The brightest open chord, often the resolution target.'},
+        {name:'Am', type:'小三和弦', strings:[null,0,2,2,1,0], fingers:[null,null,2,3,1,null], notes:['A','C','E'], theory:'根音+小三度+纯五度。vi级关系小调和弦。Am和C是关系大小调，共用完全相同的一组音。', enType:'Minor', enTheory:'Root + minor 3rd + perfect 5th. vi (relative minor). Am and C share the exact same notes — they are relative keys.'},
+        {name:'G7', type:'属七和弦', strings:[3,2,0,0,0,1], fingers:[3,2,null,null,null,1], notes:['G','B','D','F'], theory:'大三和弦+小七度。V7级属七。增加F音(降七度)制造强烈不稳定感，天生倾向解决到C和弦。', enType:'Dominant 7th', enTheory:'Major triad + minor 7th. V7 dominant. Adding F (flat 7th) creates tension that naturally resolves to C.'},
+    ],
+    'D': [
+        {name:'D',  type:'大三和弦', strings:[null,null,0,2,3,2], fingers:[null,null,null,1,3,2], notes:['D','F#','A'], theory:'D大调I级主和弦。5-6弦不弹。', enType:'Major', enTheory:'D major tonic (I). Don\'t play 5th-6th strings.'},
+        {name:'Em', type:'小三和弦', strings:[0,2,2,0,0,0], fingers:[null,2,3,null,null,null], notes:['E','G','B'], theory:'D大调ii级。', enType:'Minor', enTheory:'The ii chord in D major.'},
+        {name:'F#m', type:'小三和弦', strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1], notes:['F#','A','C#'], theory:'D大调iii级。2品食指大横按。', enType:'Minor', enTheory:'The iii chord. 2nd fret barre.'},
+        {name:'G',  type:'大三和弦', strings:[3,2,0,0,0,3], fingers:[3,2,null,null,null,4], notes:['G','B','D'], theory:'D大调IV下属和弦。', enType:'Major', enTheory:'The IV (subdominant) chord in D major.'},
+        {name:'A',  type:'大三和弦', strings:[null,0,2,2,2,0], fingers:[null,null,1,2,3,null], notes:['A','C#','E'], theory:'D大调V属和弦。', enType:'Major', enTheory:'The V (dominant) chord in D major.'},
+        {name:'Bm', type:'小三和弦', strings:[null,2,4,4,3,2], fingers:[null,1,3,4,2,1], notes:['B','D','F#'], theory:'D大调vi级。2品横按，根音在5弦。', enType:'Minor', enTheory:'The vi chord. 2nd fret barre with root on 5th string.'},
+        {name:'A7', type:'属七和弦', strings:[null,0,2,0,2,0], fingers:[null,null,2,null,3,null], notes:['A','C#','E','G'], theory:'D大调V7。增加G音倾向解决到D。', enType:'Dominant 7th', enTheory:'V7 in D major. Added G pulls toward D.'},
+    ],
+    'E': [
+        {name:'E',  type:'大三和弦', strings:[0,2,2,1,0,0], fingers:[null,2,3,1,null,null], notes:['E','G#','B'], theory:'E大调I级。吉他最自然的调性之一。', enType:'Major', enTheory:'E major tonic (I). One of guitar\'s most natural keys.'},
+        {name:'F#m', type:'小三和弦', strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1], notes:['F#','A','C#'], theory:'E大调ii级。2品横按。', enType:'Minor', enTheory:'The ii chord. 2nd fret barre.'},
+        {name:'G#m', type:'小三和弦', strings:[4,6,6,4,4,4], fingers:[1,3,4,1,1,1], notes:['G#','B','D#'], theory:'E大调iii级。4品横按。', enType:'Minor', enTheory:'The iii chord. 4th fret barre.'},
+        {name:'A',  type:'大三和弦', strings:[null,0,2,2,2,0], fingers:[null,null,1,2,3,null], notes:['A','C#','E'], theory:'E大调IV级。', enType:'Major', enTheory:'The IV chord in E major.'},
+        {name:'B',  type:'大三和弦', strings:[null,2,4,4,4,2], fingers:[null,1,2,3,4,1], notes:['B','D#','F#'], theory:'E大调V级。2品横按。', enType:'Major', enTheory:'The V chord. 2nd fret barre.'},
+        {name:'C#m', type:'小三和弦', strings:[null,4,6,6,5,4], fingers:[null,1,3,4,2,1], notes:['C#','E','G#'], theory:'E大调vi级关系小调。4品横按。', enType:'Minor', enTheory:'The vi (relative minor) chord. 4th fret barre.'},
+        {name:'B7', type:'属七和弦', strings:[null,2,1,2,0,2], fingers:[null,2,1,3,null,4], notes:['B','D#','F#','A'], theory:'E大调V7。开放属七，经典布鲁斯和弦。', enType:'Dominant 7th', enTheory:'V7 in E major. Classic blues chord.'},
+    ],
+    'F': [
+        {name:'F',  type:'大三和弦', strings:[1,1,2,3,3,1], fingers:[1,1,2,3,4,1], notes:['F','A','C'], theory:'F大调I级。1品大横按。', enType:'Major', enTheory:'F major tonic (I). 1st fret barre.'},
+        {name:'Gm', type:'小三和弦', strings:[3,5,5,3,3,3], fingers:[1,3,4,1,1,1], notes:['G','Bb','D'], theory:'F大调ii级。3品横按。', enType:'Minor', enTheory:'The ii chord. 3rd fret barre.'},
+        {name:'Am', type:'小三和弦', strings:[null,0,2,2,1,0], fingers:[null,null,2,3,1,null], notes:['A','C','E'], theory:'F大调iii级。开放和弦。', enType:'Minor', enTheory:'The iii chord. Open voicing.'},
+        {name:'Bb', type:'大三和弦', strings:[null,1,3,3,3,1], fingers:[null,1,2,3,4,1], notes:['Bb','D','F'], theory:'F大调IV级。1品横按。', enType:'Major', enTheory:'The IV chord. 1st fret barre.'},
+        {name:'C',  type:'大三和弦', strings:[null,3,2,0,1,0], fingers:[null,3,2,null,1,null], notes:['C','E','G'], theory:'F大调V级属和弦。', enType:'Major', enTheory:'The V (dominant) chord in F major.'},
+        {name:'Dm', type:'小三和弦', strings:[null,null,0,2,3,1], fingers:[null,null,null,2,3,1], notes:['D','F','A'], theory:'F大调vi级。', enType:'Minor', enTheory:'The vi chord in F major.'},
+        {name:'C7', type:'属七和弦', strings:[null,3,2,3,1,0], fingers:[null,3,2,4,1,null], notes:['C','E','G','Bb'], theory:'F大调V7。增加Bb制造紧张→解决到F。', enType:'Dominant 7th', enTheory:'V7 in F major. Added Bb creates pull toward F.'},
+    ],
+    'G': [
+        {name:'G',  type:'大三和弦', strings:[3,2,0,0,0,3], fingers:[3,2,null,null,null,4], notes:['G','B','D'], theory:'G大调I级。民谣吉他最常用的调性之一。', enType:'Major', enTheory:'G major tonic (I). One of the most common keys for acoustic guitar.'},
+        {name:'Am', type:'小三和弦', strings:[null,0,2,2,1,0], fingers:[null,null,2,3,1,null], notes:['A','C','E'], theory:'G大调ii级。', enType:'Minor', enTheory:'The ii chord in G major.'},
+        {name:'Bm', type:'小三和弦', strings:[null,2,4,4,3,2], fingers:[null,1,3,4,2,1], notes:['B','D','F#'], theory:'G大调iii级。2品横按。', enType:'Minor', enTheory:'The iii chord. 2nd fret barre.'},
+        {name:'C',  type:'大三和弦', strings:[null,3,2,0,1,0], fingers:[null,3,2,null,1,null], notes:['C','E','G'], theory:'G大调IV下属和弦。', enType:'Major', enTheory:'The IV (subdominant) chord in G major.'},
+        {name:'D',  type:'大三和弦', strings:[null,null,0,2,3,2], fingers:[null,null,null,1,3,2], notes:['D','F#','A'], theory:'G大调V属和弦。', enType:'Major', enTheory:'The V (dominant) chord in G major.'},
+        {name:'Em', type:'小三和弦', strings:[0,2,2,0,0,0], fingers:[null,2,3,null,null,null], notes:['E','G','B'], theory:'G大调vi级关系小调。Em和G共用相同音组——学会G就等于学会Em。', enType:'Minor', enTheory:'The vi (relative minor) chord. Em shares the same notes as G — learn one, you know both.'},
+        {name:'D7', type:'属七和弦', strings:[null,null,0,2,1,2], fingers:[null,null,null,2,1,3], notes:['D','F#','A','C'], theory:'G大调V7。增加C音制造紧张→天然解决到G。', enType:'Dominant 7th', enTheory:'V7 in G major. Added C creates tension naturally resolving to G.'},
+    ],
+    'A': [
+        {name:'A',  type:'大三和弦', strings:[null,0,2,2,2,0], fingers:[null,null,1,2,3,null], notes:['A','C#','E'], theory:'A大调I级。三根手指并排2品——最简单的大三和弦之一。', enType:'Major', enTheory:'A major tonic (I). Three fingers side by side at 2nd fret — one of the easiest majors.'},
+        {name:'Bm', type:'小三和弦', strings:[null,2,4,4,3,2], fingers:[null,1,3,4,2,1], notes:['B','D','F#'], theory:'A大调ii级。2品横按。', enType:'Minor', enTheory:'The ii chord. 2nd fret barre.'},
+        {name:'C#m', type:'小三和弦', strings:[null,4,6,6,5,4], fingers:[null,1,3,4,2,1], notes:['C#','E','G#'], theory:'A大调iii级。4品横按。', enType:'Minor', enTheory:'The iii chord. 4th fret barre.'},
+        {name:'D',  type:'大三和弦', strings:[null,null,0,2,3,2], fingers:[null,null,null,1,3,2], notes:['D','F#','A'], theory:'A大调IV级。', enType:'Major', enTheory:'The IV chord in A major.'},
+        {name:'E',  type:'大三和弦', strings:[0,2,2,1,0,0], fingers:[null,2,3,1,null,null], notes:['E','G#','B'], theory:'A大调V级。', enType:'Major', enTheory:'The V chord in A major.'},
+        {name:'F#m', type:'小三和弦', strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1], notes:['F#','A','C#'], theory:'A大调vi级关系小调。F#m和A共用完全相同音组。', enType:'Minor', enTheory:'The vi (relative minor). F#m shares the same notes as A major.'},
+        {name:'E7', type:'属七和弦', strings:[0,2,0,1,0,0], fingers:[null,2,null,1,null,null], notes:['E','G#','B','D'], theory:'A大调V7。开放属七，声音宽厚有力，布鲁斯必学和弦。', enType:'Dominant 7th', enTheory:'V7 in A major. Open dominant 7th with a wide, powerful sound. Essential for blues.'},
+    ],
+    'B': [
+        {name:'B',  type:'大三和弦', strings:[null,2,4,4,4,2], fingers:[null,1,2,3,4,1], notes:['B','D#','F#'], theory:'B大调I级。2品大横按。', enType:'Major', enTheory:'B major tonic (I). 2nd fret barre.'},
+        {name:'C#m', type:'小三和弦', strings:[null,4,6,6,5,4], fingers:[null,1,3,4,2,1], notes:['C#','E','G#'], theory:'B大调ii级。', enType:'Minor', enTheory:'The ii chord. Barre at 4th fret.'},
+        {name:'D#m', type:'小三和弦', strings:[null,6,8,8,7,6], fingers:[null,1,3,4,2,1], notes:['D#','F#','A#'], theory:'B大调iii级。6品横按，高把位。', enType:'Minor', enTheory:'The iii chord. 6th fret barre — upper register.'},
+        {name:'E',  type:'大三和弦', strings:[0,2,2,1,0,0], fingers:[null,2,3,1,null,null], notes:['E','G#','B'], theory:'B大调IV级。开放和弦。', enType:'Major', enTheory:'The IV chord. Open voicing.'},
+        {name:'F#', type:'大三和弦', strings:[2,4,4,3,2,2], fingers:[1,3,4,2,1,1], notes:['F#','A#','C#'], theory:'B大调V级。2品横按。', enType:'Major', enTheory:'The V chord. 2nd fret barre.'},
+        {name:'G#m', type:'小三和弦', strings:[4,6,6,4,4,4], fingers:[1,3,4,1,1,1], notes:['G#','B','D#'], theory:'B大调vi级关系小调。', enType:'Minor', enTheory:'The vi (relative minor). Barre at 4th fret.'},
+        {name:'F#7', type:'属七和弦', strings:[2,4,2,3,2,2], fingers:[1,3,1,2,1,1], notes:['F#','A#','C#','E'], theory:'B大调V7。2品横按+中指变形制造属七。', enType:'Dominant 7th', enTheory:'V7 in B major. Barre at 2nd fret with middle finger variation for the 7th.'},
+    ],
+};
 
-        <main class="flex-1 w-full max-w-2xl mx-auto px-4 pb-12">
-            <div class="text-center mb-4">
-                <h1 class="text-3xl font-bold" style="color:var(--text)">🎸 常用和弦图库</h1>
-                <p style="color:var(--mute);font-size:13px">点击和弦听声音 · 点击左侧切换调性</p>
-            </div>
+const KEYS = ['C','D','E','F','G','A','B'];
+const SX = [15,25,35,45,55,65];
+const SY = [22,36,50,64,78];
+let activeKey = 'C', heroIdx = 0, audioCtx = null, wafPlayer = null;
+function activeChord(){ return CHORDS_BY_KEY[activeKey][heroIdx]; }
 
-            <div class="flex gap-3" style="min-height:500px">
-                <!-- Left: Key selector -->
-                <div class="flex flex-col gap-1" style="width:80px;flex-shrink:0" id="keyBar"></div>
+function ensureCtx(){
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+}
 
-                <!-- Right: Chord grid -->
-                <div class="flex-1">
-                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-2" id="chordGrid"></div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <footer class="text-center text-xs py-6 border-t" style="color:var(--mute);border-color:var(--card-border)">
-        <a href="./index.html" class="text-blue-500 hover:underline">← 返回节拍器</a>
-    </footer>
-
-    <script>
-    // ===== CHORD DATA =====
-    const chordDB = {
-        'C': [
-            {name:'C',  strings:['x',0,0,2,3,1], fingers:['-','-','-',2,3,1]},
-            {name:'Dm', strings:['x','x',0,2,3,1], fingers:['-','-','-',2,3,1]},
-            {name:'Em', strings:[0,2,2,0,0,0], fingers:['-',2,3,'-','-','-']},
-            {name:'F',  strings:[1,1,2,3,3,1], fingers:[1,1,2,3,4,1]},
-            {name:'G',  strings:[3,2,0,0,0,3], fingers:[3,2,'-','-','-',4]},
-            {name:'Am', strings:['x',0,2,2,1,0], fingers:['-','-',2,3,1,'-']},
-            {name:'G7', strings:[3,2,0,0,0,1], fingers:[3,2,'-','-','-',1]},
-        ],
-        'D': [
-            {name:'D',  strings:['x','x',0,2,3,2], fingers:['-','-','-',1,3,2]},
-            {name:'Em', strings:[0,2,2,0,0,0], fingers:['-',2,3,'-','-','-']},
-            {name:'F♯m',strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1]},
-            {name:'G',  strings:[3,2,0,0,0,3], fingers:[3,2,'-','-','-',4]},
-            {name:'A',  strings:['x',0,2,2,2,0], fingers:['-','-',1,2,3,'-']},
-            {name:'Bm', strings:['x',2,4,4,3,2], fingers:['-',1,3,4,2,1]},
-            {name:'A7', strings:['x',0,2,0,2,0], fingers:['-','-',2,'-',3,'-']},
-        ],
-        'E': [
-            {name:'E',  strings:[0,2,2,1,0,0], fingers:['-',2,3,1,'-','-']},
-            {name:'F♯m',strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1]},
-            {name:'G♯m',strings:[4,6,6,4,4,4], fingers:[1,3,4,1,1,1]},
-            {name:'A',  strings:['x',0,2,2,2,0], fingers:['-','-',1,2,3,'-']},
-            {name:'B',  strings:['x',2,4,4,4,2], fingers:['-',1,2,3,4,1]},
-            {name:'C♯m',strings:['x',4,6,6,5,4], fingers:['-',1,3,4,2,1]},
-            {name:'B7', strings:['x',2,1,2,0,2], fingers:['-',2,1,3,'-',4]},
-        ],
-        'F': [
-            {name:'F',  strings:[1,1,2,3,3,1], fingers:[1,1,2,3,4,1]},
-            {name:'Gm', strings:[3,5,5,3,3,3], fingers:[1,3,4,1,1,1]},
-            {name:'Am', strings:['x',0,2,2,1,0], fingers:['-','-',2,3,1,'-']},
-            {name:'B♭', strings:['x',1,3,3,3,1], fingers:['-',1,2,3,4,1]},
-            {name:'C',  strings:['x',0,0,2,3,1], fingers:['-','-','-',2,3,1]},
-            {name:'Dm', strings:['x','x',0,2,3,1], fingers:['-','-','-',2,3,1]},
-            {name:'C7', strings:['x',0,2,3,1,3], fingers:['-','-',2,3,1,4]},
-        ],
-        'G': [
-            {name:'G',  strings:[3,2,0,0,0,3], fingers:[3,2,'-','-','-',4]},
-            {name:'Am', strings:['x',0,2,2,1,0], fingers:['-','-',2,3,1,'-']},
-            {name:'Bm', strings:['x',2,4,4,3,2], fingers:['-',1,3,4,2,1]},
-            {name:'C',  strings:['x',0,0,2,3,1], fingers:['-','-','-',2,3,1]},
-            {name:'D',  strings:['x','x',0,2,3,2], fingers:['-','-','-',1,3,2]},
-            {name:'Em', strings:[0,2,2,0,0,0], fingers:['-',2,3,'-','-','-']},
-            {name:'D7', strings:['x','x',0,2,1,2], fingers:['-','-','-',2,1,3]},
-        ],
-        'A': [
-            {name:'A',  strings:['x',0,2,2,2,0], fingers:['-','-',1,2,3,'-']},
-            {name:'Bm', strings:['x',2,4,4,3,2], fingers:['-',1,3,4,2,1]},
-            {name:'C♯m',strings:['x',4,6,6,5,4], fingers:['-',1,3,4,2,1]},
-            {name:'D',  strings:['x','x',0,2,3,2], fingers:['-','-','-',1,3,2]},
-            {name:'E',  strings:[0,2,2,1,0,0], fingers:['-',2,3,1,'-','-']},
-            {name:'F♯m',strings:[2,4,4,2,2,2], fingers:[1,3,4,1,1,1]},
-            {name:'E7', strings:[0,2,0,1,0,0], fingers:['-',2,'-',1,'-','-']},
-        ],
-        'B': [
-            {name:'B',  strings:['x',2,4,4,4,2], fingers:['-',1,2,3,4,1]},
-            {name:'C♯m',strings:['x',4,6,6,5,4], fingers:['-',1,3,4,2,1]},
-            {name:'D♯m',strings:['x',6,8,8,7,6], fingers:['-',1,3,4,2,1]},
-            {name:'E',  strings:[0,2,2,1,0,0], fingers:['-',2,3,1,'-','-']},
-            {name:'F♯', strings:[2,4,4,3,2,2], fingers:[1,3,4,2,1,1]},
-            {name:'G♯m',strings:[4,6,6,4,4,4], fingers:[1,3,4,1,1,1]},
-            {name:'F♯7',strings:[2,4,2,3,2,2], fingers:[1,3,1,2,1,1]},
-        ],
-    };
-
-    const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-    const STRING_BASE = [64,59,55,50,45,40]; // MIDI for E2,A2,D3,G3,B3,E4
-
-    let activeKey = 'C';
-    let audioCtx = null;
-
-    function ensureCtx() {
-        if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-    }
-
-    // Play chord: strum all non-muted strings
-    function playChord(chord) {
-        ensureCtx();
-        const now = audioCtx.currentTime;
-        chord.strings.forEach((s, i) => {
-            if (s === 'x' || s === 0) return; // muted or open
-            const midi = STRING_BASE[i] + parseInt(s);
-            const freq = 440 * Math.pow(2, (midi - 69) / 12);
-            // Slight stagger for strum effect
-            const t = now + i * 0.04;
-            [0, 0.003].forEach(detune => {
-                const osc = audioCtx.createOscillator();
-                osc.type = 'triangle';
-                osc.frequency.value = freq * (1 + detune);
-                const gain = audioCtx.createGain();
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(0.25, t + 0.005);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
-                const filter = audioCtx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.frequency.value = Math.min(freq * 5, 4000);
-                osc.connect(gain); gain.connect(filter); filter.connect(audioCtx.destination);
-                osc.start(t); osc.stop(t + 1.6);
-            });
-        });
-    }
-
-    // Generate SVG chord diagram
-    function chordSVG(chord, highlight) {
-        const c = highlight ? '#4F8CFF' : '#8e9bb0';
-        const sc = highlight ? '#4F8CFF' : '#abb7c9';
-        const tc = highlight ? '#4F8CFF' : '#374151';
-        const xs = [15,25,35,45,55,65];
-        const ys = [20,34,48,62,76];
-
-        let s = `<svg viewBox="0 0 80 100" class="w-full h-auto"><g stroke="${sc}" stroke-width="0.8">`;
-        xs.forEach(x => s += `<line x1="${x}" y1="20" x2="${x}" y2="76"/>`);
-        ys.forEach(y => s += `<line x1="15" y1="${y}" x2="65" y2="${y}"/>`);
-        s += `</g><line x1="14" y1="20" x2="66" y2="20" stroke="${sc}" stroke-width="2.5" stroke-linecap="round"/>`;
-
-        // Muted X and Open O marks
-        chord.strings.forEach((val, idx) => {
-            const x = xs[5 - idx];
-            if (val === 'x') {
-                s += `<g stroke="${sc}" stroke-width="1.2"><line x1="${x-2.5}" y1="8" x2="${x+2.5}" y2="13"/><line x1="${x+2.5}" y1="8" x2="${x-2.5}" y2="13"/></g>`;
-            } else if (val === 0) {
-                s += `<circle cx="${x}" cy="10" r="2.5" fill="none" stroke="${sc}" stroke-width="1.2"/>`;
-            }
-        });
-
-        // Finger dots
-        chord.strings.forEach((val, idx) => {
-            if (val === 'x' || val === 0) return;
-            const fret = parseInt(val);
-            const x = xs[5 - idx];
-            const y = ys[fret - 1] + 7;
-            s += `<circle cx="${x}" cy="${y}" r="4" fill="${c}"/>`;
-        });
-
-        // Finger numbers
-        if (chord.fingers) {
-            chord.fingers.forEach((f, idx) => {
-                if (f === '-' || chord.strings[idx] === 'x' || chord.strings[idx] === 0) return;
-                const fret = parseInt(chord.strings[idx]);
-                const x = xs[5 - idx];
-                const y = ys[fret - 1] + 7;
-                s += `<text x="${x}" y="${y+1}" text-anchor="middle" fill="#fff" font-size="7" font-weight="700">${f}</text>`;
-            });
+function chordSVG(ch, large){
+    const w = large?160:80, h = large?200:100, c = '#4F8CFF', g = '#a0aec0', d = '#374151';
+    let s = `<svg viewBox="0 0 80 106" width="${w}" height="${h}"><g stroke="${g}" stroke-width="0.7">`;
+    SX.forEach(x => s += `<line x1="${x}" y1="22" x2="${x}" y2="92"/>`);
+    SY.forEach(y => s += `<line x1="15" y1="${y}" x2="65" y2="${y}"/>`);
+    s += `</g><line x1="14" y1="22" x2="66" y2="22" stroke="${d}" stroke-width="3" stroke-linecap="round"/>`;
+    const mf = Math.min(...ch.strings.filter(v=>v!==null&&v>0))||1;
+    if(mf>1) s += `<text x="8" y="40" fill="${g}" font-size="9" font-weight="700">${mf}fr</text>`;
+    ch.strings.forEach((val, idx) => {
+        const x = SX[idx];
+        if(val===null){
+            s += `<g stroke="${g}" stroke-width="1.2"><line x1="${x-2.5}" y1="10" x2="${x+2.5}" y2="15"/><line x1="${x+2.5}" y1="10" x2="${x-2.5}" y2="15"/></g>`;
+        } else if(val===0){
+            s += `<circle cx="${x}" cy="12" r="2.5" fill="none" stroke="${g}" stroke-width="1.2"/>`;
+        } else {
+            const fy = SY[val-1]+7;
+            s += `<circle cx="${x}" cy="${fy}" r="4.5" fill="${c}"/>`;
         }
+    });
+    if(ch.fingers) ch.fingers.forEach((f, idx) => {
+        if(f===null||ch.strings[idx]===null||ch.strings[idx]===0) return;
+        const fy = SY[ch.strings[idx]-1]+7;
+        s += `<text x="${SX[idx]}" y="${fy+1}" text-anchor="middle" fill="#fff" font-size="7" font-weight="700">${f}</text>`;
+    });
+    s += `</svg>`;
+    return s;
+}
 
-        s += `</svg>`;
-        return s;
-    }
-
-    // Build key selector sidebar
-    function buildKeyBar() {
-        const bar = document.getElementById('keyBar');
-        bar.innerHTML = '';
-        Object.keys(chordDB).forEach(key => {
-            const btn = document.createElement('button');
-            btn.className = 'key-btn' + (key === activeKey ? ' on' : '');
-            btn.textContent = key + '调';
-            btn.onclick = () => { activeKey = key; buildKeyBar(); buildChords(); };
-            bar.appendChild(btn);
+function playHeroChord(){
+    ensureCtx();
+    if(!wafPlayer) wafPlayer = new WebAudioFontPlayer();
+    const ch = activeChord();
+    const baseMidi = [40,45,50,55,59,64];
+    const notes = [];
+    ch.strings.forEach((val,i)=>{ if(val!==null) notes.push(baseMidi[i]+(val||0)); });
+    try {
+        const info = wafPlayer.loader.findInstrument(24);
+        wafPlayer.queueStrumDown(audioCtx, audioCtx.destination, info, audioCtx.currentTime, notes, 1.5, 1);
+    } catch(e){
+        notes.forEach((midi,i)=>{
+            const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+            osc.type='triangle'; osc.frequency.value=440*Math.pow(2,(midi-69)/12);
+            const t=audioCtx.currentTime+i*0.04;
+            gain.gain.setValueAtTime(0,t);
+            gain.gain.linearRampToValueAtTime(0.2,t+0.005);
+            gain.gain.exponentialRampToValueAtTime(0.001,t+1.5);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(t); osc.stop(t+1.6);
         });
     }
+}
 
-    // Build chord grid
-    function buildChords() {
-        const grid = document.getElementById('chordGrid');
-        grid.innerHTML = '';
-        const chords = chordDB[activeKey] || [];
-        chords.forEach((chord, i) => {
-            const card = document.createElement('div');
-            card.className = 'chord-card';
-            const nameClass = i === 0 ? 'highlight' : '';
-            card.innerHTML = `
-                <span class="chord-name ${nameClass}">${chord.name}</span>
-                <div style="width:100%;max-width:100px">${chordSVG(chord, i === 0)}</div>
-            `;
-            card.onclick = () => {
-                // Highlight this card
-                document.querySelectorAll('.chord-card').forEach(c => c.classList.remove('playing'));
-                document.querySelectorAll('.chord-name').forEach(n => n.classList.remove('highlight'));
-                card.classList.add('playing');
-                card.querySelector('.chord-name').classList.add('highlight');
-                playChord(chord);
-                setTimeout(() => card.classList.remove('playing'), 1600);
-            };
-            grid.appendChild(card);
-        });
-    }
+function buildKeyTabs(){
+    const ct=document.getElementById('keyTabs'); ct.innerHTML='';
+    KEYS.forEach(k=>{
+        const b=document.createElement('button');
+        b.className='key-tab'+(k===activeKey?' on':'');
+        b.textContent=k+' 调'; b.onclick=()=>{activeKey=k;heroIdx=0;buildAll();};
+        ct.appendChild(b);
+    });
+}
 
-    buildKeyBar();
-    buildChords();
+function updateHero(){
+    const ch=activeChord();
+    document.getElementById('heroName').textContent=ch.name;
+    document.getElementById('heroType').textContent=ch.type+' ('+ch.enType+')';
+    document.getElementById('heroSvg').innerHTML=chordSVG(ch,true);
+    document.getElementById('theoryContent').innerHTML=`
+        <div class="flex flex-wrap gap-1 mb-3">${ch.notes.map(n=>`<span class="theory-badge">${n}</span>`).join('')}</div>
+        <p style="color:var(--text2);font-size:14px;line-height:1.7">${ch.theory}</p>
+        <p style="color:var(--mute);font-size:13px;line-height:1.7;margin-top:6px">${ch.enTheory}</p>`;
+}
 
-    // ===== THEME + LANG =====
-    (function(){
-        const btn = document.getElementById('themeToggle');
-        const s = localStorage.getItem('metronome-theme');
-        if (s === 'dark') { document.body.classList.add('dark'); btn.textContent = '🌙'; } else { btn.textContent = '☀️'; }
-        btn.addEventListener('click', () => {
-            document.body.classList.toggle('dark');
-            const d = document.body.classList.contains('dark');
-            btn.textContent = d ? '🌙' : '☀️';
-            localStorage.setItem('metronome-theme', d ? 'dark' : 'light');
-        });
-        const sel = document.getElementById('langSelectTop');
-        const sl = localStorage.getItem('metronome-lang');
-        if (sl) sel.value = sl;
-        sel.addEventListener('change', () => localStorage.setItem('metronome-lang', sel.value));
-    })();
-    </script>
+function buildChordGrid(){
+    const grid=document.getElementById('chordGrid'); grid.innerHTML='';
+    CHORDS_BY_KEY[activeKey].forEach((ch,i)=>{
+        const card=document.createElement('div');
+        card.className='chord-grid-card'+(i===heroIdx?' active':'');
+        card.innerHTML=`<div class="name" style="color:${i===heroIdx?'var(--accent)':'var(--text)'}">${ch.name}</div><div class="type">${ch.type}</div>${chordSVG(ch,false)}`;
+        card.onclick=()=>{heroIdx=i;buildAll();playHeroChord();};
+        grid.appendChild(card);
+    });
+}
+
+function buildAll(){buildKeyTabs();updateHero();buildChordGrid();}
+buildAll();
+
+(function(){
+    const btn=document.getElementById('themeToggle');
+    const s=localStorage.getItem('metronome-theme');
+    if(s==='dark'){document.body.classList.add('dark');btn.textContent='🌙';}else{btn.textContent='☀️';}
+    btn.addEventListener('click',()=>{
+        document.body.classList.toggle('dark');
+        const d=document.body.classList.contains('dark');
+        btn.textContent=d?'🌙':'☀️';
+        localStorage.setItem('metronome-theme',d?'dark':'light');
+    });
+    const sel=document.getElementById('langSelectTop');
+    const sl=localStorage.getItem('metronome-lang');
+    if(sl) sel.value=sl;
+    sel.addEventListener('change',()=>localStorage.setItem('metronome-lang',sel.value));
+})();
+</script>
 </body>
 </html>
