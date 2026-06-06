@@ -139,9 +139,9 @@
             <h2 class="text-base font-bold mb-3" style="color:var(--text)" data-i18n="ear-filter-title">🎯 选择练习音程</h2>
             <div class="flex flex-wrap justify-center gap-2" id="intervalFilter"></div>
             <div class="flex justify-center gap-2 mt-3">
-                <button class="interval-chip" onclick="selectAll()" data-i18n="ear-select-all">全选</button>
-                <button class="interval-chip" onclick="selectNone()" data-i18n="ear-select-none">全不选</button>
-                <button class="interval-chip" onclick="selectEasy()" data-i18n="ear-select-easy">入门 (3/4/5 度)</button>
+                <button class="interval-chip" id="presetAll" onclick="selectAll()" data-i18n="ear-select-all">全选</button>
+                <button class="interval-chip" id="presetNone" onclick="selectNone()" data-i18n="ear-select-none">全不选</button>
+                <button class="interval-chip on" id="presetEasy" onclick="selectEasy()" data-i18n="ear-select-easy">入门 (3/4/5 度)</button>
             </div>
         </div>
 
@@ -199,7 +199,7 @@
             const chip = document.createElement('span');
             chip.className = 'interval-chip' + (enabledIntervals.has(iv.id) ? ' on' : '');
             chip.textContent = iv.name + ' (' + iv.abbr + ')';
-            chip.addEventListener('click', () => {
+            chip.addEventListener('click', () => { updatePresetButtons('none');
                 if (enabledIntervals.has(iv.id)) {
                     if (enabledIntervals.size <= 1) return; // keep at least 1
                     enabledIntervals.delete(iv.id);
@@ -213,9 +213,26 @@
         });
     }
 
-    function selectAll() { enabledIntervals = new Set(INTERVALS.map(i=>i.id)); buildFilter(); }
-    function selectNone() { enabledIntervals = new Set([INTERVALS[0].id]); buildFilter(); }
-    function selectEasy() { enabledIntervals = new Set(['m3','M3','P4','P5','P8']); buildFilter(); }
+    function updatePresetButtons(active) {
+        ['presetAll','presetNone','presetEasy'].forEach(id => {
+            document.getElementById(id).classList.toggle('on', id===active);
+        });
+    }
+    function selectAll() {
+        enabledIntervals = new Set(INTERVALS.map(i=>i.id));
+        buildFilter();
+        updatePresetButtons('presetAll');
+    }
+    function selectNone() {
+        enabledIntervals = new Set([INTERVALS[0].id]);
+        buildFilter();
+        updatePresetButtons('presetNone');
+    }
+    function selectEasy() {
+        enabledIntervals = new Set(['m3','M3','P4','P5','P8']);
+        buildFilter();
+        updatePresetButtons('presetEasy');
+    }
 
     function setDirection(dir) {
         directionMode = dir;
