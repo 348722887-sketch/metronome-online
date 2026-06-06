@@ -7,6 +7,7 @@
     <meta name="description" content="音程练耳训练，随机听音辨音程，提升音乐听觉能力。">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="./js/i18n.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
     <style>
         :root{--bg:#f2f7f2;--card-bg:#fff;--card-border:#d0ddd0;--text:#1a2a1a;--text2:#666;--mute:#999}
         body.dark{--bg:#0a0a0f;--card-bg:#141419;--card-border:#2a2a35;--text:#e0e0e0;--text2:#999;--mute:#666}
@@ -236,68 +237,52 @@
         document.getElementById('soundGuitar').classList.toggle('on', type==='guitar');
     }
 
-    // ===== AUDIO =====
+    // ===== AUDIO: soundfont-player (real instrument samples) =====
+    let pianoInst = null, guitarInst = null, instrumentsLoaded = false;
+
+    const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    function midiToName(midi) { return NOTE_NAMES[midi%12] + Math.floor(midi/12-1); }
+
     async function ensureCtx() {
         if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') await audioCtx.resume();
     }
 
-    function playTone(midi, startTime, duration, vol) {
-        if (soundType === 'guitar') playGuitarTone(midi, startTime, duration, vol);
-        else playPianoTone(midi, startTime, duration, vol);
+    async function loadInstruments() {
+        if (instrumentsLoaded) return;
+        await ensureCtx();
+        const notes = [];
+        for (let m = 48; m <= 83; m++) notes.push(midiToName(m));
+        const opts = { notes, gain: 1 };
+        try {
+            [pianoInst, guitarInst] = await Promise.all([
+                Soundfont.instrument(audioCtx, 'acoustic_grand_piano', opts),
+                Soundfont.instrument(audioCtx, 'acoustic_guitar_nylon', opts)
+            ]);
+            instrumentsLoaded = true;
+            document.getElementById('playHint').textContent = '音色已加载，点击播放音程';
+        } catch(e) {
+            console.error('Soundfont load failed:', e);
+            document.getElementById('playHint').textContent = '⚠ 音色加载失败，请刷新重试';
+        }
     }
 
-    function playPianoTone(midi, startTime, duration, vol) {
-        const freq = 440 * Math.pow(2, (midi - 69) / 12);
-        // Two slightly detuned triangle oscillators for natural chorus/warmth
-        [1, 1.004].forEach(detune => {
-            const osc = audioCtx.createOscillator();
-            osc.type = 'triangle';
-            osc.frequency.value = freq * detune;
-            const oscGain = audioCtx.createGain();
-            // Piano ADSR envelope
-            oscGain.gain.setValueAtTime(0, startTime);
-            oscGain.gain.linearRampToValueAtTime(vol, startTime + 0.01);
-            oscGain.gain.exponentialRampToValueAtTime(vol * 0.45, startTime + 0.6);
-            oscGain.gain.linearRampToValueAtTime(0, startTime + duration);
-            // Low-pass filter softens brightness → piano-like warmth
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = 'lowpass';
-            filter.frequency.value = Math.min(freq * 5, 4000);
-            osc.connect(oscGain); oscGain.connect(filter); filter.connect(audioCtx.destination);
-            osc.start(startTime); osc.stop(startTime + duration + 0.1);
-        });
-    }
-
-    function playGuitarTone(midi, startTime, duration, vol) {
-        const freq = 440 * Math.pow(2, (midi - 69) / 12);
-        // Noise burst → resonant filter = plucked string sound (Karplus-Strong principle)
-        const nLen = Math.floor(audioCtx.sampleRate * 0.04);
-        const buf = audioCtx.createBuffer(1, nLen, audioCtx.sampleRate);
-        const d = buf.getChannelData(0);
-        for (let i = 0; i < nLen; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / nLen);
-        const noise = audioCtx.createBufferSource(); noise.buffer = buf;
-        const resonator = audioCtx.createBiquadFilter();
-        resonator.type = 'bandpass'; resonator.frequency.value = freq; resonator.Q.value = 20;
-        // Second harmonic for body
-        const res2 = audioCtx.createBiquadFilter();
-        res2.type = 'bandpass'; res2.frequency.value = freq * 2; res2.Q.value = 10;
-        const gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(0, startTime);
-        gain.gain.linearRampToValueAtTime(vol * 1.8, startTime + 0.002);
-        gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-        noise.connect(resonator); noise.connect(res2);
-        resonator.connect(gain); res2.connect(gain);
-        gain.connect(audioCtx.destination);
-        noise.start(startTime);
+    function playNote(midi, time, duration, vol) {
+        const inst = soundType === 'guitar' ? guitarInst : pianoInst;
+        if (!inst) return;
+        inst.play(midiToName(midi), time, { gain: vol, duration: duration });
     }
 
     async function playInterval() {
         await ensureCtx();
-        // Always pick a fresh interval + root for each play
+        if (!instrumentsLoaded) {
+            document.getElementById('playHint').textContent = '正在加载音色…请稍后再点';
+            await loadInstruments();
+            if (!instrumentsLoaded) return;
+        }
+
         pickNewInterval();
-        // Pick a random root: C3 to B4 (MIDI 48-71), but avoid extremes for clarity
-        currentRoot = 48 + Math.floor(Math.random() * 24); // C3 ~ B4
+        currentRoot = 48 + Math.floor(Math.random() * 24);
 
         const btn = document.getElementById('playBtn');
         const icon = document.getElementById('playIcon');
@@ -306,21 +291,15 @@
         const now = audioCtx.currentTime + 0.05;
         const note1 = currentRoot;
         const semi = currentInterval.semi;
-        let note2;
-        if (directionMode === 'both') {
-            currentDirection = Math.random() < 0.5 ? 'asc' : 'desc';
-        } else {
-            currentDirection = directionMode;
-        }
-        if (currentDirection === 'asc') note2 = currentRoot + semi;
-        else note2 = currentRoot - semi;
+        if (directionMode === 'both') currentDirection = Math.random() < 0.5 ? 'asc' : 'desc';
+        else currentDirection = directionMode;
+        const note2 = currentDirection === 'asc' ? currentRoot + semi : currentRoot - semi;
 
-        playTone(note1, now, 0.8, 0.35);
-        playTone(note2, now + 0.85, 0.8, 0.35);
+        playNote(note1, now, 0.8, 0.6);
+        playNote(note2, now + 0.85, 0.8, 0.6);
 
-        const noteNames = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
-        const n1 = noteNames[note1%12]+Math.floor(note1/12)-1;
-        const n2 = noteNames[((note2%12)+12)%12]+Math.floor(note2/12)-1;
+        const n1 = midiToName(note1).replace('#','♯');
+        const n2 = midiToName(note2).replace('#','♯');
         document.getElementById('noteDisplay').innerHTML = '第1音: <b>'+n1+'</b> &nbsp;→&nbsp; 第2音: <b>'+n2+'</b>';
         document.getElementById('playHint').textContent = '可以反复点击播放';
 
@@ -330,8 +309,9 @@
         document.getElementById('answerArea').style.display = 'none';
         document.getElementById('scoreRow').style.display = 'flex';
 
-        setTimeout(() => { btn.classList.remove('playing'); icon.textContent = '▶'; }, 1850);
+        setTimeout(() => { btn.classList.remove('playing'); icon.textContent = '▶'; }, 2000);
     }
+
 
     function pickNewInterval() {
         const available = INTERVALS.filter(i => enabledIntervals.has(i.id));
