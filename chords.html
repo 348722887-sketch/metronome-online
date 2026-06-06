@@ -163,26 +163,20 @@ function playHeroChord(){
 
     notes.forEach((midi, i) => {
         const freq = 440 * Math.pow(2, (midi-69)/12);
-        const t = now + i * 0.05; // staggered strum
+        const t = now + i * 0.06; // strum stagger
 
-        // Dual oscillators per note for richer tone
-        [1, 1.003].forEach(detune => {
-            const osc = audioCtx.createOscillator();
-            osc.type = 'triangle';
-            osc.frequency.value = freq * detune;
+        // Single sine oscillator per note — pure, no harmonic clash in chords
+        const osc = audioCtx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
 
-            const gain = audioCtx.createGain();
-            gain.gain.setValueAtTime(0, t);
-            gain.gain.linearRampToValueAtTime(0.15, t + 0.005);
-            gain.gain.exponentialRampToValueAtTime(0.001, t + 2.0);
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.1, t + 0.008);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 2.5);
 
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = 'lowpass';
-            filter.frequency.value = Math.min(freq * 5, 5000);
-
-            osc.connect(gain); gain.connect(filter); filter.connect(audioCtx.destination);
-            osc.start(t); osc.stop(t + 2.2);
-        });
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(t); osc.stop(t + 2.7);
     });
 }
 
