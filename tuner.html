@@ -304,55 +304,37 @@
         }
     })();
 
-    // ===== AUDIO ENGINE =====
+    // ===== AUDIO ENGINE (v3 — normalized autocorrelation + temporal stability) =====
     let ctx=null, analyser=null, bandpassLP=null, bandpassHP=null, running=false, mode='guitar';
-    let smoothedHz=null;  // smoothed frequency in Hz
-    let smoothedCents=0;  // smoothed cents for needle (separate from freq smoothing)
+    let smoothedHz=null;
+    let smoothedCents=0;
     let lastDetectionTime=0;
-    let noiseRejectCount=0; // consecutive non-musical frames
-    let musicalFrameCount=0; // consecutive musical frames — must reach threshold before display update
-    let peakToAvg=0; // spectral peak-to-average ratio (tonality measure)
-    let tickFrameCount=0; // frame counter for periodic spectral analysis
-    const HOLD_MS=1800;
-    const MUSICAL_FRAMES_NEEDED=3; // need 3 consecutive musical frames before trusting the reading
 
-    // === ONSET DETECTION ===
-    // Guitar strings have a sharp attack (pluck/pick). Environmental noise (fans,
-    // hums, AC, traffic) is steady-state. By requiring an "onset" (sudden amplitude
-    // increase) before processing pitch, we naturally reject most background noise.
-    let onsetActive=false;       // currently in a "listening window" after detecting onset
-    let onsetTimeout=0;          // time when listening window expires
-    let rmsHistory=[];           // last ~200ms of RMS values for onset detection
-    const RMS_HISTORY_MS=300;    // lookback window for onset detection (longer→easier to detect)
-    const ONSET_DB_THRESHOLD=3;  // 3dB jump = onset (was 6, too strict for phone mics)
-    const SUSTAIN_WINDOW_MS=3000;// how long to keep listening after onset (string decay)
-    let lastRmsDb=-100;         // previous frame RMS in dB
-    let rmsDbDelta=0;            // current frame-to-frame RMS change in dB
-    let debugGates='';           // gate status for debug display
+    let pitchHistory = [];
+    const HISTORY_SIZE = 3;
+    const HOLD_MS = 1200;
 
-    // Bandpass filter frequencies by instrument mode
     function getBandpassRange(m) {
         switch(m) {
             case 'bass':    return {low:35, high:600};
             case 'violin':  return {low:180, high:2500};
             case 'ukulele': return {low:200, high:1200};
             case 'guitar':
-            default:        return {low:70, high:1500};
+            default:        return {low:65, high:1200};
         }
     }
 
     async function toggleTuner() {
         if (running) { stopTuner(); return; }
         try {
-            // echoCancellation/noiseSuppression/autoGainControl MUST be false — they destroy pure tones
-            // iOS REQUIRES AudioContext to be created & resumed BEFORE getUserMedia
             ctx = new (window.AudioContext||window.webkitAudioContext)();
             if (ctx.state === 'suspended') { await ctx.resume(); }
-            const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+            });
             const src = ctx.createMediaStreamSource(stream);
 
-            // === BANDPASS PRE-FILTER: key noise immunity layer ===
-            // GuitarTuna/Fender use bandpass to reject rumble & hiss before pitch detection
             const range = getBandpassRange(mode);
             bandpassHP = ctx.createBiquadFilter();
             bandpassHP.type = 'highpass';
@@ -365,329 +347,175 @@
             bandpassLP.Q.value = 0.7;
 
             analyser = ctx.createAnalyser();
-            analyser.fftSize=2048;
-            analyser.smoothingTimeConstant=0.3;
+            analyser.fftSize = 2048;
+            analyser.smoothingTimeConstant = 0.3;
 
-            // Chain: mic → highpass → lowpass → analyser → silentGain → destination
             src.connect(bandpassHP);
             bandpassHP.connect(bandpassLP);
             bandpassLP.connect(analyser);
-            // iOS REQUIRES audio graph connected to destination for processing
             const silentGain = ctx.createGain();
             silentGain.gain.value = 0;
             analyser.connect(silentGain);
             silentGain.connect(ctx.destination);
 
-            running=true;
-            document.getElementById('powerIcon').textContent='⏹';
+            running = true;
+            pitchHistory = [];
+            smoothedHz = null;
+            smoothedCents = 0;
+            lastDetectionTime = 0;
+
+            document.getElementById('powerIcon').textContent = '⏹';
             document.getElementById('powerBtn').classList.add('on');
-            document.getElementById('hintText').textContent='正在监听…请弹奏一个音';
-            document.getElementById('debugPanel').style.display='block';
-            onsetActive=false;onsetTimeout=0;rmsHistory=[];lastRmsDb=-100;rmsDbDelta=0;debugGates='';
+            document.getElementById('hintText').textContent = '正在监听…请弹奏一个音';
+            document.getElementById('debugPanel').style.display = 'block';
             tick();
         } catch(e) {
-            document.getElementById('hintText').textContent='⚠ 无法访问麦克风，请检查权限';
+            document.getElementById('hintText').textContent = '⚠ 无法访问麦克风，请检查权限';
             console.error(e);
         }
     }
 
     function stopTuner() {
-        running=false;smoothedHz=null;smoothedCents=0;
-        lastDetectionTime=0;noiseRejectCount=0;musicalFrameCount=0;peakToAvg=0;tickFrameCount=0;
-        onsetActive=false;onsetTimeout=0;rmsHistory=[];lastRmsDb=-100;rmsDbDelta=0;debugGates='';
-        document.getElementById('debugPanel').style.display='none';
-        if(ctx){ctx.close();ctx=null;analyser=null;bandpassLP=null;bandpassHP=null;}
-        document.getElementById('powerIcon').textContent='🎤';
+        running = false;
+        smoothedHz = null; smoothedCents = 0; pitchHistory = [];
+        if(ctx){ ctx.close(); ctx=null; analyser=null; bandpassLP=null; bandpassHP=null; }
+        document.getElementById('debugPanel').style.display = 'none';
+        document.getElementById('powerIcon').textContent = '🎤';
         document.getElementById('powerBtn').classList.remove('on');
-        document.getElementById('hintText').textContent='已停止';
-        document.getElementById('noteText').textContent='--';
-        document.getElementById('freqLine').textContent='A4 = 440 Hz';
-        document.getElementById('devText').textContent='';
+        document.getElementById('hintText').textContent = '已停止';
+        document.getElementById('noteText').textContent = '--';
+        document.getElementById('freqLine').textContent = 'A4 = 440 Hz';
+        document.getElementById('devText').textContent = '';
         document.getElementById('devText').setAttribute('fill','#555');
-        document.getElementById('needle').style.transform='rotate(0deg)';
+        document.getElementById('needle').style.transform = 'rotate(0deg)';
         updateStrings(null);
     }
 
-    // Autocorrelation + parabolic interpolation
-    // Enhanced with RMS amplitude gate and stricter noise gate
     function detectPitch(buf) {
-        const n=buf.length, sr=ctx.sampleRate;
-        const minLag=Math.floor(sr/1500); // ~C6
-        const maxLag=Math.floor(sr/60);   // ~B1
-        if (maxLag>=n) return {freq:-1, rms:0, corrRatio:0};
+        const n = buf.length, sr = ctx.sampleRate;
+        const minLag = Math.floor(sr / 1200);
+        const maxLag = Math.floor(sr / 55);
+        if (maxLag >= n) return { freq: -1, rms: 0, corr: 0 };
 
-        // Compute RMS amplitude and r[0] (same underlying sum-of-squares)
-        let r0=0;
-        for(let i=0;i<n;i++){ const v=buf[i]; r0+=v*v; }
-        const rms=Math.sqrt(r0/n);
+        let r0 = 0;
+        for (let i = 0; i < n; i++) r0 += buf[i] * buf[i];
+        const rms = Math.sqrt(r0 / n);
 
-        // === RMS AMPLITUDE GATE ===
-        // Gate at -54 dBFS (about 0.2% of full scale) — below this is near silence
-        if (rms < 0.002) return {freq:-2, rms, corrRatio:0}; // special code: too quiet
+        if (rms < 0.0015) return { freq: -2, rms: rms, corr: 0 };
 
-        // Autocorrelation
-        let bestLag=-1, bestVal=0;
-        for(let lag=minLag;lag<maxLag;lag++){
-            let r=0;
-            for(let i=0;i<n-lag;i++) r+=buf[i]*buf[i+lag];
-            if(r>bestVal){bestVal=r;bestLag=lag;}
+        let bestLag = -1, bestCorr = -Infinity;
+        for (let lag = minLag; lag < maxLag; lag++) {
+            let r = 0, d1 = 0, d2 = 0;
+            for (let i = 0; i < n - lag; i++) {
+                r += buf[i] * buf[i + lag];
+                d1 += buf[i] * buf[i];
+                d2 += buf[i + lag] * buf[i + lag];
+            }
+            const denom = Math.sqrt(d1 * d2);
+            const corr = denom > 1e-9 ? r / denom : 0;
+            if (corr > bestCorr) { bestCorr = corr; bestLag = lag; }
         }
 
-        const corrRatio = (r0>1e-12) ? bestVal/r0 : 0;
+        if (bestLag < 0 || bestCorr < 0.80) return { freq: -3, rms: rms, corr: bestCorr };
 
-        // === STRICTER NOISE GATE ===
-        // Phone mics are very sensitive — raised from 0.65 to 0.72
-        if(bestLag<0||corrRatio<0.72) return {freq:-3, rms, corrRatio}; // special code: weak correlation
-
-        // Parabolic interpolation for sub-sample precision
-        let cm1=0,c1=0;
-        if(bestLag>0){for(let i=0;i<n-bestLag+1;i++)cm1+=buf[i]*buf[i+bestLag-1];}
-        if(bestLag<maxLag-1){for(let i=0;i<n-bestLag-1;i++)c1+=buf[i]*buf[i+bestLag+1];}
-        const div=2*(2*bestVal-c1-cm1);
-        const refinedLag=(Math.abs(div)<1e-10)?bestLag:bestLag+(c1-cm1)/div;
-        const freq = (refinedLag>0)?sr/refinedLag:sr/bestLag;
-        return {freq, rms, corrRatio};
-    }
-
-    // Spectral tonality check: musical tones have peaked spectra, noise is flat
-    // Uses peak-to-average ratio of FFT magnitude bins
-    function computeSpectralTonality() {
-        const fftSize = analyser.fftSize;
-        const freqData = new Float32Array(fftSize/2);
-        analyser.getFloatFrequencyData(freqData);
-
-        // Convert dB to linear magnitude and find peak / average
-        let maxMag = -Infinity, sumMag = 0, count = 0;
-        // Only check bins in our instrument range (skip DC and very high bins)
-        const sr = ctx.sampleRate;
-        const lowBin = Math.floor(50 * fftSize / sr);    // ~50Hz
-        const highBin = Math.floor(2500 * fftSize / sr); // ~2500Hz
-
-        for (let i = lowBin; i < Math.min(highBin, freqData.length); i++) {
-            // dBFS to linear: 10^(dB/20)
-            const linear = Math.pow(10, freqData[i] / 20);
-            sumMag += linear;
-            count++;
-            if (linear > maxMag) maxMag = linear;
+        function corrAt(lag) {
+            if (lag < minLag || lag >= maxLag) return 0;
+            let r = 0, d1 = 0, d2 = 0;
+            for (let i = 0; i < n - lag; i++) {
+                r += buf[i] * buf[i + lag];
+                d1 += buf[i] * buf[i];
+                d2 += buf[i + lag] * buf[i + lag];
+            }
+            const denom = Math.sqrt(d1 * d2);
+            return denom > 1e-9 ? r / denom : 0;
         }
+        const a = corrAt(bestLag - 1), b = bestCorr, c = corrAt(bestLag + 1);
+        const div = 2 * (2 * b - a - c);
+        const p = Math.abs(div) > 1e-9 ? (a - c) / div : 0;
+        const refinedLag = bestLag + p;
+        const freq = refinedLag > 0 ? sr / refinedLag : sr / bestLag;
 
-        const avgMag = count > 0 ? sumMag / count : 0;
-        // Peak-to-average ratio: >8 = clearly tonal, <4 = likely noise
-        return avgMag > 1e-12 ? maxMag / avgMag : 1;
-    }
-
-    // Update debug panel with real-time metrics
-    function updateDebugPanel(rms, corr, freq, cents, isOnset, gates) {
-        const rmsDb = rms > 1e-10 ? Math.round(20*Math.log10(rms)) : -Infinity;
-        document.getElementById('dbRms').textContent = rmsDb.toFixed(0)+' dB';
-        document.getElementById('dbCorr').textContent = (corr*100).toFixed(1)+'%';
-        document.getElementById('dbPar').textContent = peakToAvg.toFixed(1)+(peakToAvg>5?' ✓':' ✗');
-        document.getElementById('dbFreq').textContent = freq>0?freq.toFixed(1)+' Hz':'--';
-        document.getElementById('dbCents').textContent = freq>0?cents.toFixed(0)+'¢':'--';
-        document.getElementById('dbMusical').textContent = musicalFrameCount;
-        document.getElementById('dbNoise').textContent = noiseRejectCount;
-        document.getElementById('dbRmsDelta').textContent = rmsDbDelta.toFixed(1)+' dB';
-        document.getElementById('dbGates').textContent = gates;
-        const onsetEl = document.getElementById('dbOnset');
-        if (isOnset) {
-            onsetEl.textContent = '🎸 拨弦检测 ✓';
-            onsetEl.style.color = '#4ECB71';
-        } else if (onsetActive) {
-            onsetEl.textContent = '🔊 持续侦听中';
-            onsetEl.style.color = '#f59e0b';
-        } else {
-            onsetEl.textContent = '⏸ 等待拨弦…';
-            onsetEl.style.color = '#f80';
-        }
-    }
-
-    // Onset detection: detect sharp amplitude increase (characteristic of string pluck)
-    function detectOnset(rmsDb) {
-        const now = performance.now();
-        // Track RMS history
-        rmsHistory.push({db: rmsDb, time: now});
-        // Prune old entries
-        while (rmsHistory.length>0 && now-rmsHistory[0].time > RMS_HISTORY_MS) rmsHistory.shift();
-        if (rmsHistory.length < 3) return false; // need enough history
-
-        // Find minimum RMS in lookback window
-        let minDb = Infinity;
-        for (const h of rmsHistory) { if (h.db < minDb) minDb = h.db; }
-
-        // Onset = current level significantly above recent minimum
-        const jumpDb = rmsDb - minDb;
-        // Also check frame-to-frame change for very fast attacks
-        const frameDelta = rmsDb - lastRmsDb;
-
-        return (jumpDb > ONSET_DB_THRESHOLD && frameDelta > 3) || (frameDelta > 12);
+        return { freq, rms: rms, corr: bestCorr };
     }
 
     function tick() {
-        if(!running) return;
-        const buf=new Float32Array(analyser.fftSize);
+        if (!running) return;
+        const buf = new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(buf);
-        const now=performance.now();
-        const result=detectPitch(buf);
-        const f=result.freq;
-        const rms=result.rms;
-        const corr=result.corrRatio;
+        const now = performance.now();
+        const result = detectPitch(buf);
+        const f = result.freq, rms = result.rms, corr = result.corr;
 
-        // Compute RMS in dB for onset detection
-        const rmsDb = rms > 1e-10 ? 20*Math.log10(rms) : -100;
-        rmsDbDelta = rmsDb - lastRmsDb;
-        lastRmsDb = rmsDb;
+        let gateStatus = '等待信号…';
 
-        // === ONSET DETECTION ===
-        // Only process pitch after detecting a sharp attack (string pluck/pick)
-        // Steady-state noise (fans, hums) won't trigger onset
-        if (!onsetActive) {
-            const onsetNow = detectOnset(rmsDb);
-            if (onsetNow && rms > 0.001) { // also require minimum amplitude (lowered for phone mics)
-                onsetActive = true;
-                onsetTimeout = now + SUSTAIN_WINDOW_MS;
-                musicalFrameCount = 0;
-                noiseRejectCount = 0;
-                smoothedHz = null;
-                smoothedCents = 0;
-                updateDebugPanel(rms, corr, -1, 0, true, '拨弦触发！开始检测');
+        if (f > 40 && f < 1200) {
+            pitchHistory.push(f);
+            if (pitchHistory.length > HISTORY_SIZE) pitchHistory.shift();
+
+            let isStable = false;
+            if (pitchHistory.length === HISTORY_SIZE) {
+                const max = Math.max(...pitchHistory);
+                const min = Math.min(...pitchHistory);
+                isStable = (max - min) / min < 0.03;
+            }
+
+            if (isStable) {
+                const avgFreq = pitchHistory.reduce((a, b) => a + b, 0) / pitchHistory.length;
+                lastDetectionTime = now;
+                gateStatus = '🎵 信号锁定';
+
+                if (smoothedHz === null) {
+                    smoothedHz = avgFreq;
+                } else {
+                    smoothedHz = smoothedHz * 0.7 + avgFreq * 0.3;
+                }
+
+                const rawMidi = 69 + 12 * Math.log2(smoothedHz / 440);
+                const nearestNote = Math.round(rawMidi);
+                const centsOff = 100 * (rawMidi - nearestNote);
+                smoothedCents = smoothedCents * 0.65 + centsOff * 0.35;
+
+                updateDisplay(midiToNote(nearestNote), smoothedCents, nearestNote);
+                updateStrings(nearestNote);
             } else {
-                // Not processing: update debug with current noise metrics
-                if (tickFrameCount % 10 === 0) { // every 10th frame to save CPU
-                    updateDebugPanel(rms, corr, -1, 0, false, '等待拨弦触发…(RMS跳变'+rmsDbDelta.toFixed(1)+'dB)');
-                }
-                tickFrameCount++;
-                requestAnimationFrame(tick);return;
+                gateStatus = '⏳ 捕获中(' + pitchHistory.length + '/' + HISTORY_SIZE + ')';
             }
+        } else if (f === -2) {
+            gateStatus = '🔇 音量过低';
+        } else if (f === -3) {
+            gateStatus = '📡 非乐音(' + (corr * 100).toFixed(0) + '%)';
         }
 
-        // === SUSTAIN WINDOW CHECK ===
-        // Listening window expired → stop processing, wait for new onset
-        if (now > onsetTimeout && f < 40) {
-            onsetActive = false;
-            document.getElementById('noteText').textContent='--';
-            document.getElementById('freqLine').textContent='等待拨弦…';
-            document.getElementById('devText').textContent='';
-            document.getElementById('needle').style.transform='rotate(0deg)';
-            updateStrings(null);smoothedHz=null;smoothedCents=0;
-            musicalFrameCount=0;noiseRejectCount=0;
-            updateDebugPanel(rms, corr, -1, 0, false, '侦听窗口结束，等待新拨弦');
-            tickFrameCount++;
-            requestAnimationFrame(tick);return;
-        }
-        // Refresh listening window if signal is still strong
-        if (now > onsetTimeout && f > 40) {
-            onsetTimeout = now + 500; // extend briefly if note still sounding
-        }
-
-        if(f>40&&f<1800){
-            // === MUSICAL NOTE VALIDATION ===
-            const rawMidi=69+12*Math.log2(f/440);
-            const nearestNote=Math.round(rawMidi);
-            const centsOff=100*(rawMidi-nearestNote);
-
-            // === SPECTRAL TONALITY CHECK ===
-            tickFrameCount++;
-            const needsFreshTonality = (musicalFrameCount===0 && noiseRejectCount>0) || (tickFrameCount % 4 === 0);
-            if (needsFreshTonality) {
-                peakToAvg = computeSpectralTonality();
-            }
-
-            // === THREE-LAYER NOISE GATE ===
-            const centsOk = Math.abs(centsOff) <= 30;
-            const spectralOk = peakToAvg > 5.0;
-            const isMusical = centsOk && spectralOk;
-
-            debugGates = (centsOk?'✅音分':'❌音分')+' '+(spectralOk?'✅频谱':'❌频谱')+' '+(corr>0.72?'✅相关':'❌相关');
-
-            if(!isMusical){
-                noiseRejectCount++;
-                musicalFrameCount=0;
-                updateDebugPanel(rms, corr, f, centsOff, onsetActive, debugGates+' →噪声拒绝 #'+noiseRejectCount);
-                if(noiseRejectCount>=5 && smoothedHz!==null && (now-lastDetectionTime)>=HOLD_MS){
-                    document.getElementById('noteText').textContent='--';
-                    document.getElementById('freqLine').textContent='等待信号…';
-                    document.getElementById('devText').textContent='';
-                    document.getElementById('needle').style.transform='rotate(0deg)';
-                    updateStrings(null);smoothedHz=null;smoothedCents=0;
-                }
-                requestAnimationFrame(tick);return;
-            }
-
-            // === VALID MUSICAL SIGNAL ===
-            noiseRejectCount=0;
-            musicalFrameCount++;
-            lastDetectionTime=now;
-
-            if (musicalFrameCount < MUSICAL_FRAMES_NEEDED) {
-                updateDebugPanel(rms, corr, f, centsOff, onsetActive, debugGates+' →确认帧 '+musicalFrameCount+'/'+MUSICAL_FRAMES_NEEDED);
-                requestAnimationFrame(tick);return;
-            }
-
-            // === ADAPTIVE SMOOTHING ===
-            if(smoothedHz===null){
-                smoothedHz=f;
-                smoothedCents=centsOff;
-            } else {
-                const freqChange = Math.abs(f-smoothedHz)/smoothedHz;
-                if (freqChange > 0.30) {
-                    updateDebugPanel(rms, corr, f, centsOff, onsetActive, '频率跳变拒绝('+(freqChange*100).toFixed(0)+'%)');
-                    requestAnimationFrame(tick);return;
-                }
-                let smooth;
-                if (freqChange < 0.02)      smooth = 0.15;
-                else if (freqChange < 0.10) smooth = 0.30;
-                else                         smooth = 0.50;
-                smoothedHz = smoothedHz*(1-smooth) + f*smooth;
-                const centsSmooth = (Math.abs(centsOff - smoothedCents) < 3) ? 0.12 : 0.35;
-                smoothedCents = smoothedCents*(1-centsSmooth) + centsOff*centsSmooth;
-            }
-            const midi=69+12*Math.log2(smoothedHz/440);
-            const mr=Math.round(midi),cents=100*(midi-mr);
-            updateDisplay(midiToNote(mr+cents/100),cents,mr);
-            updateStrings(mr);
-            updateDebugPanel(rms, corr, smoothedHz, smoothedCents, onsetActive, debugGates+' →✅显示');
-        } else if (f===-2) {
-            // Too quiet (RMS gate)
-            noiseRejectCount++;
-            musicalFrameCount=0;
-            updateDebugPanel(rms, corr, -1, 0, onsetActive, 'RMS过低(-48dBFS) #'+noiseRejectCount);
-            if (noiseRejectCount>=3 && smoothedHz!==null && (now-lastDetectionTime)>=HOLD_MS) {
-                document.getElementById('noteText').textContent='--';
-                document.getElementById('freqLine').textContent='等待信号…';
-                document.getElementById('devText').textContent='';
-                document.getElementById('needle').style.transform='rotate(0deg)';
-                updateStrings(null);smoothedHz=null;smoothedCents=0;
-            }
-        } else if (f===-3) {
-            // Weak correlation
-            noiseRejectCount++;
-            musicalFrameCount=0;
-            updateDebugPanel(rms, corr, -1, 0, onsetActive, '自相关不足('+(corr*100).toFixed(0)+'%) #'+noiseRejectCount);
-            if (noiseRejectCount>=3 && smoothedHz!==null && (now-lastDetectionTime)>=HOLD_MS) {
-                document.getElementById('noteText').textContent='--';
-                document.getElementById('freqLine').textContent='等待信号…';
-                document.getElementById('devText').textContent='';
-                document.getElementById('needle').style.transform='rotate(0deg)';
-                updateStrings(null);smoothedHz=null;smoothedCents=0;
-            }
-        } else if(smoothedHz!==null&&(now-lastDetectionTime)<HOLD_MS){
-            if (Math.abs(smoothedCents) > 0.5) {
+        if (f <= 40 || f >= 1200) {
+            if (smoothedHz !== null && (now - lastDetectionTime) < HOLD_MS) {
                 smoothedCents *= 0.95;
+                const rawMidi = 69 + 12 * Math.log2(smoothedHz / 440);
+                const nearestNote = Math.round(rawMidi);
+                updateDisplay(midiToNote(nearestNote), smoothedCents, nearestNote);
+            } else if (smoothedHz !== null) {
+                document.getElementById('noteText').textContent = '--';
+                document.getElementById('freqLine').textContent = '等待信号…';
+                document.getElementById('devText').textContent = '';
+                document.getElementById('needle').style.transform = 'rotate(0deg)';
+                updateStrings(null);
+                smoothedHz = null; smoothedCents = 0; pitchHistory = [];
             }
-            const midi=69+12*Math.log2(smoothedHz/440);
-            const mr=Math.round(midi),cents=100*(midi-mr);
-            updateDisplay(midiToNote(mr+cents/100),smoothedCents,mr);
-            updateDebugPanel(rms, 0, smoothedHz, smoothedCents, onsetActive, '保持显示→衰减中');
-        }else if(smoothedHz!==null){
-            document.getElementById('noteText').textContent='--';
-            document.getElementById('freqLine').textContent='等待信号…';
-            document.getElementById('devText').textContent='';
-            document.getElementById('needle').style.transform='rotate(0deg)';
-            updateStrings(null);
-            smoothedHz=null;smoothedCents=0;noiseRejectCount=0;musicalFrameCount=0;
         }
+
+        const rmsDb = rms > 1e-10 ? 20 * Math.log10(rms) : -120;
+        document.getElementById('dbRms').textContent = rmsDb.toFixed(1) + ' dB';
+        document.getElementById('dbCorr').textContent = (corr * 100).toFixed(1) + '%';
+        document.getElementById('dbPar').textContent = gateStatus;
+        document.getElementById('dbFreq').textContent = smoothedHz ? smoothedHz.toFixed(1) + ' Hz' : '--';
+        document.getElementById('dbCents').textContent = smoothedHz ? smoothedCents.toFixed(0) + '¢' : '--';
+        document.getElementById('dbMusical').textContent = pitchHistory.length;
+        document.getElementById('dbNoise').textContent = (f===-3?'噪声':(f===-2?'静音':'乐音'));
+        document.getElementById('dbRmsDelta').textContent = '-';
+        document.getElementById('dbGates').textContent = '归一化自相关+时域稳定 v3.0';
+
         requestAnimationFrame(tick);
     }
+
 
     function updateDisplay(note,cents,midi) {
         const nEl=document.getElementById('noteText'), fEl=document.getElementById('freqLine');
