@@ -311,8 +311,8 @@
     let lastDetectionTime=0;
 
     let pitchHistory = [];
-    const HISTORY_SIZE = 3;
-    const HOLD_MS = 1200;
+    const HISTORY_SIZE = 4;  // 4 frames for tighter stability
+    const HOLD_MS = 1800;
 
     function getBandpassRange(m) {
         switch(m) {
@@ -393,8 +393,8 @@
 
     function detectPitch(buf) {
         const n = buf.length, sr = ctx.sampleRate;
-        const minLag = Math.floor(sr / 1200);
-        const maxLag = Math.floor(sr / 55);
+        const minLag = Math.floor(sr / 1500); // C6
+        const maxLag = Math.floor(sr / 40);   // E1 (bass low string)
         if (maxLag >= n) return { freq: -1, rms: 0, corr: 0 };
 
         let r0 = 0;
@@ -403,7 +403,10 @@
 
         if (rms < 0.0015) return { freq: -2, rms: rms, corr: 0 };
 
-        let bestLag = -1, bestCorr = -Infinity;
+        // Dual-mode: raw for precision, normalized for noise gate
+        let bestLag = -1, bestRaw = 0, bestNorm = -Infinity;
+        const rawVals = new Float32Array(maxLag);
+
         for (let lag = minLag; lag < maxLag; lag++) {
             let r = 0, d1 = 0, d2 = 0;
             for (let i = 0; i < n - lag; i++) {
@@ -411,31 +414,24 @@
                 d1 += buf[i] * buf[i];
                 d2 += buf[i + lag] * buf[i + lag];
             }
+            rawVals[lag] = r;
             const denom = Math.sqrt(d1 * d2);
-            const corr = denom > 1e-9 ? r / denom : 0;
-            if (corr > bestCorr) { bestCorr = corr; bestLag = lag; }
+            const norm = denom > 1e-9 ? r / denom : 0;
+            if (norm > bestNorm) { bestNorm = norm; bestLag = lag; bestRaw = r; }
         }
 
-        if (bestLag < 0 || bestCorr < 0.80) return { freq: -3, rms: rms, corr: bestCorr };
+        // Gate using NORMALIZED correlation (amplitude-independent, reliable)
+        if (bestLag < 0 || bestNorm < 0.80) return { freq: -3, rms: rms, corr: bestNorm };
 
-        function corrAt(lag) {
-            if (lag < minLag || lag >= maxLag) return 0;
-            let r = 0, d1 = 0, d2 = 0;
-            for (let i = 0; i < n - lag; i++) {
-                r += buf[i] * buf[i + lag];
-                d1 += buf[i] * buf[i];
-                d2 += buf[i + lag] * buf[i + lag];
-            }
-            const denom = Math.sqrt(d1 * d2);
-            return denom > 1e-9 ? r / denom : 0;
-        }
-        const a = corrAt(bestLag - 1), b = bestCorr, c = corrAt(bestLag + 1);
+        // Frequency from RAW autocorrelation + parabolic interpolation (more accurate)
+        const rawAt = (lag) => (lag >= minLag && lag < maxLag) ? rawVals[lag] : 0;
+        const a = rawAt(bestLag - 1), b = bestRaw, c = rawAt(bestLag + 1);
         const div = 2 * (2 * b - a - c);
         const p = Math.abs(div) > 1e-9 ? (a - c) / div : 0;
         const refinedLag = bestLag + p;
         const freq = refinedLag > 0 ? sr / refinedLag : sr / bestLag;
 
-        return { freq, rms: rms, corr: bestCorr };
+        return { freq, rms: rms, corr: bestNorm };
     }
 
     function tick() {
@@ -448,26 +444,29 @@
 
         let gateStatus = '等待信号…';
 
-        if (f > 40 && f < 1200) {
+        if (f > 30 && f < 2000) {
             pitchHistory.push(f);
             if (pitchHistory.length > HISTORY_SIZE) pitchHistory.shift();
 
             let isStable = false;
             if (pitchHistory.length === HISTORY_SIZE) {
-                const max = Math.max(...pitchHistory);
-                const min = Math.min(...pitchHistory);
-                isStable = (max - min) / min < 0.03;
+                // Use median to reject outlier frames, then check spread
+                const sorted = [...pitchHistory].sort((a, b) => a - b);
+                const median = sorted[Math.floor(sorted.length / 2)];
+                isStable = (sorted[sorted.length - 1] - sorted[0]) / median < 0.02; // 2% spread
             }
 
             if (isStable) {
-                const avgFreq = pitchHistory.reduce((a, b) => a + b, 0) / pitchHistory.length;
+                // Median filters out single-frame outliers better than average
+                const sorted = [...pitchHistory].sort((a, b) => a - b);
+                const medianFreq = sorted[Math.floor(sorted.length / 2)];
                 lastDetectionTime = now;
                 gateStatus = '🎵 信号锁定';
 
                 if (smoothedHz === null) {
-                    smoothedHz = avgFreq;
+                    smoothedHz = medianFreq;
                 } else {
-                    smoothedHz = smoothedHz * 0.7 + avgFreq * 0.3;
+                    smoothedHz = smoothedHz * 0.7 + medianFreq * 0.3;
                 }
 
                 const rawMidi = 69 + 12 * Math.log2(smoothedHz / 440);
@@ -486,7 +485,7 @@
             gateStatus = '📡 非乐音(' + (corr * 100).toFixed(0) + '%)';
         }
 
-        if (f <= 40 || f >= 1200) {
+        if (f <= 30 || f >= 2000) {
             if (smoothedHz !== null && (now - lastDetectionTime) < HOLD_MS) {
                 smoothedCents *= 0.95;
                 const rawMidi = 69 + 12 * Math.log2(smoothedHz / 440);
