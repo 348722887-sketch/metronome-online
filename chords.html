@@ -82,76 +82,76 @@ select{background:var(--card-bg);color:var(--mute);border-color:var(--card-borde
 // barre: fret within diagram (1-indexed relative to diagram top)
 // fretStart: actual fret number label (shown left of diagram)
 // dots: [{str:1-6, fr:fret_number}]
-const DB = {
-'C':{t:'C大调I级。C-E-G构成。',et:'C Major Key. Tonic (I). Notes: C-E-G.',
+const DB={
+'C':{t:'C大调I级。C-E-G。',et:'C Major Key. Tonic (I). C-E-G.',
 c:[
-{n:'C',mu:[6],o:[3,1],d:[{s:5,f:3},{s:4,f:2},{s:2,f:1}],nt:'C-E-G',ty:'大三和弦',en:'Major'},
-{n:'Dm',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:3},{s:1,f:1}],nt:'D-F-A',ty:'小三和弦',en:'Minor'},
-{n:'Em',mu:[],o:[6,3,2,1],d:[{s:5,f:2},{s:4,f:2}],nt:'E-G-B',ty:'小三和弦',en:'Minor'},
-{n:'F',mu:[],o:[],b:1,d:[{s:5,f:3},{s:4,f:3},{s:3,f:2}],nt:'F-A-C',ty:'大三和弦',en:'Major'},
-{n:'G',mu:[],o:[4,3,2],d:[{s:6,f:3},{s:5,f:2},{s:1,f:3}],nt:'G-B-D',ty:'大三和弦',en:'Major'},
-{n:'Am',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:1}],nt:'A-C-E',ty:'小三和弦',en:'Minor'},
-{n:'G7',mu:[],o:[4,3,2],d:[{s:6,f:3},{s:5,f:2},{s:1,f:1}],nt:'G-B-D-F',ty:'属七和弦',en:'Dominant 7th'},
+{n:'C',f:['x',3,2,0,1,0],nt:'C-E-G',ty:'大三和弦',en:'Major'},
+{n:'Dm',f:['x','x',0,2,3,1],nt:'D-F-A',ty:'小三和弦',en:'Minor'},
+{n:'Em',f:[0,2,2,0,0,0],nt:'E-G-B',ty:'小三和弦',en:'Minor'},
+{n:'F',f:[1,3,3,2,1,1],bf:1,b:{f:1,ss:6,se:1},nt:'F-A-C',ty:'大三和弦',en:'Major'},
+{n:'G',f:[3,2,0,0,0,3],nt:'G-B-D',ty:'大三和弦',en:'Major'},
+{n:'Am',f:['x',0,2,2,1,0],nt:'A-C-E',ty:'小三和弦',en:'Minor'},
+{n:'G7',f:[3,2,0,0,0,1],nt:'G-B-D-F',ty:'属七和弦',en:'Dominant 7th'},
 ]},
 'D':{t:'D大调。两个升号(F#,C#)。',et:'D Major. Two sharps: F#, C#.',
 c:[
-{n:'D',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:3},{s:1,f:2}],nt:'D-F#-A',ty:'大三和弦',en:'Major'},
-{n:'Em',mu:[],o:[6,3,2,1],d:[{s:5,f:2},{s:4,f:2}],nt:'E-G-B',ty:'小三和弦',en:'Minor'},
-{n:'F#m',mu:[],o:[],b:1,fs:2,d:[{s:5,f:3},{s:4,f:3}],nt:'F#-A-C#',ty:'小三和弦',en:'Minor'},
-{n:'G',mu:[],o:[4,3,2],d:[{s:6,f:3},{s:5,f:2},{s:1,f:3}],nt:'G-B-D',ty:'大三和弦',en:'Major'},
-{n:'A',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:2}],nt:'A-C#-E',ty:'大三和弦',en:'Major'},
-{n:'Bm',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'B-D-F#',ty:'小三和弦',en:'Minor'},
-{n:'A7',mu:[6],o:[5,3,1],d:[{s:4,f:2},{s:2,f:2}],nt:'A-C#-E-G',ty:'属七和弦',en:'Dominant 7th'},
+{n:'D',f:['x','x',0,2,3,2],nt:'D-F#-A',ty:'大三和弦',en:'Major'},
+{n:'Em',f:[0,2,2,0,0,0],nt:'E-G-B',ty:'小三和弦',en:'Minor'},
+{n:'F#m',f:[2,4,4,2,2,2],bf:2,b:{f:1,ss:6,se:1},nt:'F#-A-C#',ty:'小三和弦',en:'Minor'},
+{n:'G',f:[3,2,0,0,0,3],nt:'G-B-D',ty:'大三和弦',en:'Major'},
+{n:'A',f:['x',0,2,2,2,0],nt:'A-C#-E',ty:'大三和弦',en:'Major'},
+{n:'Bm',f:['x',2,4,4,3,2],bf:2,b:{f:1,ss:5,se:1},nt:'B-D-F#',ty:'小三和弦',en:'Minor'},
+{n:'A7',f:['x',0,2,0,2,0],nt:'A-C#-E-G',ty:'属七和弦',en:'Dominant 7th'},
 ]},
-'E':{t:'E大调。四个升号。吉他最自然的调性。',et:'E Major. Four sharps. Guitar\'s most natural key.',
+'E':{t:'E大调。四个升号。',et:'E Major. Four sharps.',
 c:[
-{n:'E',mu:[],o:[6,2,1],d:[{s:5,f:2},{s:4,f:2},{s:3,f:1}],nt:'E-G#-B',ty:'大三和弦',en:'Major'},
-{n:'F#m',mu:[],o:[],b:1,fs:2,d:[{s:5,f:3},{s:4,f:3}],nt:'F#-A-C#',ty:'小三和弦',en:'Minor'},
-{n:'G#m',mu:[],o:[],b:1,fs:4,d:[{s:5,f:3},{s:4,f:3}],nt:'G#-B-D#',ty:'小三和弦',en:'Minor'},
-{n:'A',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:2}],nt:'A-C#-E',ty:'大三和弦',en:'Major'},
-{n:'B',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:3,f:3},{s:2,f:3}],nt:'B-D#-F#',ty:'大三和弦',en:'Major'},
-{n:'C#m',mu:[6],o:[],b:1,fs:4,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'C#-E-G#',ty:'小三和弦',en:'Minor'},
-{n:'B7',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:2,f:3}],nt:'B-D#-F#-A',ty:'属七和弦',en:'Dominant 7th'},
+{n:'E',f:[0,2,2,1,0,0],nt:'E-G#-B',ty:'大三和弦',en:'Major'},
+{n:'F#m',f:[2,4,4,2,2,2],bf:2,b:{f:1,ss:6,se:1},nt:'F#-A-C#',ty:'小三和弦',en:'Minor'},
+{n:'G#m',f:[4,6,6,4,4,4],bf:4,b:{f:1,ss:6,se:1},nt:'G#-B-D#',ty:'小三和弦',en:'Minor'},
+{n:'A',f:['x',0,2,2,2,0],nt:'A-C#-E',ty:'大三和弦',en:'Major'},
+{n:'B',f:['x',2,4,4,4,2],bf:2,b:{f:1,ss:5,se:1},nt:'B-D#-F#',ty:'大三和弦',en:'Major'},
+{n:'C#m',f:['x',4,6,6,5,4],bf:4,b:{f:1,ss:5,se:1},nt:'C#-E-G#',ty:'小三和弦',en:'Minor'},
+{n:'B7',f:['x',2,1,2,0,2],nt:'B-D#-F#-A',ty:'属七和弦',en:'Dominant 7th'},
 ]},
 'F':{t:'F大调。一个降号(Bb)。',et:'F Major. One flat: Bb.',
 c:[
-{n:'F',mu:[],o:[],b:1,d:[{s:5,f:3},{s:4,f:3},{s:3,f:2}],nt:'F-A-C',ty:'大三和弦',en:'Major'},
-{n:'Gm',mu:[],o:[],b:1,fs:3,d:[{s:5,f:3},{s:4,f:3}],nt:'G-Bb-D',ty:'小三和弦',en:'Minor'},
-{n:'Am',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:1}],nt:'A-C-E',ty:'小三和弦',en:'Minor'},
-{n:'Bb',mu:[6],o:[],b:1,d:[{s:4,f:3},{s:3,f:3},{s:2,f:3}],nt:'Bb-D-F',ty:'大三和弦',en:'Major'},
-{n:'C',mu:[6],o:[3,1],d:[{s:5,f:3},{s:4,f:2},{s:2,f:1}],nt:'C-E-G',ty:'大三和弦',en:'Major'},
-{n:'Dm',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:3},{s:1,f:1}],nt:'D-F-A',ty:'小三和弦',en:'Minor'},
-{n:'C7',mu:[6],o:[3,1],d:[{s:5,f:3},{s:4,f:2},{s:3,f:3},{s:2,f:1}],nt:'C-E-G-Bb',ty:'属七和弦',en:'Dominant 7th'},
+{n:'F',f:[1,3,3,2,1,1],bf:1,b:{f:1,ss:6,se:1},nt:'F-A-C',ty:'大三和弦',en:'Major'},
+{n:'Gm',f:[3,5,5,3,3,3],bf:3,b:{f:1,ss:6,se:1},nt:'G-Bb-D',ty:'小三和弦',en:'Minor'},
+{n:'Am',f:['x',0,2,2,1,0],nt:'A-C-E',ty:'小三和弦',en:'Minor'},
+{n:'Bb',f:['x',1,3,3,3,1],bf:1,b:{f:1,ss:5,se:1},nt:'Bb-D-F',ty:'大三和弦',en:'Major'},
+{n:'C',f:['x',3,2,0,1,0],nt:'C-E-G',ty:'大三和弦',en:'Major'},
+{n:'Dm',f:['x','x',0,2,3,1],nt:'D-F-A',ty:'小三和弦',en:'Minor'},
+{n:'C7',f:['x',3,2,3,1,0],nt:'C-E-G-Bb',ty:'属七和弦',en:'Dominant 7th'},
 ]},
-'G':{t:'G大调。一个升号(F#)。民谣最常用。',et:'G Major. One sharp: F#. Most common acoustic key.',
+'G':{t:'G大调。一个升号(F#)。',et:'G Major. One sharp: F#.',
 c:[
-{n:'G',mu:[],o:[4,3,2],d:[{s:6,f:3},{s:5,f:2},{s:1,f:3}],nt:'G-B-D',ty:'大三和弦',en:'Major'},
-{n:'Am',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:1}],nt:'A-C-E',ty:'小三和弦',en:'Minor'},
-{n:'Bm',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'B-D-F#',ty:'小三和弦',en:'Minor'},
-{n:'C',mu:[6],o:[3,1],d:[{s:5,f:3},{s:4,f:2},{s:2,f:1}],nt:'C-E-G',ty:'大三和弦',en:'Major'},
-{n:'D',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:3},{s:1,f:2}],nt:'D-F#-A',ty:'大三和弦',en:'Major'},
-{n:'Em',mu:[],o:[6,3,2,1],d:[{s:5,f:2},{s:4,f:2}],nt:'E-G-B',ty:'小三和弦',en:'Minor'},
-{n:'D7',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:1},{s:1,f:2}],nt:'D-F#-A-C',ty:'属七和弦',en:'Dominant 7th'},
+{n:'G',f:[3,2,0,0,0,3],nt:'G-B-D',ty:'大三和弦',en:'Major'},
+{n:'Am',f:['x',0,2,2,1,0],nt:'A-C-E',ty:'小三和弦',en:'Minor'},
+{n:'Bm',f:['x',2,4,4,3,2],bf:2,b:{f:1,ss:5,se:1},nt:'B-D-F#',ty:'小三和弦',en:'Minor'},
+{n:'C',f:['x',3,2,0,1,0],nt:'C-E-G',ty:'大三和弦',en:'Major'},
+{n:'D',f:['x','x',0,2,3,2],nt:'D-F#-A',ty:'大三和弦',en:'Major'},
+{n:'Em',f:[0,2,2,0,0,0],nt:'E-G-B',ty:'小三和弦',en:'Minor'},
+{n:'D7',f:['x','x',0,2,1,2],nt:'D-F#-A-C',ty:'属七和弦',en:'Dominant 7th'},
 ]},
-'A':{t:'A大调。三个升号(F#,C#,G#)。',et:'A Major. Three sharps: F#, C#, G#.',
+'A':{t:'A大调。三个升号。',et:'A Major. Three sharps.',
 c:[
-{n:'A',mu:[6],o:[5,1],d:[{s:4,f:2},{s:3,f:2},{s:2,f:2}],nt:'A-C#-E',ty:'大三和弦',en:'Major'},
-{n:'Bm',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'B-D-F#',ty:'小三和弦',en:'Minor'},
-{n:'C#m',mu:[6],o:[],b:1,fs:4,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'C#-E-G#',ty:'小三和弦',en:'Minor'},
-{n:'D',mu:[6,5],o:[4],d:[{s:3,f:2},{s:2,f:3},{s:1,f:2}],nt:'D-F#-A',ty:'大三和弦',en:'Major'},
-{n:'E',mu:[],o:[6,2,1],d:[{s:5,f:2},{s:4,f:2},{s:3,f:1}],nt:'E-G#-B',ty:'大三和弦',en:'Major'},
-{n:'F#m',mu:[],o:[],b:1,fs:2,d:[{s:5,f:3},{s:4,f:3}],nt:'F#-A-C#',ty:'小三和弦',en:'Minor'},
-{n:'E7',mu:[],o:[6,4,2,1],d:[{s:5,f:2},{s:3,f:1}],nt:'E-G#-B-D',ty:'属七和弦',en:'Dominant 7th'},
+{n:'A',f:['x',0,2,2,2,0],nt:'A-C#-E',ty:'大三和弦',en:'Major'},
+{n:'Bm',f:['x',2,4,4,3,2],bf:2,b:{f:1,ss:5,se:1},nt:'B-D-F#',ty:'小三和弦',en:'Minor'},
+{n:'C#m',f:['x',4,6,6,5,4],bf:4,b:{f:1,ss:5,se:1},nt:'C#-E-G#',ty:'小三和弦',en:'Minor'},
+{n:'D',f:['x','x',0,2,3,2],nt:'D-F#-A',ty:'大三和弦',en:'Major'},
+{n:'E',f:[0,2,2,1,0,0],nt:'E-G#-B',ty:'大三和弦',en:'Major'},
+{n:'F#m',f:[2,4,4,2,2,2],bf:2,b:{f:1,ss:6,se:1},nt:'F#-A-C#',ty:'小三和弦',en:'Minor'},
+{n:'E7',f:[0,2,2,1,3,0],nt:'E-G#-B-D',ty:'属七和弦',en:'Dominant 7th'},
 ]},
 'B':{t:'B大调。五个升号。',et:'B Major. Five sharps.',
 c:[
-{n:'B',mu:[6],o:[],b:1,fs:2,d:[{s:4,f:3},{s:3,f:3},{s:2,f:3}],nt:'B-D#-F#',ty:'大三和弦',en:'Major'},
-{n:'C#m',mu:[6],o:[],b:1,fs:4,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'C#-E-G#',ty:'小三和弦',en:'Minor'},
-{n:'D#m',mu:[6],o:[],b:1,fs:6,d:[{s:4,f:3},{s:3,f:3},{s:2,f:2}],nt:'D#-F#-A#',ty:'小三和弦',en:'Minor'},
-{n:'E',mu:[],o:[6,2,1],d:[{s:5,f:2},{s:4,f:2},{s:3,f:1}],nt:'E-G#-B',ty:'大三和弦',en:'Major'},
-{n:'F#',mu:[],o:[],b:1,fs:2,d:[{s:5,f:3},{s:4,f:3},{s:3,f:2}],nt:'F#-A#-C#',ty:'大三和弦',en:'Major'},
-{n:'G#m',mu:[],o:[],b:1,fs:4,d:[{s:5,f:3},{s:4,f:3}],nt:'G#-B-D#',ty:'小三和弦',en:'Minor'},
-{n:'F#7',mu:[],o:[],b:1,fs:2,d:[{s:5,f:3},{s:3,f:2}],nt:'F#-A#-C#-E',ty:'属七和弦',en:'Dominant 7th'},
+{n:'B',f:['x',2,4,4,4,2],bf:2,b:{f:1,ss:5,se:1},nt:'B-D#-F#',ty:'大三和弦',en:'Major'},
+{n:'C#m',f:['x',4,6,6,5,4],bf:4,b:{f:1,ss:5,se:1},nt:'C#-E-G#',ty:'小三和弦',en:'Minor'},
+{n:'D#m',f:['x',6,8,8,7,6],bf:6,b:{f:1,ss:5,se:1},nt:'D#-F#-A#',ty:'小三和弦',en:'Minor'},
+{n:'E',f:[0,2,2,1,0,0],nt:'E-G#-B',ty:'大三和弦',en:'Major'},
+{n:'F#',f:[2,4,4,3,2,2],bf:2,b:{f:1,ss:6,se:1},nt:'F#-A#-C#',ty:'大三和弦',en:'Major'},
+{n:'G#m',f:[4,6,6,4,4,4],bf:4,b:{f:1,ss:6,se:1},nt:'G#-B-D#',ty:'小三和弦',en:'Minor'},
+{n:'F#7',f:[2,4,2,3,2,2],bf:2,b:{f:1,ss:6,se:1},nt:'F#-A#-C#-E',ty:'属七和弦',en:'Dominant 7th'},
 ]},
 };
 const KEYS=['C','D','E','F','G','A','B'];
@@ -162,11 +162,9 @@ function ctx(){if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();i
 function play(){
     ctx();const ch=gc(),bm=[40,45,50,55,59,64],n=[];
     for(let s=6;s>=1;s--){
-        if(ch.mu&&ch.mu.includes(s))continue; // muted string
-        if(ch.o&&ch.o.includes(s)){n.push(bm[6-s]);continue;} // open string
-        if(ch.d){const dt=ch.d.find(d=>d.s===s);if(dt){n.push(bm[6-s]+dt.f);continue;}} // dotted string
-        if(ch.b){n.push(bm[6-s]+ch.b);continue;} // barre string (no explicit dot, plays at barre fret)
-        // string not muted, not open, no dot, no barre → skip
+        const v=ch.f[6-s];
+        if(v==='x')continue;
+        n.push(bm[6-s]+(v===0?0:v));
     }
     const now=ac.currentTime;
     n.forEach((m,i)=>{const fr=440*Math.pow(2,(m-69)/12),t=now+i*0.06;const o=ac.createOscillator();o.type='sine';o.frequency.value=fr;const g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.1,t+.008);g.gain.exponentialRampToValueAtTime(.001,t+2.5);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+2.7);});
@@ -177,13 +175,16 @@ function svg(ch,lg){
     SX.forEach(x=>s+=`<line x1="${x}" y1="24" x2="${x}" y2="80"/>`);
     SY.forEach(y=>s+=`<line x1="15" y1="${y}" x2="65" y2="${y}"/>`);
     s+=`</g>`;
-    const nw=ch.fs?1.0:2.5;
+    const nw=ch.bf?1.0:2.5;
     s+=`<line x1="14" y1="24" x2="66" y2="24" stroke="${d}" stroke-width="${nw}" stroke-linecap="round"/>`;
-    if(ch.fs)s+=`<text x="7" y="34" font-size="10" font-weight="700" fill="${g}" text-anchor="middle">${ch.fs}</text>`;
-    if(ch.mu)ch.mu.forEach(n=>{const x=SX[6-n];s+=`<g stroke="${g}" stroke-width="1.2" stroke-linecap="round"><line x1="${x-2.5}" y1="10" x2="${x+2.5}" y2="15"/><line x1="${x+2.5}" y1="10" x2="${x-2.5}" y2="15"/></g>`;});
-    if(ch.o)ch.o.forEach(n=>{const x=SX[6-n];s+=`<circle cx="${x}" cy="12.5" r="2.5" fill="none" stroke="${g}" stroke-width="1.2"/>`;});
-    if(ch.b){const by=SY[ch.b-1]+7;let bMin=6,bMax=1;for(let ss=1;ss<=6;ss++){if(ch.mu&&ch.mu.includes(ss))continue;if(ss<bMin)bMin=ss;if(ss>bMax)bMax=ss;}const bx=SX[6-bMax]-2,bw=SX[6-bMin]-SX[6-bMax]+4;s+=`<rect x="${bx}" y="${by-3}" width="${bw}" height="6" rx="3" fill="${c}" opacity="0.8"/>`;}
-    if(ch.d)ch.d.forEach(d=>{const x=SX[6-d.s],y=SY[d.f-1]+7;s+=`<circle cx="${x}" cy="${y}" r="3.8" fill="${c}"/>`;});
+    if(ch.bf)s+=`<text x="7" y="34" font-size="10" font-weight="700" fill="${g}" text-anchor="middle">${ch.bf}</text>`;
+    ch.f.forEach((v,i)=>{
+        const x=SX[i];
+        if(v==='x'){s+=`<g stroke="${g}" stroke-width="1.2" stroke-linecap="round"><line x1="${x-2.5}" y1="10" x2="${x+2.5}" y2="15"/><line x1="${x+2.5}" y1="10" x2="${x-2.5}" y2="15"/></g>`;}
+        else if(v===0){s+=`<circle cx="${x}" cy="12.5" r="2.5" fill="none" stroke="${g}" stroke-width="1.2"/>`;}
+        else{const y=SY[v-1]+7;s+=`<circle cx="${x}" cy="${y}" r="3.8" fill="${c}"/>`;}
+    });
+    if(ch.b){const by=SY[ch.b.f-1]+7,bx=SX[6-ch.b.ss]-2,bw=SX[6-ch.b.se]-SX[6-ch.b.ss]+4;s+=`<rect x="${bx}" y="${by-3}" width="${bw}" height="6" rx="3" fill="${c}" opacity="0.8"/>`;}
     s+=`</svg>`;return s;
 }
 function bt(){const ct=document.getElementById('keyTabs');ct.innerHTML='';KEYS.forEach(k=>{const b=document.createElement('button');b.className='key-tab'+(k===ak?' on':'');b.textContent=k+' 调';b.onclick=()=>{ak=k;hi=0;ba();};ct.appendChild(b);});}
