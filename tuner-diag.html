@@ -3,148 +3,167 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>调音器诊断</title>
+<title>调音器诊断 v2</title>
 <style>
-body{font-family:monospace;background:#111;color:#0f0;padding:20px;max-width:500px;margin:0 auto;font-size:16px}
-h1{font-size:20px;text-align:center;margin-bottom:16px}
-.metric{margin:6px 0;padding:6px;background:#1a1a1a;border-radius:4px;display:flex;justify-content:space-between}
-.metric .val{color:#ff0;font-weight:bold}
-.big{font-size:32px;text-align:center;margin:12px 0;color:#0ff}
-.btn{display:block;width:100%;padding:16px;font-size:20px;background:#4F8CFF;color:#fff;border:none;border-radius:12px;margin:16px 0;cursor:pointer}
-.btn.on{background:#ef4444}
-#status{text-align:center;margin:8px 0;font-size:14px}
-.warn{color:#f80}
-.good{color:#0f0}
+body{font-family:monospace;background:#000;color:#0f0;padding:16px;max-width:500px;margin:0 auto;font-size:15px}
+h1{font-size:18px;text-align:center;margin-bottom:10px;color:#0ff}
+.btn{display:block;width:100%;padding:14px;font-size:18px;background:#e84;color:#fff;border:none;border-radius:12px;margin:10px 0;cursor:pointer}
+.btn.on{background:#e33}
+.log{padding:8px;background:#111;border-radius:6px;margin:4px 0;font-size:13px;word-break:break-all}
+.log .l{color:#4c4}
+.log .v{color:#ff0}
+hr{border-color:#333;margin:12px 0}
 </style>
 </head>
 <body>
-<h1>🔬 调音器诊断工具</h1>
+<h1>🔬 调音器诊断 v2 — 音频轨道层检查</h1>
 
 <button class="btn" id="btn" onclick="toggle()">🎤 开始监听</button>
-<div id="status"></div>
 
-<div class="metric"><span>RMS (原始音量)</span><span class="val" id="rmsVal">-</span></div>
-<div class="metric"><span>RMS dB</span><span class="val" id="rmsDbVal">-</span></div>
-<div class="metric"><span>自相关质量</span><span class="val" id="corrVal">-</span></div>
-<div class="metric"><span>检测频率</span><span class="val" id="freqVal">-</span></div>
-<div class="metric"><span>最近音符</span><span class="val" id="noteVal">-</span></div>
-<div class="metric"><span>音分偏差</span><span class="val" id="centVal">-</span></div>
-<div class="metric"><span>自相关延迟(lag)</span><span class="val" id="lagVal">-</span></div>
-
-<div class="big" id="bigNote">🎵</div>
-
-<hr style="border-color:#333;margin:16px 0">
-<p style="font-size:13px;color:#888">
-📋 使用方法:<br>
-1. 点击按钮 → 允许麦克风<br>
-2. 保持安静 → 记录各项数值<br>
-3. 弹琴弦 → 看 RMS 和频率是否变化<br>
-4. 截图发给我
-</p>
+<div id="logs">
+  <div class="log"><span class="l">等待启动…</span></div>
+</div>
 
 <script>
-let ctx=null, analyser=null, running=false;
+let ctx=null, analyser=null, scriptNode=null, stream=null, running=false;
+let tickCount=0, nonZeroCount=0;
+
+function log(label, value) {
+  const d=document.getElementById('logs');
+  const div=document.createElement('div');
+  div.className='log';
+  div.innerHTML='<span class="l">'+label+'</span> <span class="v">'+value+'</span>';
+  d.insertBefore(div, d.firstChild);
+  if(d.children.length>30) d.removeChild(d.lastChild);
+}
 
 async function toggle() {
-    if (running) {
-        running=false;
-        if(ctx){ctx.close();ctx=null;analyser=null;}
-        document.getElementById('btn').textContent='🎤 开始监听';
-        document.getElementById('btn').classList.remove('on');
-        document.getElementById('status').textContent='';
-        return;
+  if(running){
+    running=false;
+    if(scriptNode){scriptNode.disconnect();scriptNode=null;}
+    if(ctx){ctx.close();ctx=null;analyser=null;}
+    if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+    document.getElementById('btn').textContent='🎤 开始监听';
+    document.getElementById('btn').classList.remove('on');
+    log('⏹','已停止');
+    return;
+  }
+
+  try {
+    // === STEP 1: Check if getUserMedia is supported ===
+    log('📡','检查 navigator.mediaDevices…');
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+      log('❌ FATAL','getUserMedia 不可用！这个浏览器不支持');
+      return;
     }
-    try {
-        document.getElementById('status').textContent='正在请求麦克风权限…';
-        document.getElementById('status').className='';
+    log('✅','getUserMedia 可用');
 
-        // TEST 1: simplest possible constraints
-        const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    // === STEP 2: Enumerate devices ===
+    log('📋','枚举音频设备…');
+    const devices=await navigator.mediaDevices.enumerateDevices();
+    const audioInputs=devices.filter(d=>d.kind==='audioinput');
+    log('🎙 发现音频输入设备',audioInputs.length+' 个');
+    audioInputs.forEach(d=>log('  📱',d.label||'(无标签) — '+d.deviceId.slice(0,8)+'…'));
 
-        document.getElementById('status').textContent='✅ 麦克风已连接，开始监听';
-        document.getElementById('status').className='good';
+    // === STEP 3: Get mic stream ===
+    log('🎤','请求麦克风 (audio:true)…');
+    stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    log('✅','getUserMedia 成功');
 
-        ctx = new (window.AudioContext||window.webkitAudioContext)();
-        document.getElementById('status').textContent+=' | AudioCtx: '+ctx.sampleRate+'Hz';
-        if (ctx.state==='suspended') {
-            await ctx.resume();
-            document.getElementById('status').textContent+=' | resumed';
-        }
-        document.getElementById('status').textContent+=' | state:'+ctx.state;
+    // === STEP 4: Check track status ===
+    const tracks=stream.getAudioTracks();
+    log('🎵 音频轨道数',tracks.length);
+    tracks.forEach(t=>{
+      log('  轨道',t.label);
+      log('    enabled',t.enabled);
+      log('    muted',t.muted);
+      log('    readyState',t.readyState);
+      log('    constraints',JSON.stringify(t.getConstraints()));
+      log('    settings',JSON.stringify(t.getSettings()));
+    });
 
-        const src = ctx.createMediaStreamSource(stream);
-        analyser = ctx.createAnalyser();
-        analyser.fftSize = 2048;
-        analyser.smoothingTimeConstant = 0.3;
-        src.connect(analyser);
-        // CRITICAL for iOS: connect to destination via zero-gain node.
-        // iOS Safari WILL NOT process an audio graph that isn't connected to destination.
-        const silentGain = ctx.createGain();
-        silentGain.gain.value = 0;
-        analyser.connect(silentGain);
-        silentGain.connect(ctx.destination);
-
-        running = true;
-        document.getElementById('btn').textContent = '⏹ 停止';
-        document.getElementById('btn').classList.add('on');
-        tick();
-    } catch(e) {
-        document.getElementById('status').textContent = '❌ 错误: '+e.message;
-        document.getElementById('status').className = 'warn';
-        console.error(e);
+    if(tracks.length===0){
+      log('❌ FATAL','没有音频轨道！');
+      return;
     }
+
+    // === STEP 5: Create AudioContext ===
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    log('🔊 AudioContext 创建','sampleRate='+ctx.sampleRate+'Hz, state='+ctx.state);
+
+    if(ctx.state==='suspended'){
+      log('⏳','正在 resume…');
+      await ctx.resume();
+      log('✅','resume 完成, state='+ctx.state);
+    }
+
+    // === STEP 6: Create script processor (alternative to analyser) ===
+    const src=ctx.createMediaStreamSource(stream);
+    analyser=ctx.createAnalyser();
+    analyser.fftSize=2048;
+
+    // ScriptProcessorNode: directly processes audio — works even if AnalyserNode doesn't
+    scriptNode=ctx.createScriptProcessor(2048,1,1);
+    scriptNode.onaudioprocess=function(e){
+      tickCount++;
+      const buf=e.inputBuffer.getChannelData(0);
+      let max=0, sum=0;
+      for(let i=0;i<buf.length;i++){
+        const a=Math.abs(buf[i]);
+        sum+=a;
+        if(a>max)max=a;
+      }
+      if(max>0.0001) nonZeroCount++;
+
+      // Update every 30 ticks
+      if(tickCount%30===0){
+        document.getElementById('btn').textContent='⏹ 停止 (tick:'+tickCount+' nz:'+nonZeroCount+')';
+      }
+    };
+
+    // Connect: src → analyser → scriptNode → silentGain → destination
+    src.connect(analyser);
+    analyser.connect(scriptNode);
+    const silentGain=ctx.createGain();
+    silentGain.gain.value=0;
+    scriptNode.connect(silentGain);
+    silentGain.connect(ctx.destination);
+
+    log('🔗','音频链: mic→analyser→scriptNode→silentGain→dest');
+
+    running=true;
+    document.getElementById('btn').textContent='⏹ 停止';
+    document.getElementById('btn').classList.add('on');
+
+    // === STEP 7: Start reading ===
+    tickCount=0; nonZeroCount=0;
+    readAnalyser();
+  } catch(e) {
+    log('❌ 异常',e.name+': '+e.message);
+  }
 }
 
-function detectPitch(buf) {
-    const n=buf.length, sr=ctx.sampleRate;
-    const minLag=Math.floor(sr/1500);
-    const maxLag=Math.floor(sr/60);
-    if (maxLag>=n) return {freq:-1, rms:0, corr:0, lag:0};
+function readAnalyser(){
+  if(!running) return;
 
-    let r0=0;
-    for(let i=0;i<n;i++) r0+=buf[i]*buf[i];
-    const rms=Math.sqrt(r0/n);
+  const buf=new Float32Array(analyser.fftSize);
+  analyser.getFloatTimeDomainData(buf);
 
-    // Find best lag with autocorrelation — NO GATES, raw detection
-    let bestLag=-1, bestVal=0;
-    for(let lag=minLag;lag<maxLag;lag++){
-        let r=0;
-        for(let i=0;i<n-lag;i++) r+=buf[i]*buf[i+lag];
-        if(r>bestVal){bestVal=r;bestLag=lag;}
-    }
-    const corr = r0>1e-12 ? bestVal/r0 : 0;
-    const freq = bestLag>0 ? sr/bestLag : -1;
-    return {freq, rms, corr, lag:bestLag};
-}
+  let max=0, rms=0;
+  for(let i=0;i<buf.length;i++){ const v=Math.abs(buf[i]); rms+=buf[i]*buf[i]; if(v>max)max=v; }
+  rms=Math.sqrt(rms/buf.length);
 
-function tick() {
-    if(!running) return;
-    const buf = new Float32Array(analyser.fftSize);
-    analyser.getFloatTimeDomainData(buf);
-    const r = detectPitch(buf);
+  tickCount++;
+  if(max>0) nonZeroCount++;
 
-    document.getElementById('rmsVal').textContent = r.rms.toFixed(6);
-    const rmsDb = r.rms>1e-10 ? (20*Math.log10(r.rms)).toFixed(1) : '-∞';
-    document.getElementById('rmsDbVal').textContent = rmsDb+' dB';
-    document.getElementById('corrVal').textContent = (r.corr*100).toFixed(1)+'%';
-    document.getElementById('freqVal').textContent = r.freq>0 ? r.freq.toFixed(2)+' Hz' : '未检测到';
-    document.getElementById('lagVal').textContent = r.lag;
+  // Update display every 15 frames
+  if(tickCount%15===0){
+    const rmsDb=rms>1e-10?(20*Math.log10(rms)).toFixed(1):'-∞';
+    log('📊 帧#'+tickCount,
+      'RMS='+rmsDb+'dB peak='+max.toFixed(4)+' nzFrames='+nonZeroCount+'/'+tickCount+' state='+(ctx?ctx.state:'?'));
+  }
 
-    if (r.freq>40&&r.freq<2000) {
-        const midi = 69+12*Math.log2(r.freq/440);
-        const mr = Math.round(midi);
-        const cents = 100*(midi-mr);
-        const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-        const noteName = NOTES[((mr%12)+12)%12]+Math.floor(mr/12)-1;
-        document.getElementById('noteVal').textContent = noteName;
-        document.getElementById('centVal').textContent = cents.toFixed(0)+'¢';
-        document.getElementById('bigNote').textContent = noteName.slice(0,-1)+' '+noteName.slice(-1);
-    } else {
-        document.getElementById('noteVal').textContent = '--';
-        document.getElementById('centVal').textContent = '--';
-    }
-
-    requestAnimationFrame(tick);
+  requestAnimationFrame(readAnalyser);
 }
 </script>
 </body>
