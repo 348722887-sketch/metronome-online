@@ -356,12 +356,20 @@
             bandpassLP.Q.value = 0.7;
 
             analyser = ctx.createAnalyser();
-            analyser.fftSize = 4096; // pitchy recommends 4096 for best accuracy
+            analyser.fftSize = 4096;
             analyser.smoothingTimeConstant = 0.2;
+
+            // Low-shelf boost: phone mics lose sensitivity below 100Hz.
+            // 6th string E2 = 82Hz falls in this dead zone. +8dB below 200Hz compensates.
+            const lowBoost = ctx.createBiquadFilter();
+            lowBoost.type = 'lowshelf';
+            lowBoost.frequency.value = 200;
+            lowBoost.gain.value = 8;
 
             src.connect(bandpassHP);
             bandpassHP.connect(bandpassLP);
-            bandpassLP.connect(analyser);
+            bandpassLP.connect(lowBoost);
+            lowBoost.connect(analyser);
             const silentGain = ctx.createGain();
             silentGain.gain.value = 0;
             analyser.connect(silentGain);
