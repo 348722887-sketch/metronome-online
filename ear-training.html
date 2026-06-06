@@ -270,7 +270,7 @@
     function playNote(midi, time, duration, vol) {
         const inst = soundType === 'guitar' ? guitarInst : pianoInst;
         if (!inst) return;
-        inst.play(midiToName(midi), time, { gain: vol, duration: duration });
+        inst.play(midiToName(midi), time, { gain: vol * 2.5, duration: duration });
     }
 
     async function playInterval() {
@@ -298,9 +298,12 @@
         playNote(note1, now, 0.8, 0.6);
         playNote(note2, now + 0.85, 0.8, 0.6);
 
+        // Store notes for reveal — don't show them yet (anti-cheat)
         const n1 = midiToName(note1).replace('#','♯');
         const n2 = midiToName(note2).replace('#','♯');
-        document.getElementById('noteDisplay').innerHTML = '第1音: <b>'+n1+'</b> &nbsp;→&nbsp; 第2音: <b>'+n2+'</b>';
+        window._quizNotes = { n1, n2 };
+
+        document.getElementById('noteDisplay').textContent = '🔊 正在播放…仔细听';
         document.getElementById('playHint').textContent = '可以反复点击播放';
 
         answered = false;
@@ -323,8 +326,10 @@
     function revealAnswer() {
         if (!currentInterval) return;
         answered = true;
-        const iv = currentInterval;
-        const area = document.getElementById('answerArea');
+        // Show the actual notes played
+        const q = window._quizNotes || { n1: '?', n2: '?' };
+        document.getElementById('noteDisplay').innerHTML = '第1音: <b>'+q.n1+'</b> &nbsp;→&nbsp; 第2音: <b>'+q.n2+'</b>';
+        
         area.style.display = 'block';
         document.getElementById('revealBtn').style.display = 'none';
         document.getElementById('nextBtn').style.display = 'inline-block';
