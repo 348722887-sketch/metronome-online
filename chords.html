@@ -161,8 +161,13 @@ function gc(){return DB[ak].c[hi];}
 function ctx(){if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();}
 function play(){
     ctx();const ch=gc(),bm=[40,45,50,55,59,64],n=[];
-    const live=new Set();if(ch.o)ch.o.forEach(s=>live.add(s));if(ch.d)ch.d.forEach(d=>live.add(d.str));
-    for(let s=6;s>=1;s--){if(!live.has(s))continue;if(ch.mu&&ch.mu.includes(s))continue;let f=0;if(ch.d){const dt=ch.d.find(d=>d.s===s);if(dt)f=dt.f;}n.push(bm[6-s]+f);}
+    for(let s=6;s>=1;s--){
+        if(ch.mu&&ch.mu.includes(s))continue; // muted string
+        if(ch.o&&ch.o.includes(s)){n.push(bm[6-s]);continue;} // open string
+        if(ch.d){const dt=ch.d.find(d=>d.s===s);if(dt){n.push(bm[6-s]+dt.f);continue;}} // dotted string
+        if(ch.b){n.push(bm[6-s]+ch.b);continue;} // barre string (no explicit dot, plays at barre fret)
+        // string not muted, not open, no dot, no barre → skip
+    }
     const now=ac.currentTime;
     n.forEach((m,i)=>{const fr=440*Math.pow(2,(m-69)/12),t=now+i*0.06;const o=ac.createOscillator();o.type='sine';o.frequency.value=fr;const g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.1,t+.008);g.gain.exponentialRampToValueAtTime(.001,t+2.5);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+2.7);});
 }
