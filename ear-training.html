@@ -108,7 +108,7 @@
             <div class="text-gray-500 text-xs mb-3" id="noteDisplay" style="min-height:18px">点击下方按钮随机出题</div>
 
             <!-- Play button -->
-            <button class="play-btn mb-3" id="playBtn" onclick="playInterval()" title="播放音程">
+            <button class="play-btn mb-3" id="playBtn" onclick="(async()=>{await playInterval();})()" title="播放音程">
                 <span id="playIcon">▶</span>
             </button>
             <p style="color:var(--mute);font-size:12px;margin-top:4px" id="playHint" data-i18n="ear-play-hint">点击播放音程</p>
@@ -225,9 +225,9 @@
     }
 
     // ===== AUDIO =====
-    function ensureCtx() {
+    async function ensureCtx() {
         if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
     }
 
     function playTone(midi, startTime, duration, vol) {
@@ -243,8 +243,8 @@
         osc.start(startTime); osc.stop(startTime + duration);
     }
 
-    function playInterval() {
-        ensureCtx();
+    async function playInterval() {
+        await ensureCtx();
         // Always pick a fresh interval + root for each play
         pickNewInterval();
         // Pick a random root: C3 to B4 (MIDI 48-71), but avoid extremes for clarity
