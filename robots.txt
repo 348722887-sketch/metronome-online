@@ -1,4 +1,4 @@
-User-agent: *
+﻿User-agent: *
 Allow: /
 
-Sitemap: https://metronome-online-mvp.vercel.app/sitemap.xml
+Sitemap: https://beat.sevenmeow.com/sitemap.xml

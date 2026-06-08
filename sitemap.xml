@@ -1,88 +1,161 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
     <!-- 主页面（中文，x-default） -->
     <url>
-        <loc>https://metronome-online-mvp.vercel.app/</loc>
+        <loc>https://beat.sevenmeow.com/</loc>
         <lastmod>2026-06-04</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
-        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://metronome-online-mvp.vercel.app/?lang=zh-CN"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://metronome-online-mvp.vercel.app/en/"/>
-        <xhtml:link rel="alternate" hreflang="ja" href="https://metronome-online-mvp.vercel.app/ja/"/>
-        <xhtml:link rel="alternate" hreflang="es" href="https://metronome-online-mvp.vercel.app/es/"/>
-        <xhtml:link rel="alternate" hreflang="pt" href="https://metronome-online-mvp.vercel.app/pt/"/>
-        <xhtml:link rel="alternate" hreflang="x-default" href="https://metronome-online-mvp.vercel.app/"/>
+        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://beat.sevenmeow.com/?lang=zh-CN"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://beat.sevenmeow.com/en/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://beat.sevenmeow.com/ja/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://beat.sevenmeow.com/es/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://beat.sevenmeow.com/pt/"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://beat.sevenmeow.com/"/>
     </url>
 
     <!-- English -->
     <url>
-        <loc>https://metronome-online-mvp.vercel.app/en/</loc>
+        <loc>https://beat.sevenmeow.com/en/</loc>
         <lastmod>2026-06-04</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
-        <xhtml:link rel="alternate" hreflang="en" href="https://metronome-online-mvp.vercel.app/en/"/>
-        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://metronome-online-mvp.vercel.app/"/>
-        <xhtml:link rel="alternate" hreflang="ja" href="https://metronome-online-mvp.vercel.app/ja/"/>
-        <xhtml:link rel="alternate" hreflang="es" href="https://metronome-online-mvp.vercel.app/es/"/>
-        <xhtml:link rel="alternate" hreflang="pt" href="https://metronome-online-mvp.vercel.app/pt/"/>
-        <xhtml:link rel="alternate" hreflang="x-default" href="https://metronome-online-mvp.vercel.app/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://beat.sevenmeow.com/en/"/>
+        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://beat.sevenmeow.com/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://beat.sevenmeow.com/ja/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://beat.sevenmeow.com/es/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://beat.sevenmeow.com/pt/"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://beat.sevenmeow.com/"/>
     </url>
 
     <!-- 日本語 -->
     <url>
-        <loc>https://metronome-online-mvp.vercel.app/ja/</loc>
+        <loc>https://beat.sevenmeow.com/ja/</loc>
         <lastmod>2026-06-04</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
-        <xhtml:link rel="alternate" hreflang="ja" href="https://metronome-online-mvp.vercel.app/ja/"/>
-        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://metronome-online-mvp.vercel.app/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://metronome-online-mvp.vercel.app/en/"/>
-        <xhtml:link rel="alternate" hreflang="es" href="https://metronome-online-mvp.vercel.app/es/"/>
-        <xhtml:link rel="alternate" hreflang="pt" href="https://metronome-online-mvp.vercel.app/pt/"/>
-        <xhtml:link rel="alternate" hreflang="x-default" href="https://metronome-online-mvp.vercel.app/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://beat.sevenmeow.com/ja/"/>
+        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://beat.sevenmeow.com/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://beat.sevenmeow.com/en/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://beat.sevenmeow.com/es/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://beat.sevenmeow.com/pt/"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://beat.sevenmeow.com/"/>
     </url>
 
     <!-- Español -->
     <url>
-        <loc>https://metronome-online-mvp.vercel.app/es/</loc>
+        <loc>https://beat.sevenmeow.com/es/</loc>
         <lastmod>2026-06-04</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
-        <xhtml:link rel="alternate" hreflang="es" href="https://metronome-online-mvp.vercel.app/es/"/>
-        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://metronome-online-mvp.vercel.app/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://metronome-online-mvp.vercel.app/en/"/>
-        <xhtml:link rel="alternate" hreflang="ja" href="https://metronome-online-mvp.vercel.app/ja/"/>
-        <xhtml:link rel="alternate" hreflang="pt" href="https://metronome-online-mvp.vercel.app/pt/"/>
-        <xhtml:link rel="alternate" hreflang="x-default" href="https://metronome-online-mvp.vercel.app/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://beat.sevenmeow.com/es/"/>
+        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://beat.sevenmeow.com/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://beat.sevenmeow.com/en/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://beat.sevenmeow.com/ja/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://beat.sevenmeow.com/pt/"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://beat.sevenmeow.com/"/>
     </url>
 
     <!-- Português -->
     <url>
-        <loc>https://metronome-online-mvp.vercel.app/pt/</loc>
+        <loc>https://beat.sevenmeow.com/pt/</loc>
         <lastmod>2026-06-04</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
-        <xhtml:link rel="alternate" hreflang="pt" href="https://metronome-online-mvp.vercel.app/pt/"/>
-        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://metronome-online-mvp.vercel.app/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://metronome-online-mvp.vercel.app/en/"/>
-        <xhtml:link rel="alternate" hreflang="ja" href="https://metronome-online-mvp.vercel.app/ja/"/>
-        <xhtml:link rel="alternate" hreflang="es" href="https://metronome-online-mvp.vercel.app/es/"/>
-        <xhtml:link rel="alternate" hreflang="x-default" href="https://metronome-online-mvp.vercel.app/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://beat.sevenmeow.com/pt/"/>
+        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://beat.sevenmeow.com/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://beat.sevenmeow.com/en/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://beat.sevenmeow.com/ja/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://beat.sevenmeow.com/es/"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://beat.sevenmeow.com/"/>
     </url>
 
     <!-- 隐私政策 -->
     <url>
-        <loc>https://metronome-online-mvp.vercel.app/privacy.html</loc>
+        <loc>https://beat.sevenmeow.com/privacy.html</loc>
         <lastmod>2026-06-04</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.3</priority>
     </url>
 
+    <!-- 调音器 -->
+    <url>
+        <loc>https://beat.sevenmeow.com/tuner.html</loc>
+        <lastmod>2026-06-08</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <!-- 五线谱 -->
+    <url>
+        <loc>https://beat.sevenmeow.com/staff.html</loc>
+        <lastmod>2026-06-08</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <!-- 五度圈 -->
+    <url>
+        <loc>https://beat.sevenmeow.com/circle-of-fifths.html</loc>
+        <lastmod>2026-06-08</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <!-- 和弦 -->
+    <url>
+        <loc>https://beat.sevenmeow.com/chords.html</loc>
+        <lastmod>2026-06-08</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <!-- 练耳 -->
+    <url>
+        <loc>https://beat.sevenmeow.com/ear-training.html</loc>
+        <lastmod>2026-06-08</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <!-- 鼓机 -->
+    <url>
+        <loc>https://beat.sevenmeow.com/drum-machine.html</loc>
+        <lastmod>2026-06-08</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <!-- Loop -->
+    <url>
+        <loc>https://beat.sevenmeow.com/loop.html</loc>
+        <lastmod>2026-06-08</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- ===== 博客文章 ===== -->
+    <!-- BPM指南 -->
+    <url>
+        <loc>https://beat.sevenmeow.com/blog-what-is-bpm.html</loc>
+        <lastmod>2026-06-08</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <!-- 练习指南 -->
+    <url>
+        <loc>https://beat.sevenmeow.com/blog-how-to-practice.html</loc>
+        <lastmod>2026-06-08</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <!-- 节奏训练 -->
+    <url>
+        <loc>https://beat.sevenmeow.com/blog-rhythm-training.html</loc>
+        <lastmod>2026-06-08</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
     <!-- 关于 -->
     <url>
-        <loc>https://metronome-online-mvp.vercel.app/about.html</loc>
+        <loc>https://beat.sevenmeow.com/about.html</loc>
         <lastmod>2026-06-04</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.4</priority>
